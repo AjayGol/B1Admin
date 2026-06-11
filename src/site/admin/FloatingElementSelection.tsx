@@ -17,16 +17,19 @@ interface Props {
 
 const actionButtonSx = {
   padding: "3px",
-  "&:hover": { backgroundColor: "#f3f4f6" }
+  "&:hover": { backgroundColor: "action.hover" }
 };
 
 export const FloatingElementSelection: React.FC<Props> = ({
+  element,
   targetSelector,
   onDelete,
   onDuplicate,
   onMoveUp,
   onMoveDown
 }) => {
+  // Duplicating or reordering a column would corrupt the 12-grid sizing RowEdit manages by index.
+  const isColumn = element?.elementType === "column";
   const [position, setPosition] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const rafRef = useRef<number>(undefined);
 
@@ -84,7 +87,7 @@ export const FloatingElementSelection: React.FC<Props> = ({
           left: position.left,
           width: position.width,
           height: position.height,
-          outline: "1.5px solid #1976d2",
+          outline: "1.5px solid var(--focus)",
           outlineOffset: "1px",
           pointerEvents: "none",
           zIndex: 1001
@@ -100,18 +103,22 @@ export const FloatingElementSelection: React.FC<Props> = ({
           gap: 0,
           backgroundColor: "rgba(255, 255, 255, 0.96)",
           borderRadius: "4px",
-          border: "1px solid #e5e7eb",
+          border: "1px solid var(--border-main)",
           padding: "1px",
           zIndex: 1002,
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)"
         }}
       >
-        <AppIconButton label={Locale.label("common.duplicate")} icon={<ContentCopy sx={{ fontSize: 14 }} />} onClick={onDuplicate} sx={actionButtonSx} />
+        {!isColumn && (
+          <>
+            <AppIconButton label={Locale.label("common.duplicate")} icon={<ContentCopy sx={{ fontSize: 14 }} />} onClick={onDuplicate} sx={actionButtonSx} />
 
-        <AppIconButton label={Locale.label("site.elementSelection.moveUp")} icon={<ArrowUpward sx={{ fontSize: 14 }} />} onClick={onMoveUp} sx={actionButtonSx} />
+            <AppIconButton label={Locale.label("site.elementSelection.moveUp")} icon={<ArrowUpward sx={{ fontSize: 14 }} />} onClick={onMoveUp} sx={actionButtonSx} />
 
-        <AppIconButton label={Locale.label("site.elementSelection.moveDown")} icon={<ArrowDownward sx={{ fontSize: 14 }} />} onClick={onMoveDown} sx={actionButtonSx} />
+            <AppIconButton label={Locale.label("site.elementSelection.moveDown")} icon={<ArrowDownward sx={{ fontSize: 14 }} />} onClick={onMoveDown} sx={actionButtonSx} />
+          </>
+        )}
 
         <AppIconButton label={Locale.label("common.delete")} icon={<Delete sx={{ fontSize: 14 }} />} intent="remove" onClick={onDelete} sx={actionButtonSx} />
       </Box>

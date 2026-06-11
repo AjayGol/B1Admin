@@ -80,18 +80,18 @@ export const TimeList = (props: Props) => {
               <button
                 type="button"
                 onClick={() => handleSelect(t)}
-                style={{ background: "none", border: 0, padding: 0, color: "#1976d2", cursor: "pointer" }}>
+                style={{ background: "none", border: 0, padding: 0, color: "var(--link)", cursor: "pointer" }}>
                 {t.displayName}
               </button>
             ) : (
               <span>{t.displayName}</span>
             )}
-            <span style={{ marginLeft: 8, fontSize: 11, color: "#666", textTransform: "uppercase" }}>{typeLabel}</span>
+            <span style={{ marginLeft: 8, fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase" }}>{typeLabel}</span>
             <div style={{ fontSize: 12 }}>
               {DateHelper.prettyDateTime(startTime)}
               {t.endTime ? " - " + DateHelper.prettyTime(endTime) : ""}
               <br />
-              <i style={{ color: "#999" }}>{teamList.join(", ")}</i>
+              <i style={{ color: "var(--text-muted)" }}>{teamList.join(", ")}</i>
             </div>
           </td>
         </tr>

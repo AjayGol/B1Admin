@@ -3105,11 +3105,20 @@
       "placeholder": "#FF0000"
     },
     "contentEditor": {
+      "addSectionHere": "Add section",
+      "backToSite": "Back to Site",
       "blockPreview": "Block Preview",
+      "discard": "Discard",
+      "discardElementMessage": "Discard unsaved changes to this element?",
+      "discardElementTitle": "Discard changes?",
+      "discardSectionMessage": "Discard unsaved changes to this section?",
       "dropToAddElement": "Drop here to add element",
       "dropToAddSection": "Drop here to add section",
+      "keepEditing": "Keep editing",
       "scrollDown": "Scroll Down",
-      "scrollUp": "Scroll Up"
+      "scrollUp": "Scroll Up",
+      "smallScreenMessage": "Open this page on a tablet or desktop to edit your website.",
+      "smallScreenTitle": "This editor needs a larger screen"
     },
     "cssEdit": {
       "advancedFeature": "Advanced Feature:",
@@ -3182,12 +3191,23 @@
       "addContent": "Add Content",
       "ago": "ago",
       "block": "Block",
+      "disablePublish": "Turn off publishing",
+      "disablePublishConfirm": "Turn off publishing for this page? Edits will go live immediately again.",
+      "discardChanges": "Discard unpublished changes",
+      "discardChangesConfirm": "Discard all changes made since the last publish? The editor will be restored to the live version.",
       "exit": "Exit",
       "justNow": "just now",
-      "notSavedYet": "No changes yet",
       "page": "Page",
+      "publish": "Publish",
+      "publishedLabel": "Published",
+      "publishOffTip": "Edits currently go live immediately. Publish to save a live version and keep future edits private until the next publish.",
       "redoTip": "Redo (Ctrl+Shift+Z)",
       "savedAllChanges": "All changes saved",
+      "saveError": "Couldn't save",
+      "saving": "Saving…",
+      "statusLiveOnSave": "Live on save",
+      "statusPublished": "Published",
+      "statusUnpublishedChanges": "Unpublished changes",
       "switchToDesktop": "Switch to Desktop View",
       "switchToMobile": "Switch to Mobile View",
       "undoTip": "Undo (Ctrl+Z)",
@@ -3204,6 +3224,7 @@
       "card": "Card",
       "carousel": "Carousel",
       "church": "Church",
+      "column": "Column",
       "common": "Common",
       "descBox": "Flexible container box",
       "descCalendar": "Event calendar view",
@@ -3253,7 +3274,10 @@
       "video": "Video"
     },
     "elementEdit": {
-      "enableLightbox": "Enable Lightbox"
+      "enableLightbox": "Enable Lightbox",
+      "groupAnimation": "Animation",
+      "groupContent": "Content",
+      "groupStyle": "Style"
     },
     "elements": {
       "address": "Address",
@@ -3405,6 +3429,8 @@
       "fullDocs": "Full documentation",
       "moveBody": "Drag sections and elements to reorder them. Use the up/down arrows on the selection toolbar for precise moves.",
       "moveTitle": "Rearrange",
+      "shortcutsBody": "Delete removes the selected element, Ctrl+D duplicates it, Alt+Up/Down moves it, and Esc deselects.",
+      "shortcutsTitle": "Keyboard shortcuts",
       "title": "Page editor basics",
       "undoBody": "Use Ctrl+Z to undo and Ctrl+Shift+Z to redo. Open the History panel from the menu to jump to any earlier state.",
       "undoTitle": "Undo & history"
@@ -3496,6 +3522,7 @@
       "previewPage": "Preview page",
       "showLogin": "Show Login",
       "showLoginTooltip": "Show login button in the navigation bar",
+      "startFromTemplate": "Start From a Template",
       "subtitle": "Manage your website pages, content, and navigation",
       "toggleLoginVisibility": "Toggle login button visibility",
       "totalPages": "Total Pages",
@@ -3601,6 +3628,8 @@
     "section": {
       "confirmDelete": "Are you sure you wish to permanently delete this section?",
       "confirmDuplicate": "Are you sure you wish to make a copy of this section and all of it's contents?",
+      "deleteSectionBody": "This permanently deletes the section and everything in it. You can undo this with Ctrl+Z.",
+      "deleteSectionTitle": "Delete section?",
       "editSection": "Edit Section",
       "layoutContainer": "Layout container",
       "section": "Section"
@@ -3618,6 +3647,95 @@
       "duplicate": "Duplicate",
       "duplicateSection": "Duplicate Section",
       "id": "ID"
+    },
+    "sectionTemplates": {
+      "aboutSplit": "Our Story",
+      "all": "All",
+      "blank": "Blank Section",
+      "category": {
+        "about": "About",
+        "cta": "Call to Action",
+        "giving": "Giving",
+        "hero": "Hero",
+        "media": "Media",
+        "people": "People & Groups",
+        "services": "Services"
+      },
+      "connectColumns": "Contact Columns",
+      "ctaBanner": "Next Step Banner",
+      "faqSection": "Common Questions",
+      "findUs": "Find Us",
+      "galleryRow": "Photo Row",
+      "givingBanner": "Giving Banner",
+      "givingOptions": "Ways to Give",
+      "groupListSection": "Group List",
+      "groupsBrowser": "Groups Browser",
+      "heroCentered": "Photo Hero",
+      "heroGradient": "Gradient Hero",
+      "heroSplit": "Split Hero",
+      "ministriesCards": "Ministry Cards",
+      "sermonsLatest": "Recent Messages",
+      "serviceTimes": "Service Times",
+      "staffGrid": "Staff Grid",
+      "storyColumns": "Three Columns",
+      "testimony": "Testimony Quote",
+      "title": "Add a Section",
+      "verseBanner": "Verse Banner",
+      "watchOnline": "Watch Online",
+      "welcome": "Welcome Text"
+    },
+    "sectionToolbar": {
+      "delete": "Delete section",
+      "dragToReorder": "Drag to reorder",
+      "duplicate": "Duplicate section",
+      "moveDown": "Move section down",
+      "moveUp": "Move section up",
+      "settings": "Section settings"
+    },
+    "siteTemplates": {
+      "back": "Back",
+      "create": "Create Site",
+      "creating": "Creating {title}...",
+      "descriptions": {
+        "classic": "A complete traditional site with a welcoming home page, about page, and plan-your-visit page.",
+        "community": "Puts groups and ministries front and center so people get connected fast.",
+        "heritage": "A classic, scripture-forward design for established congregations.",
+        "media": "Built around your live stream and message archive for churches with a strong online presence.",
+        "modern": "A contemporary look with bold gradients, online services, and a connect page.",
+        "simple": "A clean two-page starter, perfect for church plants and small congregations.",
+        "visitor": "Focused on answering a first-time guest's questions before they arrive."
+      },
+      "errFailed": "Failed to create the site. Please try again.",
+      "exists": "Already exists",
+      "existsNote": "Pages marked \"already exists\" will be left unchanged.",
+      "intro": "Pick a starter site below. We'll create the pages and navigation links for you — everything can be edited afterward.",
+      "names": {
+        "classic": "Classic Church",
+        "community": "Community Life",
+        "heritage": "Heritage",
+        "media": "Online First",
+        "modern": "Modern Welcome",
+        "simple": "Simple Start",
+        "visitor": "Visitor Focus"
+      },
+      "nav": {
+        "about": "About",
+        "connect": "Connect",
+        "give": "Give",
+        "home": "Home",
+        "live": "Live",
+        "sermons": "Sermons",
+        "visit": "Visit"
+      },
+      "navLinksNote": "Also adds navigation links to built-in pages:",
+      "pageCount": "{count} pages",
+      "pages": {
+        "about": "About Us",
+        "connect": "Connect",
+        "home": "Home",
+        "visit": "Plan Your Visit"
+      },
+      "title": "Start From a Template"
     },
     "spacingScaleEdit": {
       "buttonOne": "Button 1",
@@ -3669,8 +3787,11 @@
     "stylesAnimations": {
       "animations": "Animations",
       "animationsDesc": "Effect for when element is shown.",
+      "hideOnDesktop": "Hide on desktop",
+      "hideOnMobile": "Hide on mobile",
       "styles": "Styles",
-      "stylesDesc": "Advanced appearance options."
+      "stylesDesc": "Advanced appearance options.",
+      "visibility": "Visibility:"
     },
     "stylesManager": {
       "color": "Color Palette",
