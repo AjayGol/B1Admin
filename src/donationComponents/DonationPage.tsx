@@ -5,7 +5,8 @@ import { loadStripe } from "@stripe/stripe-js";
 import type { Stripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { DisplayBox, ExportLink, Loading } from "@churchapps/apphelper";
-import { DonationForm, RecurringDonations, PaymentMethods, StripePaymentMethod } from "@churchapps/apphelper/donations";
+import { DonationForm, MultiGatewayDonationForm, RecurringDonations, PaymentMethods, StripePaymentMethod, DonationHelper } from "@churchapps/apphelper/donations";
+import type { PaymentGateway } from "@churchapps/apphelper/donations";
 import { ApiHelper, DateHelper, UniqueIdHelper, CurrencyHelper, Locale } from "../helpers";
 import type { DonationInterface, PersonInterface, ChurchInterface } from "@churchapps/helpers";
 // import { Link } from "react-router-dom"
@@ -22,6 +23,7 @@ export const DonationPage: React.FC<Props> = (props) => {
   const [donations, setDonations] = React.useState<DonationInterface[]>(null);
   const [stripePromise, setStripe] = React.useState<Promise<Stripe>>(null);
   const [paymentMethods, setPaymentMethods] = React.useState<StripePaymentMethod[]>(null);
+  const [paymentGateways, setPaymentGateways] = React.useState<PaymentGateway[]>([]);
   const [customerId, setCustomerId] = React.useState(null);
   const [person, setPerson] = React.useState<PersonInterface>(null);
   const [message, setMessage] = React.useState<string>(null);
@@ -29,6 +31,7 @@ export const DonationPage: React.FC<Props> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [currency, setCurrency] = React.useState<string>("usd");
   const open = Boolean(anchorEl);
+  const hasKF = paymentGateways.some((g) => DonationHelper.isProvider(g.provider, "kingdomfunding"));
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -51,9 +54,11 @@ export const DonationPage: React.FC<Props> = (props) => {
         setPaymentMethods(cards.concat(banks));
       } else {
         // New flat array format from normalized API response
-        const methods = data.map((pm: any) => new StripePaymentMethod(pm));
+        const methods = data
+          .filter((pm: any) => DonationHelper.isProvider(pm.provider, "stripe") || DonationHelper.isProvider(pm.provider, "kingdomfunding"))
+          .map((pm: any) => new StripePaymentMethod(pm));
         // Get customerId from first payment method if available
-        const firstMethod = data[0];
+        const firstMethod = data.find((pm: any) => pm.customerId);
         if (firstMethod?.customerId) {
           setCustomerId(firstMethod.customerId);
         }
@@ -75,16 +80,15 @@ export const DonationPage: React.FC<Props> = (props) => {
   };
 
   const loadStripeData = async (gatewayData: any) => {
-    if (!gatewayData.length || !gatewayData[0]?.publicKey) {
+    if (!gatewayData.length) {
       setPaymentMethods([]);
       return;
     }
 
-    setStripe(loadStripe(gatewayData[0].publicKey));
-    await Promise.all([
-      // loadPersonData(),
-      loadPaymentMethods()
-    ]);
+    setPaymentGateways(gatewayData);
+    const stripeGateway = DonationHelper.findGatewayByProvider(gatewayData, "stripe");
+    if (stripeGateway?.publicKey) setStripe(loadStripe(stripeGateway.publicKey));
+    await loadPaymentMethods();
   };
 
   const loadData = async () => {
@@ -254,17 +258,30 @@ export const DonationPage: React.FC<Props> = (props) => {
     else {
       return (
         <>
-          <Elements stripe={stripePromise}>
-            <DonationForm
+          {hasKF ? (
+            <MultiGatewayDonationForm
               person={person}
               customerId={customerId}
-              paymentMethods={paymentMethods}
+              paymentMethods={paymentMethods || []}
+              paymentGateways={paymentGateways}
               stripePromise={stripePromise}
               donationSuccess={handleDataUpdate}
               church={props?.church}
               churchLogo={props?.churchLogo}
             />
-          </Elements>
+          ) : (
+            <Elements stripe={stripePromise}>
+              <DonationForm
+                person={person}
+                customerId={customerId}
+                paymentMethods={paymentMethods}
+                stripePromise={stripePromise}
+                donationSuccess={handleDataUpdate}
+                church={props?.church}
+                churchLogo={props?.churchLogo}
+              />
+            </Elements>
+          )}
           <DisplayBox headerIcon="payments" headerText={Locale.label("donation.donationPage.donations")} editContent={getEditContent()}>
             {getTable()}
           </DisplayBox>

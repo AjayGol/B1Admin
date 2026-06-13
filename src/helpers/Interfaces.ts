@@ -5,14 +5,60 @@ export interface SessionInterface extends BaseSessionInterface {
   _updateTimestamp?: number;
 }
 
+// Mirrors @churchapps/helpers — switch to the package exports once >1.7.1 is published.
+export interface CampaignInterface {
+  id?: string;
+  churchId?: string;
+  fundId?: string;
+  name?: string;
+  description?: string;
+  goalAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  showPublic?: boolean;
+  allowSelfPledge?: boolean;
+}
+
+export interface PledgeInterface {
+  id?: string;
+  churchId?: string;
+  campaignId?: string;
+  personId?: string;
+  amount?: number;
+}
+
+export type PledgeStatus = "notStarted" | "inProgress" | "fulfilled" | "beyondPledged" | "nonPledged";
+
+export interface PledgeProgressRowInterface {
+  campaignId?: string;
+  campaignName?: string;
+  personId?: string;
+  pledgeId?: string;
+  pledgedAmount?: number;
+  givenAmount?: number;
+  status?: PledgeStatus;
+}
+
+export interface CampaignProgressInterface {
+  campaign?: CampaignInterface;
+  totalPledged?: number;
+  totalGiven?: number;
+  pledgeCount?: number;
+  donorCount?: number;
+  rows?: PledgeProgressRowInterface[];
+}
+
 export interface PaymentGatewaysInterface {
   id?: string;
   churchId?: string;
   provider?: string;
   publicKey?: string;
   privateKey?: string;
+  webhookKey?: string;
   payFees?: boolean;
   currency?: string;
+  enabled?: boolean;
+  settings?: Record<string, any>;
 }
 
 export interface SongInterface {
@@ -116,6 +162,18 @@ export interface PlanInterface {
   providerPlanName?: string;
   signupDeadlineHours?: number;
   showVolunteerNames?: boolean;
+  prepared?: boolean;
+  autoReplaceOnDecline?: boolean;
+  lastAutofillRunId?: string;
+}
+
+export interface SchedulingPreferenceInterface {
+  id?: string;
+  churchId?: string;
+  personId?: string;
+  maxPerMonth?: number;
+  preferredTimes?: string;
+  householdScheduling?: string;
 }
 
 export interface ProgramInterface {
