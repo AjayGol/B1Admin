@@ -15,7 +15,6 @@ const GroupPage = React.lazy(() => import("./groups/GroupPage").then((module) =>
 const PendingRequestsPage = React.lazy(() => import("./groups/PendingRequestsPage"));
 const GroupsHealthPage = React.lazy(() => import("./groups/GroupsHealthPage"));
 const AttendancePage = React.lazy(() => import("./attendance/AttendancePage").then((module) => ({ default: module.AttendancePage })));
-const LabelsPage = React.lazy(() => import("./attendance/LabelsPage").then((module) => ({ default: module.LabelsPage })));
 const DonationsPage = React.lazy(() => import("./donations/DonationsPage").then((module) => ({ default: module.DonationsPage })));
 const DonationBatchPage = React.lazy(() => import("./donations/DonationBatchPage").then((module) => ({ default: module.DonationBatchPage })));
 const FundPage = React.lazy(() => import("./donations/FundPage").then((module) => ({ default: module.FundPage })));
@@ -59,6 +58,7 @@ const CalendarsPage = React.lazy(() => import("./calendars/CalendarsPage").then(
 const CalendarPage = React.lazy(() => import("./calendars/CalendarPage").then((module) => ({ default: module.CalendarPage })));
 const RoomsResourcesPage = React.lazy(() => import("./calendars/RoomsResourcesPage").then((module) => ({ default: module.RoomsResourcesPage })));
 const ApprovalsPage = React.lazy(() => import("./calendars/ApprovalsPage").then((module) => ({ default: module.ApprovalsPage })));
+const AvailabilityPage = React.lazy(() => import("./calendars/AvailabilityPage").then((module) => ({ default: module.AvailabilityPage })));
 const RegistrationsPage = React.lazy(() => import("./registrations/RegistrationsPage").then((module) => ({ default: module.RegistrationsPage })));
 const RegistrationDetailsPage = React.lazy(() => import("./registrations/RegistrationDetailsPage").then((module) => ({ default: module.RegistrationDetailsPage })));
 const Site = React.lazy(() => import("./site").then((module) => ({ default: module.Site })));
@@ -118,7 +118,6 @@ export const Authenticated: React.FC = () => {
           <Route path="/groups/health" element={<GroupsHealthPage />} />
           <Route path="/groups/:id" element={<GroupPage />} />
           <Route path="/groups" element={<GroupsPage />} />
-          <Route path="/attendance/labels" element={<LabelsPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
           <Route path="/donations/funds/:id" element={<FundPage />} />
           <Route path="/donations/funds" element={<FundsPage />} />
@@ -156,6 +155,7 @@ export const Authenticated: React.FC = () => {
           <Route path="/registrations" element={<RegistrationsPage />} />
           <Route path="/calendars/rooms" element={<RoomsResourcesPage />} />
           <Route path="/calendars/approvals" element={<ApprovalsPage />} />
+          <Route path="/calendars/availability" element={<AvailabilityPage />} />
           <Route path="/calendars/:id" element={<CalendarPage />} />
           <Route path="/calendars" element={<CalendarsPage />} />
           <Route path="/site/*" element={<Site />} />
