@@ -15,7 +15,7 @@ type AnyRecord = Record<string, any>;
 export const PlanTypeEdit: React.FC<Props> = ({ planType, onClose }) => {
   const [loading, setLoading] = React.useState(false);
 
-  const { register, handleSubmit, setError, formState } = useForm<AnyRecord>({ defaultValues: { name: planType?.name || "" } });
+  const { register, handleSubmit, setError, formState } = useForm<AnyRecord>({ defaultValues: { name: planType?.name || "", reminderOffsets: planType?.reminderOffsets ?? "2", reminderMessage: planType?.reminderMessage ?? "" } });
   const e = formState.errors as any;
   const summaryErrors: string[] = [];
   if (e.name?.message) summaryErrors.push(e.name.message);
@@ -51,6 +51,10 @@ export const PlanTypeEdit: React.FC<Props> = ({ planType, onClose }) => {
           {summaryErrors.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{summaryErrors.map((msg) => <div key={msg}>{msg}</div>)}</Alert>}
           <FormCard icon="assignment" title={Locale.label("plans.planType.details")}>
             <TextField fullWidth label={Locale.label("plans.planTypeEdit.planTypeName")} required margin="normal" placeholder={Locale.label("placeholders.planType.name")} error={!!e.name} helperText={e.name?.message} {...register("name", { required: Locale.label("plans.planTypeEdit.nameRequired") })} />
+          </FormCard>
+          <FormCard icon="notifications" title={Locale.label("plans.planTypeEdit.reminders")}>
+            <TextField fullWidth label={Locale.label("plans.planTypeEdit.reminderOffsets")} margin="normal" placeholder="7,1,0" helperText={Locale.label("plans.planTypeEdit.reminderOffsetsHelp")} {...register("reminderOffsets")} />
+            <TextField fullWidth multiline minRows={2} label={Locale.label("plans.planTypeEdit.reminderMessage")} margin="normal" helperText={Locale.label("plans.planTypeEdit.reminderMessageHelp")} {...register("reminderMessage")} />
           </FormCard>
         </Box>
       </DialogContent>

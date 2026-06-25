@@ -2185,7 +2185,12 @@
       "errorSaving": "保存计划类型时出错",
       "nameRequired": "计划类型名称为必填项",
       "planType": "计划类型",
-      "planTypeName": "计划类型名称"
+      "planTypeName": "计划类型名称",
+      "reminderMessage": "自定义提醒消息（可选）",
+      "reminderMessageHelp": "添加到此计划类型的提醒电子邮件和通知中。",
+      "reminderOffsets": "聚会前提醒天数",
+      "reminderOffsetsHelp": "聚会前发送提醒的天数，用逗号分隔（0 = 当天）。留空可关闭提醒。",
+      "reminders": "提醒"
     },
     "planTypeGroups": {
       "addGroup": "添加团体",
@@ -3102,6 +3107,7 @@
       "paypalGoTo": "前往",
       "paypalLogin": "登录，然后在",
       "paypalSetup": "创建 PayPal REST 应用并将其客户端 ID 和密钥粘贴到下方。请访问",
+      "privateKeyRequired": "保存前请输入此提供商的密钥/私钥。",
       "prov": "提供商",
       "pubKey": "公钥",
       "saveError": "无法保存给予设置",

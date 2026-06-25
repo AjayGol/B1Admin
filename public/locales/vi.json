@@ -2185,7 +2185,12 @@
       "errorSaving": "Lỗi saving plan type",
       "nameRequired": "Plan type Tên is required",
       "planType": "Plan Type",
-      "planTypeName": "Plan Type Tên"
+      "planTypeName": "Plan Type Tên",
+      "reminderMessage": "Tin nhắn nhắc tùy chỉnh (tùy chọn)",
+      "reminderMessageHelp": "Được thêm vào email và thông báo nhắc cho loại kế hoạch này.",
+      "reminderOffsets": "Số ngày nhắc trước buổi lễ",
+      "reminderOffsetsHelp": "Số ngày trước buổi lễ để gửi lời nhắc, phân tách bằng dấu phẩy (0 = trong ngày). Để trống để tắt lời nhắc.",
+      "reminders": "Lời nhắc"
     },
     "planTypeGroups": {
       "addGroup": "Thêm nhóm",
@@ -3102,6 +3107,7 @@
       "paypalGoTo": "Go to",
       "paypalLogin": "log in, then under",
       "paypalSetup": "Tạo ứng dụng REST PayPal và dán Client ID và Secret bên dưới. Bắt đầu tại",
+      "privateKeyRequired": "Vui lòng nhập khóa bí mật/riêng tư cho nhà cung cấp này trước khi lưu.",
       "prov": "Provider",
       "pubKey": "Public Key",
       "saveError": "Failed to Lưu giving Cài đặt",

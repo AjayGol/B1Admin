@@ -2185,7 +2185,12 @@
       "errorSaving": "Error saving plan type",
       "nameRequired": "Plan type name is required",
       "planType": "Plan Type",
-      "planTypeName": "Plan Type Name"
+      "planTypeName": "Plan Type Name",
+      "reminderMessage": "Mukautettu muistutusviesti (valinnainen)",
+      "reminderMessageHelp": "Lisätään tämän suunnitelmatyypin muistutussähköpostiin ja -ilmoitukseen.",
+      "reminderOffsets": "Muistutuspäivät ennen jumalanpalvelusta",
+      "reminderOffsetsHelp": "Päivät ennen jumalanpalvelusta, jolloin muistutukset lähetetään, pilkulla erotettuna (0 = samana päivänä). Jätä tyhjäksi poistaaksesi muistutukset käytöstä.",
+      "reminders": "Muistutukset"
     },
     "planTypeGroups": {
       "addGroup": "Lisää ryhmä",
@@ -3102,6 +3107,7 @@
       "paypalGoTo": "Go to",
       "paypalLogin": "log in, then under",
       "paypalSetup": "Luo PayPal REST -sovellus ja liitä sen asiakastunnus ja salaisuus alle. Aloita osoitteessa",
+      "privateKeyRequired": "Anna tämän palveluntarjoajan salainen/yksityinen avain ennen tallentamista.",
       "prov": "Provider",
       "pubKey": "Public Key",
       "saveError": "Failed to save giving settings",

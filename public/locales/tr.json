@@ -2185,7 +2185,12 @@
       "errorSaving": "Error saving plan type",
       "nameRequired": "Plan type name is required",
       "planType": "Plan Type",
-      "planTypeName": "Plan Type Name"
+      "planTypeName": "Plan Type Name",
+      "reminderMessage": "Özel hatırlatma mesajı (isteğe bağlı)",
+      "reminderMessageHelp": "Bu plan türü için hatırlatma e-postasına ve bildirimine eklenir.",
+      "reminderOffsets": "Hizmetten önce hatırlatma günleri",
+      "reminderOffsetsHelp": "Hatırlatıcı göndermek için hizmetten önceki günler, virgülle ayrılmış (0 = aynı gün). Hatırlatıcıları kapatmak için boş bırakın.",
+      "reminders": "Hatırlatıcılar"
     },
     "planTypeGroups": {
       "addGroup": "Grup Ekle",
@@ -3102,6 +3107,7 @@
       "paypalGoTo": "Go to",
       "paypalLogin": "log in, then under",
       "paypalSetup": "Bir PayPal REST uygulaması oluşturun ve İstemci Kimliğini ve Gizli Anahtarı aşağıya yapıştırın. Başlamak için",
+      "privateKeyRequired": "Kaydetmeden önce lütfen bu sağlayıcının gizli/özel anahtarını girin.",
       "prov": "Provider",
       "pubKey": "Public Key",
       "saveError": "Failed to save giving settings",

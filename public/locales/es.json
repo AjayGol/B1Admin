@@ -2185,7 +2185,12 @@
       "errorSaving": "Error al guardar el tipo de plan",
       "nameRequired": "El nombre del tipo de plan es obligatorio",
       "planType": "Tipo de plan",
-      "planTypeName": "Nombre del tipo de plan"
+      "planTypeName": "Nombre del tipo de plan",
+      "reminderMessage": "Mensaje de recordatorio personalizado (opcional)",
+      "reminderMessageHelp": "Se añade al correo electrónico y a la notificación del recordatorio para este tipo de plan.",
+      "reminderOffsets": "Días de antelación del recordatorio",
+      "reminderOffsetsHelp": "Días antes del servicio para enviar recordatorios, separados por comas (0 = el mismo día). Déjalo en blanco para desactivar los recordatorios.",
+      "reminders": "Recordatorios"
     },
     "planTypeGroups": {
       "addGroup": "Agregar grupo",
@@ -3102,6 +3107,7 @@
       "paypalGoTo": "Vaya a",
       "paypalLogin": "inicie sesión, luego bajo",
       "paypalSetup": "Cree una aplicación REST de PayPal y pegue su Client ID y Secret a continuación. Comience en",
+      "privateKeyRequired": "Introduzca la clave secreta/privada de este proveedor antes de guardar.",
       "prov": "Proveedor",
       "pubKey": "Clave Pública",
       "saveError": "No se pudo guardar la configuración de donación",

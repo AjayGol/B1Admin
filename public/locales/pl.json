@@ -2185,7 +2185,12 @@
       "errorSaving": "Error saving plan type",
       "nameRequired": "Plan type name is required",
       "planType": "Plan Type",
-      "planTypeName": "Plan Type Name"
+      "planTypeName": "Plan Type Name",
+      "reminderMessage": "Niestandardowa wiadomość przypomnienia (opcjonalnie)",
+      "reminderMessageHelp": "Dodawana do e-maila i powiadomienia z przypomnieniem dla tego typu planu.",
+      "reminderOffsets": "Dni przypomnienia przed nabożeństwem",
+      "reminderOffsetsHelp": "Liczba dni przed nabożeństwem do wysłania przypomnień, oddzielone przecinkami (0 = w dniu nabożeństwa). Pozostaw puste, aby wyłączyć przypomnienia.",
+      "reminders": "Przypomnienia"
     },
     "planTypeGroups": {
       "addGroup": "Dodaj grupę",
@@ -3102,6 +3107,7 @@
       "paypalGoTo": "Go to",
       "paypalLogin": "log in, then under",
       "paypalSetup": "Utwórz aplikację PayPal REST i wklej jej identyfikator klienta i klucz tajny poniżej. Zacznij od",
+      "privateKeyRequired": "Przed zapisaniem wprowadź tajny/prywatny klucz dla tego dostawcy.",
       "prov": "Dostawca",
       "pubKey": "Public Key",
       "saveError": "Failed to save giving settings",
