@@ -63,6 +63,7 @@ export interface PaymentGatewaysInterface {
 
 export interface SongInterface {
   id?: string;
+  songDetailId?: string;
   name?: string;
   dateAdded: Date;
 }
@@ -101,6 +102,10 @@ export interface ArrangementInterface {
   songDetailId?: string;
   name?: string;
   lyrics?: string;
+  bpm?: number;
+  seconds?: number;
+  meter?: string;
+  sequence?: string;
 }
 
 export interface ArrangementKeyInterface {
@@ -136,6 +141,14 @@ export interface PlanTypeInterface {
   name?: string;
   reminderOffsets?: string;
   reminderMessage?: string;
+}
+
+export interface PlanTemplateInterface {
+  id?: string;
+  churchId?: string;
+  ministryId?: string;
+  name?: string;
+  data?: string;
 }
 
 export interface AssociatedGroupInterface {

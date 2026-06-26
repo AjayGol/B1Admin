@@ -1991,10 +1991,13 @@
     "assignment": {
       "addPosition": "Add Position",
       "autoAssign": "Auto Assign",
+      "fullyStaffed": "Fully staffed",
+      "needed": "needed",
       "notesPlaceholder": "Add notes for this service plan...",
       "notesPlaceholderReadOnly": "Plan notes (read-only)",
       "penciledIn": "Penciled In",
       "planNotesAria": "Plan notes",
+      "positionsFilled": "{filled} of {total} positions filled",
       "saveNotes": "Save Notes",
       "undoAutoAssign": "Undo Auto Assign"
     },
@@ -2343,6 +2346,26 @@
       "newTeam": "New Serving Team",
       "noTeam": "No serving teams found. Please create a serving team.",
       "teams": "Serving Teams"
+    },
+    "templates": {
+      "apply": "Apply",
+      "applyTitle": "Apply Template",
+      "applyTo": "Apply to plans",
+      "button": "Templates",
+      "confirmDelete": "Delete this template?",
+      "none": "No templates yet. Open a plan and choose \"Save as Template\".",
+      "noPlans": "No upcoming plans.",
+      "optPositions": "Positions",
+      "optServiceOrder": "Order of Service",
+      "plan": "Plan",
+      "positionsWarning": "Applying positions replaces existing positions and their assignments on the selected plans.",
+      "rename": "Rename Template",
+      "saveTitle": "Save as Template",
+      "startBlank": "None",
+      "startFrom": "Start from template",
+      "title": "Plan Templates",
+      "updateFromPlan": "Update from plan",
+      "updateFromPlanHelp": "Replace this template's contents with a plan's current order of service and positions."
     },
     "timeEdit": {
       "disName": "Display Name",
