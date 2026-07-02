@@ -14,6 +14,7 @@ interface Props {
 type AnyRecord = Record<string, any>;
 
 export const ArrangementEdit = (props: Props) => {
+  "use no memo"; // compiler caches register() results, breaking RHF field re-registration after reset()
   const { register, handleSubmit, reset } = useForm<AnyRecord>({ defaultValues: { name: "", lyrics: "" } });
 
   useEffect(() => {
@@ -44,7 +45,9 @@ export const ArrangementEdit = (props: Props) => {
       <TextField label={Locale.label("songs.details.meter") || "Meter"} fullWidth {...register("meter")} />
       <TextField label={Locale.label("songs.details.length") || "Length"} type="number" placeholder="seconds" fullWidth {...register("seconds", { valueAsNumber: true })} />
       <TextField label="Sequence" fullWidth placeholder="Verse 1, Chorus, Verse 2, Chorus, Bridge" {...register("sequence")} />
-      <TextField label={Locale.label("songs.arrangement.lyrics")} multiline fullWidth placeholder={Locale.label("placeholders.song.lyrics")} {...register("lyrics")} />
+      <TextField label={Locale.label("songs.arrangement.lyrics")} multiline fullWidth placeholder={Locale.label("placeholders.song.lyrics")} {...register("lyrics")} maxRows={25} sx={{ "& textarea": { maxHeight: 600, overflowY: "auto !important" } }} />
+
+
     </FormCard>
   );
 };

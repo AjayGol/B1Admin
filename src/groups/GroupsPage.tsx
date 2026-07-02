@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { GroupAdd } from "./components";
 import { ApiHelper, UserHelper, Loading, Locale, PageHeader } from "@churchapps/apphelper";
 import { Link } from "react-router-dom";
-import { Table, TableBody, TableCell, TableRow, Box, Card, Chip, Button, Stack, Typography } from "@mui/material";
-import { Add as AddIcon, Folder as FolderIcon, Group as GroupIcon, Inbox as InboxIcon, MonitorHeart as HealthIcon, People as PeopleIcon } from "@mui/icons-material";
+import { Table, TableBody, TableCell, TableRow, Box, Card, Chip, Button, Stack, Typography, Switch, FormControlLabel } from "@mui/material";
+import { Add as AddIcon, Email as EmailIcon, Folder as FolderIcon, Group as GroupIcon, Inbox as InboxIcon, MonitorHeart as HealthIcon, People as PeopleIcon } from "@mui/icons-material";
 import { type GroupInterface, type GroupJoinRequestInterface } from "@churchapps/helpers";
 import { useMountedState, Permissions } from "@churchapps/apphelper";
 import { useQuery } from "@tanstack/react-query";
 import { CountChip, ExportButton, SortableTableHead } from "../components/ui";
+import { hasPlansEditAccess } from "../helpers";
 
 const formatHeader = (key: string): string => {
   const customMap: Record<string, string> = {
@@ -41,7 +42,10 @@ const GroupsPage = () => {
   const [groups, setGroups] = useState<GroupInterface[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showArchived, setShowArchived] = useState(false);
   const isMounted = useMountedState();
+
+  const canEditGroups = UserHelper.checkAccess(Permissions.membershipApi.groups.edit);
 
   const handleAddUpdated = () => {
     setShowAdd(false);
@@ -50,7 +54,8 @@ const GroupsPage = () => {
 
   const loadData = () => {
     setIsLoading(true);
-    ApiHelper.get("/groups/tag/standard", "MembershipApi")
+    const endpoint = showArchived ? "/groups?archived=1" : "/groups/tag/standard";
+    ApiHelper.get(endpoint, "MembershipApi")
       .then((data: any) => {
         if (isMounted()) {
           setGroups(data);
@@ -63,7 +68,12 @@ const GroupsPage = () => {
       });
   };
 
-  React.useEffect(loadData, [isMounted]);
+  React.useEffect(loadData, [isMounted, showArchived]);
+
+  const handleRestore = (g: GroupInterface) => {
+    const group: GroupInterface = { ...g, archived: false };
+    ApiHelper.post("/groups", [group], "MembershipApi").then(() => loadData());
+  };
 
   const canApproveRequests = UserHelper.checkAccess(Permissions.membershipApi.groupMembers.edit);
   const { data: pendingRequests = [] } = useQuery<GroupJoinRequestInterface[]>({
@@ -73,7 +83,7 @@ const GroupsPage = () => {
   });
   const pendingCount = pendingRequests?.length || 0;
 
-  const canEditPlans = UserHelper.checkAccess(Permissions.membershipApi.plans.edit);
+  const canEditPlans = hasPlansEditAccess();
   const { data: myMinistries = [] } = useQuery<GroupInterface[]>({
     queryKey: ["/groups/my/ministry", "MembershipApi"],
     placeholderData: [],
@@ -145,6 +155,15 @@ const GroupsPage = () => {
             ))}
           </TableCell>
           <TableCell>{memberCount}</TableCell>
+          {showArchived && (
+            <TableCell align="right">
+              {canEditGroups && (
+                <Button size="small" onClick={() => handleRestore(g)} data-testid={`restore-group-${g.id}`}>
+                  {Locale.label("groups.groupsPage.restore")}
+                </Button>
+              )}
+            </TableCell>
+          )}
         </TableRow>
       );
       lastCat = g.categoryName;
@@ -166,8 +185,14 @@ const GroupsPage = () => {
                 <Typography variant="h6">{Locale.label("groups.groupsPage.groups")}</Typography>
                 {groups.length > 0 && <CountChip count={groups.length} />}
               </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                {groups.length > 0 && UserHelper.checkAccess(Permissions.membershipApi.groups.edit) && (
+              <Stack direction="row" spacing={2} alignItems="center">
+                {canEditGroups && (
+                  <FormControlLabel
+                    control={<Switch checked={showArchived} onChange={(ev) => setShowArchived(ev.target.checked)} size="small" data-testid="show-archived-toggle" />}
+                    label={Locale.label("groups.groupsPage.showArchived")}
+                  />
+                )}
+                {groups.length > 0 && canEditGroups && (
                   <ExportButton data={exportData} filename="groups.csv" text={Locale.label("groups.groupsPage.export")} />
                 )}
               </Stack>
@@ -181,7 +206,8 @@ const GroupsPage = () => {
                     { key: "categoryName", label: Locale.label("groups.groupsPage.cat") },
                     { key: "name", label: Locale.label("common.name") },
                     { key: "labels", label: Locale.label("groups.groupsPage.labels") },
-                    { key: "memberCount", label: Locale.label("groups.groupsPage.ppl") }
+                    { key: "memberCount", label: Locale.label("groups.groupsPage.ppl") },
+                    ...(showArchived ? [{ key: "actions", label: "" }] : [])
                   ]}
                 />
               )}
@@ -289,6 +315,22 @@ const GroupsPage = () => {
                 {Locale.label("components.wrapper.teams")}
               </Button>
             )}
+            <Button
+              variant="outlined"
+              component={Link}
+              to="/email-templates"
+              startIcon={<EmailIcon />}
+              data-testid="email-templates-button"
+              sx={{
+                color: "#FFF",
+                borderColor: "rgba(255,255,255,0.5)",
+                "&:hover": {
+                  borderColor: "#FFF",
+                  backgroundColor: "rgba(255,255,255,0.1)"
+                }
+              }}>
+              {Locale.label("settings.emailTemplatesPage.title")}
+            </Button>
             {UserHelper.checkAccess(Permissions.membershipApi.groups.edit) && (
               <Button
                 variant="outlined"

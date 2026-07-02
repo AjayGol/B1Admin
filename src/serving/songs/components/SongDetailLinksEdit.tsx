@@ -15,6 +15,7 @@ interface Props {
 type AnyRecord = Record<string, any>;
 
 export const SongDetailLinksEdit = (props: Props) => {
+  "use no memo"; // compiler caches register() results, breaking RHF field re-registration after reset()
   const [songDetailLinks, setSongDetailLinks] = React.useState<SongDetailLinkInterface[]>([]);
   const [editLink, setEditLink] = React.useState<SongDetailLinkInterface>(null);
 
@@ -94,7 +95,7 @@ export const SongDetailLinksEdit = (props: Props) => {
           {link.service}
         </button>
       </TableCell>
-      <TableCell>{link.serviceKey}</TableCell>
+      <TableCell sx={{ whiteSpace: "nowrap" }}>{link.serviceKey}</TableCell>
     </TableRow>
   );
 
@@ -139,15 +140,17 @@ export const SongDetailLinksEdit = (props: Props) => {
           </Stack>
         </Stack>
 
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>{Locale.label("songs.songDetailLinksEdit.service")}</TableCell>
-              <TableCell>{Locale.label("songs.songDetailLinksEdit.key")}</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>{songDetailLinks?.map((sd) => getRow(sd))}</TableBody>
-        </Table>
+        <Box sx={{ overflowX: "auto", width: "100%" }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>{Locale.label("songs.songDetailLinksEdit.service")}</TableCell>
+                <TableCell>{Locale.label("songs.songDetailLinksEdit.key")}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>{songDetailLinks?.map((sd) => getRow(sd))}</TableBody>
+          </Table>
+        </Box>
       </Box>
     );
   }

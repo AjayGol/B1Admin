@@ -9,13 +9,11 @@ import {
   type PositionInterface,
   type TimeInterface
 } from "@churchapps/helpers";
-import { type PlanInterface } from "../../helpers";
+import { type PlanInterface, hasPlansEditAccess } from "../../helpers";
 import {
   ApiHelper,
   ArrayHelper,
-  Locale,
-  UserHelper,
-  Permissions
+  Locale
 } from "@churchapps/apphelper";
 import { useQuery } from "@tanstack/react-query";
 import { PositionEdit } from "./PositionEdit";
@@ -30,7 +28,7 @@ interface Props {
 
 export const Assignment = (props: Props) => {
   const [plan, setPlan] = React.useState<PlanInterface>(null);
-  const hasPlansEdit = UserHelper.checkAccess(Permissions.membershipApi.plans.edit);
+  const hasPlansEdit = hasPlansEditAccess();
 
   const myMinistriesQuery = useQuery<GroupInterface[]>({
     queryKey: ["/groups/my/ministry", "MembershipApi"],
@@ -51,6 +49,9 @@ export const Assignment = (props: Props) => {
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
   const [allPlans, setAllPlans] = React.useState<PlanInterface[]>([]);
   const [copyMenuAnchor, setCopyMenuAnchor] = React.useState<null | HTMLElement>(null);
+  // Hoisted: the compiler emits non-optional guard reads (position.count/position.id) for
+  // the AssignmentEdit JSX deps, which crash while position is still null.
+  const peopleNeededForPosition = position ? position.count - ArrayHelper.getAll(assignments, "positionId", position.id).length : 0;
 
   const previousPlan = React.useMemo(() => {
     if (allPlans.length === 0 || !props.plan?.serviceDate) return null;
@@ -406,7 +407,7 @@ export const Assignment = (props: Props) => {
             <AssignmentEdit
               position={position}
               assignment={assignment}
-              peopleNeeded={position.count - ArrayHelper.getAll(assignments, "positionId", position.id).length}
+              peopleNeeded={peopleNeededForPosition}
               updatedFunction={handleAssignmentUpdate}
             />
           )}
