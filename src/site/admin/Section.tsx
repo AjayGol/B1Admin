@@ -4,12 +4,13 @@ import { ApiHelper } from "../../helpers";
 import { Locale } from "@churchapps/apphelper";
 import { StyleHelper } from "@churchapps/apphelper/website";
 import { Box, Container } from "@mui/material";
-import { DraggableWrapper, YoutubeBackground, DroppableArea, Element } from "@churchapps/apphelper/website";
+import { DraggableWrapper, YoutubeBackground, DroppableArea, Element, SectionDivider, parseDividerConfig } from "@churchapps/apphelper/website";
 import type { ChurchInterface } from "@churchapps/helpers";
 import { ElementTypes } from "@churchapps/helpers";
 import { ElementSelection } from "./ElementSelection";
 import { FloatingElementSelection } from "./FloatingElementSelection";
 import { SectionToolbar } from "./SectionToolbar";
+import { hasExtractableContent } from "./templates/sectionTemplates";
 import { getElementTypeMeta } from "./elements/elementTypeMeta";
 import { trackSave } from "./saveStatusTracker";
 
@@ -32,6 +33,8 @@ interface Props {
   onSectionMove?: (section: SectionInterface, direction: "up" | "down") => void;
   onSectionDuplicate?: (sectionId: string) => void;
   onSectionDelete?: (section: SectionInterface) => void;
+  onSectionSwitchLayout?: (section: SectionInterface) => void;
+  onSectionAiRewrite?: (section: SectionInterface) => void;
   isFirstSection?: boolean;
   isLastSection?: boolean;
   isSectionEditing?: boolean;
@@ -397,12 +400,23 @@ export const Section: React.FC<Props> = props => {
     return result;
   };
 
+  const topDivider = parseDividerConfig(props.section.answers?.dividerTop);
+  const bottomDivider = parseDividerConfig(props.section.answers?.dividerBottom);
+
+  const getDividers = () => (
+    <>
+      {topDivider && <SectionDivider position="top" {...topDivider} />}
+      {bottomDivider && <SectionDivider position="bottom" {...bottomDivider} />}
+    </>
+  );
+
   const getClassName = () => {
     let result = "section";
     if (props.section.background.indexOf("/") > -1) result += " sectionBG";
     if (props.section.textColor === "light") result += " sectionDark";
     if (props.first) result += " sectionFirst";
     if (props.onEdit) result += " sectionWrapper";
+    if (topDivider || bottomDivider) result += " sectionWithDivider";
 
     let hc = props.section.headingColor;
     if (hc) {
@@ -543,12 +557,12 @@ export const Section: React.FC<Props> = props => {
   let result: React.ReactElement;
   if (props.section.background && props.section.background.indexOf("youtube:") > -1) {
     const youtubeId = props.section.background.split(":")[1];
-    result = (<>{getSectionAnchor()}<YoutubeBackground isDragging={isDragging} id={getId()} videoId={youtubeId} overlay="rgba(0,0,0,.4)" contentClassName={getVideoClassName()}>{contents}</YoutubeBackground></>);
-  } else result = (<>{getSectionAnchor()}<Box component="div" sx={{ "&&:before": { opacity: props.section.answers?.backgroundOpacity || "" } }} style={getStyle()} className={getClassName()} id={getId()}>{contents}</Box></>);
+    result = (<>{getSectionAnchor()}<YoutubeBackground isDragging={isDragging} id={getId()} videoId={youtubeId} overlay="rgba(0,0,0,.4)" contentClassName={getVideoClassName() + ((topDivider || bottomDivider) ? " sectionWithDivider" : "")}>{getDividers()}{contents}</YoutubeBackground></>);
+  } else result = (<>{getSectionAnchor()}<Box component="div" sx={{ "&&:before": { opacity: props.section.answers?.backgroundOpacity || "" } }} style={getStyle()} className={getClassName()} id={getId()}>{getDividers()}{contents}</Box></>);
 
   if (props.onEdit) {
     return (
-      <div className="sectionEditWrapper">
+      <div className="sectionEditWrapper" data-section-id={props.section.id}>
         <DraggableWrapper dndType="section" elementType="section" data={props.section} onDoubleClick={(e: React.MouseEvent) => { const target = e.target as HTMLElement; if (!target.closest(".elementWrapper")) { props.onEdit(props.section, null); } }}>
           {result}
           <div className="sectionHoverEdge" />
@@ -562,6 +576,8 @@ export const Section: React.FC<Props> = props => {
               onMoveDown={() => props.onSectionMove(props.section, "down")}
               onDuplicate={() => props.onSectionDuplicate?.(props.section.id)}
               onDelete={() => props.onSectionDelete?.(props.section)}
+              onSwitchLayout={props.onSectionSwitchLayout && !props.section.targetBlockId && hasExtractableContent(props.section) ? () => props.onSectionSwitchLayout(props.section) : undefined}
+              onAiRewrite={props.onSectionAiRewrite && !props.section.targetBlockId ? () => props.onSectionAiRewrite(props.section) : undefined}
             />
           )}
         </DraggableWrapper>

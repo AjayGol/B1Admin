@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 import { login } from "./helpers/auth";
 import { STORAGE_STATE_PATH } from "./global-setup";
 
-// Editable scheduling matrix (Services/Music parity #5). Drives the demo Sunday
+// Editable scheduling matrix (roadmap #5). Drives the demo Sunday
 // Service plan type (PLT00000001 / ministry GRP0000000a): plan PLA00000001 is the
 // upcoming Sunday in the default range, with POS1-9 filled and Hospitality
 // Greeter/Usher as unfilled (red) gap cells to fill, auto-schedule, and email.

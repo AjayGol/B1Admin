@@ -43,7 +43,8 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
       printNametag: "false",
       slug: "",
       campusId: "",
-      joinPolicy: "open"
+      joinPolicy: "open",
+      publicRoster: "false"
     }
   });
 
@@ -70,7 +71,8 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
         printNametag: props.group.printNametag?.toString() || "false",
         slug: props.group.slug || "",
         campusId: props.group.campusId || "",
-        joinPolicy: props.group.joinPolicy || "open"
+        joinPolicy: props.group.joinPolicy || "open",
+        publicRoster: (props.group as AnyRecord).publicRoster?.toString() || "false"
       });
       setAbout(props.group.about || "");
       setPhotoUrl(props.group.photoUrl || "");
@@ -100,6 +102,7 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
     group.campusId = values.campusId || null;
     // Cast until the published GroupInterface includes attendanceReminders.
     (group as AnyRecord).attendanceReminders = values.attendanceReminders === "true";
+    (group as AnyRecord).publicRoster = values.publicRoster === "true";
     ApiHelper.post("/groups", [group], "MembershipApi").then(() => {
       props.updatedFunction();
     });
@@ -300,6 +303,17 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
                       <MenuItem value="open">Open (members can join immediately)</MenuItem>
                       <MenuItem value="request">Request to Join (leader approval required)</MenuItem>
                       <MenuItem value="closed">Closed (admin-add only)</MenuItem>
+                    </Select>
+                  )} />
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel>{Locale.label("groups.groupDetailsEdit.publicRoster")}</InputLabel>
+                  <Controller name="publicRoster" control={control} render={({ field }) => (
+                    <Select {...field} value={field.value ?? "false"} label={Locale.label("groups.groupDetailsEdit.publicRoster")} data-testid="public-roster-select">
+                      <MenuItem value="false">{Locale.label("common.no")}</MenuItem>
+                      <MenuItem value="true">{Locale.label("common.yes")}</MenuItem>
                     </Select>
                   )} />
                 </FormControl>

@@ -1,4 +1,4 @@
-import { Alert, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Alert, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useMountedState, ApiHelper, DateHelper, Locale } from "@churchapps/apphelper";
@@ -20,6 +20,10 @@ export interface FormInterface {
   archived: boolean;
   action?: string;
   thankYouMessage?: string;
+  displayMode?: string;
+  autoCreatePerson?: boolean;
+  followUpSubject?: string;
+  followUpBody?: string;
 }
 
 type AnyRecord = Record<string, any>;
@@ -31,7 +35,7 @@ export function FormEdit(props: Props) {
   const isMounted = useMountedState();
   const queryClient = useQueryClient();
 
-  const { control, register, handleSubmit, reset, watch, formState } = useForm<AnyRecord>({ defaultValues: { name: "", contentType: "person", thankYouMessage: "", restricted: false, accessStartTime: null, accessEndTime: null } });
+  const { control, register, handleSubmit, reset, watch, formState } = useForm<AnyRecord>({ defaultValues: { name: "", contentType: "person", thankYouMessage: "", restricted: false, accessStartTime: null, accessEndTime: null, displayMode: "standard", autoCreatePerson: false, followUpSubject: "", followUpBody: "" } });
 
   const e = formState.errors as any;
   const summaryErrors: string[] = [];
@@ -40,6 +44,7 @@ export function FormEdit(props: Props) {
   if (e.accessEndTime?.message) summaryErrors.push(e.accessEndTime.message);
 
   const watchedId = watch("id");
+  const autoCreatePerson = watch("autoCreatePerson");
 
   const formQuery = useQuery<FormInterface>({
     queryKey: ["/forms/" + props.formId, "MembershipApi"],
@@ -56,7 +61,11 @@ export function FormEdit(props: Props) {
         ...data,
         accessStartTime: data.accessStartTime ? DateHelper.formatHtml5Date(data.accessStartTime) : null,
         accessEndTime: data.accessEndTime ? DateHelper.formatHtml5Date(data.accessEndTime) : null,
-        restricted: data.restricted ?? false
+        restricted: data.restricted ?? false,
+        displayMode: data.displayMode ?? "standard",
+        autoCreatePerson: data.autoCreatePerson ?? false,
+        followUpSubject: data.followUpSubject ?? "",
+        followUpBody: data.followUpBody ?? ""
       });
     }
   }, [formQuery.data, isMounted]);
@@ -145,6 +154,25 @@ export function FormEdit(props: Props) {
         </Grid>
       )}
       <TextField fullWidth label={Locale.label("forms.formEdit.thankYouMessage")} type="text" placeholder={Locale.label("placeholders.form.thankYouMessage")} {...register("thankYouMessage")} />
+      <FormControl fullWidth>
+        <InputLabel id="displayMode">{Locale.label("forms.formEdit.displayMode")}</InputLabel>
+        <Controller name="displayMode" control={control} render={({ field }) => (
+          <Select {...field} value={field.value ?? "standard"} labelId="displayMode" label={Locale.label("forms.formEdit.displayMode")} data-testid="display-mode-select">
+            <MenuItem value="standard">{Locale.label("forms.formEdit.displayStandard")}</MenuItem>
+            <MenuItem value="conversational">{Locale.label("forms.formEdit.displayConversational")}</MenuItem>
+          </Select>
+        )} />
+      </FormControl>
+      <Controller name="autoCreatePerson" control={control} render={({ field }) => (
+        <FormControlLabel control={<Checkbox checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} data-testid="auto-create-person-checkbox" />} label={Locale.label("forms.formEdit.autoCreatePerson")} />
+      )} />
+      {autoCreatePerson && (
+        <>
+          <TextField fullWidth label={Locale.label("forms.formEdit.followUpSubject")} type="text" {...register("followUpSubject")} data-testid="follow-up-subject-input" />
+          <TextField fullWidth multiline minRows={4} label={Locale.label("forms.formEdit.followUpBody")} {...register("followUpBody")} data-testid="follow-up-body-input" />
+          <Typography variant="caption" color="text.secondary">{Locale.label("forms.formEdit.followUpHelper")}</Typography>
+        </>
+      )}
     </FormCard>
   );
 }

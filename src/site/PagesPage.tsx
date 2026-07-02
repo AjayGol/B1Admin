@@ -8,6 +8,7 @@ import {
   Description as DescriptionIcon,
   Edit as EditIcon,
   ExpandMore as ExpandMoreIcon,
+  AutoAwesome as AutoAwesomeIcon,
   AutoAwesomeMosaic as AutoAwesomeMosaicIcon,
   Public as PublicIcon,
   Transform as TransformIcon,
@@ -16,7 +17,7 @@ import {
 import { ApiHelper, ErrorMessages, PageHeader, UserHelper, Locale, Permissions } from "@churchapps/apphelper";
 import { useWindowWidth } from "@react-hook/window-size";
 import { useNavigate } from "react-router-dom";
-import { AddPageModal, NavLinkEdit } from "./components";
+import { AddPageModal, NavLinkEdit, GenerateSiteModal } from "./components";
 import { SiteTemplatePicker } from "./admin/templates/SiteTemplatePicker";
 import { PageHelper, EnvironmentHelper } from "../helpers";
 import type { PageLink } from "../helpers";
@@ -39,6 +40,7 @@ export const PagesPage = () => {
   const [editLink, setEditLink] = useState<LinkInterface | null>(null);
   const [showLogin, setShowLogin] = useState<GenericSettingInterface>();
   const [showSiteTemplates, setShowSiteTemplates] = useState(false);
+  const [showGenerateSite, setShowGenerateSite] = useState(false);
 
   const getExpandControl = (item: PageLink, level: number) => {
     if (item.children && item.children.length > 0) {
@@ -225,6 +227,12 @@ export const PagesPage = () => {
           if (firstCreatedPageId) navigate("/site/pages/preview/" + firstCreatedPageId);
         }}
       />
+      {showGenerateSite && (
+        <GenerateSiteModal
+          onDone={() => setShowGenerateSite(false)}
+          updatedCallback={loadData}
+        />
+      )}
       {addMode !== "" && (
         <AddPageModal
           updatedCallback={() => {
@@ -266,6 +274,16 @@ export const PagesPage = () => {
           data-testid="start-from-template-button"
           sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
           {Locale.label("site.pagesPage.startFromTemplate")}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<AutoAwesomeIcon />}
+          onClick={() => {
+            setShowGenerateSite(true);
+          }}
+          data-testid="generate-site-button"
+          sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+          {Locale.label("site.generateSite.button")}
         </Button>
         <Button
           variant="outlined"

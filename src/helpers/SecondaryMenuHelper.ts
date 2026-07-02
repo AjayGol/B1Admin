@@ -136,12 +136,14 @@ export class SecondaryMenuHelper {
 
     if (UserHelper.checkAccess(Permissions.contentApi.content.edit)) {
       menuItems.push({ url: "/site/pages", label: Locale.label("helpers.secondaryMenuHelper.pages"), icon: "article" });
+      menuItems.push({ url: "/site/blog", label: Locale.label("helpers.secondaryMenuHelper.blog"), icon: "rss_feed" });
       menuItems.push({ url: "/site/blocks", label: Locale.label("helpers.secondaryMenuHelper.blocks"), icon: "widgets" });
       menuItems.push({ url: "/site/appearance", label: Locale.label("helpers.secondaryMenuHelper.appearance"), icon: "palette" });
       menuItems.push({ url: "/site/files", label: Locale.label("helpers.secondaryMenuHelper.files"), icon: "folder_open" });
     }
 
     if (path.startsWith("/site/pages")) label = Locale.label("helpers.secondaryMenuHelper.pages");
+    else if (path.startsWith("/site/blog")) label = Locale.label("helpers.secondaryMenuHelper.blog");
     else if (path.startsWith("/site/blocks")) label = Locale.label("helpers.secondaryMenuHelper.blocks");
     else if (path.startsWith("/site/appearance")) label = Locale.label("helpers.secondaryMenuHelper.appearance");
     else if (path.startsWith("/site/files")) label = Locale.label("helpers.secondaryMenuHelper.files");

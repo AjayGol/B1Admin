@@ -125,6 +125,12 @@ export function ElementAdd(props: Props) {
     textWithPhoto: { icon: "article", labelKey: "site.elementAdd.textWithPhoto", descKey: "site.elementAdd.descTextWithPhoto" },
     card: { icon: "dashboard", labelKey: "site.elementAdd.card", descKey: "site.elementAdd.descCard" },
     faq: { icon: "help_outline", labelKey: "site.elementAdd.expandable", descKey: "site.elementAdd.descExpandable" },
+    iconFeature: { icon: "stars", labelKey: "site.elementAdd.iconFeature", descKey: "site.elementAdd.descIconFeature" },
+    gallery: { icon: "collections", labelKey: "site.elementAdd.gallery", descKey: "site.elementAdd.descGallery" },
+    testimonial: { icon: "format_quote", labelKey: "site.elementAdd.testimonial", descKey: "site.elementAdd.descTestimonial" },
+    socialIcons: { icon: "share", labelKey: "site.elementAdd.socialIcons", descKey: "site.elementAdd.descSocialIcons" },
+    countdown: { icon: "timer", labelKey: "site.elementAdd.countdown", descKey: "site.elementAdd.descCountdown" },
+    stats: { icon: "insights", labelKey: "site.elementAdd.stats", descKey: "site.elementAdd.descStats" },
     table: { icon: "table_chart", labelKey: "site.elementAdd.table", descKey: "site.elementAdd.descTable" },
     image: { icon: "image", labelKey: "site.elementAdd.image", descKey: "site.elementAdd.descImage" },
     video: { icon: "play_circle", labelKey: "site.elementAdd.video", descKey: "site.elementAdd.descVideo" },
@@ -138,6 +144,9 @@ export function ElementAdd(props: Props) {
     calendar: { icon: "event", labelKey: "site.elementAdd.calendar", descKey: "site.elementAdd.descCalendar" },
     groupList: { icon: "groups", labelKey: "site.elementAdd.groupList", descKey: "site.elementAdd.descGroupList" },
     groups: { icon: "manage_search", label: "Groups Browser", description: "Filterable directory of all church groups, with optional search and category filters." },
+    campaignProgress: { icon: "savings", labelKey: "site.elementAdd.campaignProgress", descKey: "site.elementAdd.descCampaignProgress" },
+    staffGrid: { icon: "groups_2", labelKey: "site.elementAdd.staffGrid", descKey: "site.elementAdd.descStaffGrid" },
+    serviceTimes: { icon: "schedule", labelKey: "site.elementAdd.serviceTimes", descKey: "site.elementAdd.descServiceTimes" },
     rawHTML: { icon: "code", labelKey: "site.elementAdd.html", descKey: "site.elementAdd.descHtml" },
     iframe: { icon: "web", labelKey: "site.elementAdd.embedPage", descKey: "site.elementAdd.descEmbedPage" }
   };

@@ -29,8 +29,8 @@ interface FormDetail {
   answers: AnswerInterface[];
 }
 
-// The person record's "Profile" view plus a vertical side rail with one entry per person-form
-// (Planning Center style). Profile is selected by default; each form shows a completion dot
+// The person record's "Profile" view plus a vertical side rail with one entry per person-form.
+// Profile is selected by default; each form shows a completion dot
 // (filled = submitted, hollow = not). The selected entry renders inline on the right and edits in place.
 export const PersonProfileTabs: React.FC<Props> = (props) => {
   const [allForms, setAllForms] = useState<PersonFormOption[]>([]);

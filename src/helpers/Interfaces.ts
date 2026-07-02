@@ -319,8 +319,25 @@ export interface PageInterface {
   url?: string;
   title?: string;
   layout?: string;
+  visibility?: string;
+  groupIds?: string;
+  metaDescription?: string;
   publishedAt?: string;
   sections?: SectionInterface[];
+}
+
+export interface PostInterface {
+  id?: string;
+  churchId?: string;
+  pageId?: string;
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  authorId?: string;
+  photoUrl?: string;
+  publishDate?: Date | string | null;
+  category?: string;
+  tags?: string;
 }
 
 export interface BlockInterface {

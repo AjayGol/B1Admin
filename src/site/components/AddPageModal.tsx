@@ -101,6 +101,12 @@ export function AddPageModal(props: Props) {
         "textWithPhoto",
         "card",
         "faq",
+        "iconFeature",
+        "testimonial",
+        "stats",
+        "gallery",
+        "socialIcons",
+        "countdown",
         "table",
         "image",
         "video",
@@ -348,7 +354,7 @@ export function AddPageModal(props: Props) {
             {getTemplateButton("about", "quiz", Locale.label("site.addPageModal.aboutUs"))}
             {getTemplateButton("donate", "volunteer_activism", Locale.label("site.addPageModal.donate"))}
             {getTemplateButton("location", "location_on", Locale.label("site.addPageModal.location"))}
-            {/* {getTemplateButton("ai", "auto_awesome", "AI")} */}
+            {getTemplateButton("ai", "auto_awesome", "AI")}
             {(props.mode === "navigation") && getTemplateButton("link", "link", Locale.label("site.addPageModal.linkType"))}
           </Grid>
 

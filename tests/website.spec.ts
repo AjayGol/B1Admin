@@ -97,6 +97,31 @@ test.describe("Website Management", () => {
       await expect(name).toHaveCount(0);
     });
 
+    test("should set and persist page visibility", async () => {
+      const openSettings = async () => {
+        await page.locator('[data-testid="edit-page-button"]').last().click();
+        await page.locator("button").getByText("Page Settings").click();
+        await page.locator('[data-testid="page-visibility-select"]').waitFor({ state: "visible" });
+      };
+      await openSettings();
+      await page.locator('[data-testid="page-visibility-select"]').click();
+      await page.getByRole("option", { name: "Members & Staff" }).click();
+      let pagePost = page.waitForResponse(r => r.url().includes("/content/pages") && r.request().method() === "POST", { timeout: 15000 });
+      await page.locator("button").getByText("Save").click();
+      await pagePost;
+
+      await navigateToSite(page);
+      await openSettings();
+      await expect(page.locator('[data-testid="page-visibility-select"]')).toContainText("Members & Staff");
+
+      // Restore to Everyone so the shared page doesn't affect later tests.
+      await page.locator('[data-testid="page-visibility-select"]').click();
+      await page.getByRole("option", { name: "Everyone" }).click();
+      pagePost = page.waitForResponse(r => r.url().includes("/content/pages") && r.request().method() === "POST", { timeout: 15000 });
+      await page.locator("button").getByText("Save").click();
+      await pagePost;
+    });
+
     test("should edit page content", async () => {
       const editBtn = page.locator('[data-testid="edit-page-button"]').last();
       await editBtn.click();
@@ -1042,6 +1067,126 @@ test.describe("Website Management", () => {
       await appearanceTab.click();
       await page.waitForURL(/\/site\/appearance/, { timeout: 10000 });
       await expect(page).toHaveURL(/\/site\/appearance/);
+    });
+  });
+
+  test.describe("Accessibility Checker", () => {
+    test("a11yChecker self-check", async () => {
+      const { assertA11ySelfCheck } = await import("../src/site/admin/a11yChecker");
+      expect(assertA11ySelfCheck()).toBe(true);
+    });
+
+    test("accessibility panel opens on a demo page and reports issues or a clean bill", async ({ page }) => {
+      await page.goto("/site/pages/PAG00000001");
+      await expect(page.locator(".elementWrapper").first()).toBeVisible({ timeout: 20000 });
+
+      const a11yBtn = page.locator('[data-testid="content-editor-a11y-button"]');
+      await expect(a11yBtn).toBeVisible({ timeout: 10000 });
+      await a11yBtn.click();
+
+      const panel = page.locator('[data-testid="a11y-panel"]');
+      await expect(panel).toBeVisible({ timeout: 10000 });
+
+      // The panel deterministically shows either the empty (clean) state or a list of issues.
+      const issues = panel.locator('[data-testid="a11y-issue"]');
+      const empty = panel.locator('[data-testid="a11y-empty"]');
+      await expect(issues.or(empty).first()).toBeVisible({ timeout: 10000 });
+      const issueCount = await issues.count();
+      const emptyCount = await empty.count();
+      expect(issueCount + emptyCount).toBeGreaterThan(0);
+
+      // When issues exist, a section-level group exposes a working "highlight" affordance.
+      const highlight = panel.locator('[data-testid="a11y-highlight"]').first();
+      if (issueCount > 0 && await highlight.isVisible().catch(() => false)) {
+        await highlight.click();
+        await expect(panel).toBeVisible();
+      }
+    });
+  });
+
+  test.describe.serial("Layout Switcher", () => {
+    // Creates its own page — a retry would collide on the URL slug.
+    test.describe.configure({ retries: 0 });
+
+    let page: Page;
+
+    test.beforeAll(async ({ browser }) => {
+      const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+      page = await context.newPage();
+      await login(page);
+      await navigateToSite(page);
+    });
+
+    test.afterAll(async () => {
+      await page?.context().close();
+    });
+
+    test("remapSectionContent self-check", async () => {
+      const { assertRemapSelfCheck } = await import("../src/site/admin/templates/sectionTemplates");
+      expect(assertRemapSelfCheck()).toBe(true);
+    });
+
+    test("should switch a section's layout, keeping its content", async () => {
+      const addBtn = page.locator('[data-testid="add-page-button"]');
+      await addBtn.click();
+      await page.locator('[name="title"]').fill("Zacchaeus Layout Page");
+      const pagePost = page.waitForResponse(r => r.url().includes("/content/pages") && r.request().method() === "POST", { timeout: 15000 });
+      await page.locator("button").getByText("Save").click();
+      await pagePost;
+      // Wait for the row to land and the Add Page dialog to fully close, otherwise
+      // its backdrop intercepts the edit-page click under parallel load.
+      await expect(page.locator("td").getByText("Zacchaeus Layout Page")).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('[name="title"]')).toHaveCount(0);
+
+      const editBtn = page.locator('[data-testid="edit-page-button"]').last();
+      await editBtn.click();
+      await page.locator("button").getByText("Edit Content").click();
+
+      const addContentBtn = page.locator('[data-testid="content-editor-add-button"]');
+      // The content-editor route compiles on first hit; wait it out before interacting.
+      await expect(addContentBtn).toBeVisible({ timeout: 30000 });
+      const ensurePanelOpen = async () => {
+        const visible = await page.locator('[data-testid="draggable-element-section"]').isVisible({ timeout: 500 }).catch(() => false);
+        if (!visible) await addContentBtn.click();
+      };
+      await ensurePanelOpen();
+      const section = page.locator('[data-testid="draggable-element-section"]');
+      await expect(section).toBeVisible({ timeout: 10000 });
+      const dropzone = page.locator('div [data-testid="droppable-area"]').first();
+      await section.hover();
+      await page.mouse.down();
+      await page.mouse.move(-10, -10);
+      await dropzone.hover();
+      await page.mouse.up();
+      // Split hero carries a heading, a button, and a photo — three content kinds to remap.
+      const heroSplitCard = page.locator('[data-testid="template-heroSplit"]');
+      await expect(heroSplitCard).toBeVisible({ timeout: 10000 });
+      const treePost = page.waitForResponse(r => r.url().includes("/content/sections/tree") && r.request().method() === "POST", { timeout: 15000 });
+      await heroSplitCard.click();
+      expect((await treePost).status()).toBe(200);
+      await expect(page.getByText("A Church For Your Whole Family")).toBeVisible({ timeout: 10000 });
+
+      // Switch this section to the centered hero layout via the hover toolbar.
+      const sectionWrapper = page.locator(".sectionEditWrapper").filter({ hasText: "A Church For Your Whole Family" }).first();
+      await sectionWrapper.hover();
+      const switchBtn = sectionWrapper.locator('[data-testid="section-toolbar-switch-layout"]');
+      await expect(switchBtn).toBeVisible({ timeout: 10000 });
+      await switchBtn.click();
+      // Switch-mode picker drops the Blank tile and shows the lossy-content hint.
+      await expect(page.locator('[data-testid="switch-layout-hint"]')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('[data-testid="template-blank"]')).toHaveCount(0);
+
+      const switchTreePost = page.waitForResponse(r => r.url().includes("/content/sections/tree") && r.request().method() === "POST", { timeout: 15000 });
+      const oldSectionDelete = page.waitForResponse(r => /\/content\/sections\/[^/]+$/.test(r.url()) && r.request().method() === "DELETE", { timeout: 15000 });
+      await page.locator('[data-testid="template-heroCentered"]').click();
+      expect((await switchTreePost).status()).toBe(200);
+      expect((await oldSectionDelete).status()).toBe(200);
+
+      // The heading and button survive the re-pour into the new (centered) layout.
+      await expect(page.getByText("A Church For Your Whole Family")).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText("Join Us Sunday")).toBeVisible({ timeout: 10000 });
+      // The centered hero's placeholder heading was overwritten, not left behind.
+      await expect(page.getByText("Welcome Home", { exact: true })).toHaveCount(0);
     });
   });
 

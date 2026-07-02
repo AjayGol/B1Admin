@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
-import { Settings, ArrowUpward, ArrowDownward, ContentCopy, Delete, DragIndicator } from "@mui/icons-material";
+import { Settings, ArrowUpward, ArrowDownward, ContentCopy, Delete, DragIndicator, ViewQuilt, AutoAwesome } from "@mui/icons-material";
 import { Locale } from "@churchapps/apphelper";
 import { AppIconButton } from "../../components/ui/AppIconButton";
 
@@ -14,6 +14,8 @@ interface Props {
   onMoveDown: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onSwitchLayout?: () => void;
+  onAiRewrite?: () => void;
 }
 
 const actionButtonSx = {
@@ -55,6 +57,12 @@ export const SectionToolbar: React.FC<Props> = (props) => (
     <AppIconButton label={Locale.label("site.sectionToolbar.moveUp")} icon={<ArrowUpward sx={{ fontSize: 14 }} />} onClick={props.onMoveUp} disabled={props.isFirst} sx={actionButtonSx} data-testid="section-toolbar-move-up" />
     <AppIconButton label={Locale.label("site.sectionToolbar.moveDown")} icon={<ArrowDownward sx={{ fontSize: 14 }} />} onClick={props.onMoveDown} disabled={props.isLast} sx={actionButtonSx} data-testid="section-toolbar-move-down" />
     <AppIconButton label={Locale.label("site.sectionToolbar.duplicate")} icon={<ContentCopy sx={{ fontSize: 14 }} />} onClick={props.onDuplicate} sx={actionButtonSx} data-testid="section-toolbar-duplicate" />
+    {props.onSwitchLayout && (
+      <AppIconButton label={Locale.label("site.sectionToolbar.switchLayout")} icon={<ViewQuilt sx={{ fontSize: 14 }} />} onClick={props.onSwitchLayout} sx={actionButtonSx} data-testid="section-toolbar-switch-layout" />
+    )}
+    {props.onAiRewrite && (
+      <AppIconButton label={Locale.label("site.sectionToolbar.aiRewrite")} icon={<AutoAwesome sx={{ fontSize: 14 }} />} onClick={props.onAiRewrite} sx={actionButtonSx} data-testid="section-toolbar-ai-rewrite" />
+    )}
     <AppIconButton label={Locale.label("site.sectionToolbar.delete")} icon={<Delete sx={{ fontSize: 14 }} />} intent="remove" onClick={props.onDelete} sx={actionButtonSx} data-testid="section-toolbar-delete" />
   </Box>
 );
