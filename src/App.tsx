@@ -51,6 +51,9 @@ const createMdTheme = (mode: PaletteMode) =>
           "body.dark-theme #banner": {
             backgroundColor: "#1e1e1e",
             borderBottom: "1px solid #333"
+          },
+          ".google-visualization-tooltip, .google-visualization-tooltip *": {
+            pointerEvents: "none"
           }
         }
       },
