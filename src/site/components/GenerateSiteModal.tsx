@@ -8,6 +8,7 @@ import type { ElementInterface } from "../../helpers/Interfaces";
 type Props = {
   onDone: () => void;
   updatedCallback: () => void;
+  siteId?: string;
 };
 
 const TONE_KEYS = ["warm", "formal", "inspirational", "casual"];
@@ -35,7 +36,7 @@ export function GenerateSiteModal(props: Props) {
 
   const buildChurchContext = async (): Promise<any> => {
     let globalStyles: any;
-    try { globalStyles = await ApiHelper.get("/globalStyles", "ContentApi"); } catch { globalStyles = null; }
+    try { globalStyles = await ApiHelper.get("/globalStyles" + (props.siteId ? "?siteId=" + props.siteId : ""), "ContentApi"); } catch { globalStyles = null; }
     return {
       churchId: church.id,
       churchName,
@@ -95,7 +96,7 @@ export function GenerateSiteModal(props: Props) {
       let pageId: string;
       try {
         const url = page.url || SlugHelper.slugifyString("/" + page.title.toLowerCase().replace(/\s+/g, "-"), "urlPath") || "/untitled";
-        const saved = await ApiHelper.post("/pages", [{ churchId: church.id, url, title: page.title, layout: page.layout || "headerFooter" }], "ContentApi");
+        const saved = await ApiHelper.post("/pages", [{ churchId: church.id, url, title: page.title, layout: page.layout || "headerFooter", siteId: props.siteId || "" }], "ContentApi");
         pageId = saved[0].id;
         if (!firstPageId) firstPageId = pageId;
       } catch {

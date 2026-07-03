@@ -8,6 +8,7 @@ import { SiteTemplatePreview } from "./SiteTemplatePreview";
 
 interface Props {
   open: boolean;
+  siteId?: string;
   onClose: () => void;
   updatedCallback: (firstCreatedPageId: string | null) => void;
 }
@@ -18,6 +19,7 @@ interface PageSummary {
 }
 
 export const SiteTemplatePicker: React.FC<Props> = (props) => {
+  const siteId = props.siteId || "";
   const [selected, setSelected] = useState<SiteTemplateDef | null>(null);
   const [existingPages, setExistingPages] = useState<PageSummary[]>([]);
   const [existingLinks, setExistingLinks] = useState<LinkInterface[]>([]);
@@ -30,11 +32,11 @@ export const SiteTemplatePicker: React.FC<Props> = (props) => {
     if (props.open) {
       setSelected(null);
       setErrors([]);
-      ApiHelper.get("/pages", "ContentApi").then((data: PageSummary[]) => setExistingPages(data || []));
-      ApiHelper.get("/links?category=website", "ContentApi").then((data: LinkInterface[]) => setExistingLinks(data || []));
-      ApiHelper.get("/globalStyles", "ContentApi").then((gs: any) => setExistingStyle(gs || {}));
+      ApiHelper.get("/pages" + (siteId ? "?siteId=" + siteId : ""), "ContentApi").then((data: PageSummary[]) => setExistingPages(data || []));
+      ApiHelper.get("/links?category=website" + (siteId ? "&siteId=" + siteId : ""), "ContentApi").then((data: LinkInterface[]) => setExistingLinks(data || []));
+      ApiHelper.get("/globalStyles" + (siteId ? "?siteId=" + siteId : ""), "ContentApi").then((gs: any) => setExistingStyle(gs || {}));
     }
-  }, [props.open]);
+  }, [props.open, siteId]);
 
   const label = (key: string) => Locale.label("site.siteTemplates." + key);
   const pageTitle = (p: SiteTemplatePageDef) => label("pages." + p.titleKey);
@@ -58,7 +60,7 @@ export const SiteTemplatePicker: React.FC<Props> = (props) => {
         if (isCustom && !pageExists(pageDef)) {
           const title = pageTitle(pageDef);
           setStatus(label("creating").replace("{title}", title));
-          const saved = await ApiHelper.post("/pages", [{ churchId, title, url: pageDef.url, layout: "headerFooter" }], "ContentApi");
+          const saved = await ApiHelper.post("/pages", [{ churchId, siteId, title, url: pageDef.url, layout: "headerFooter" }], "ContentApi");
           const pageId = saved[0].id;
           if (!firstCreatedPageId) firstCreatedPageId = pageId;
           let sort = 1;
@@ -70,13 +72,15 @@ export const SiteTemplatePicker: React.FC<Props> = (props) => {
           const navText = label("nav." + pageDef.navKey);
           const linkExists = existingLinks.some((l) => l.url === pageDef.url || (l.text || "").toLowerCase() === navText.toLowerCase());
           if (!linkExists) {
-            await ApiHelper.post("/links", [{ churchId, category: "website", linkType: "url", linkData: "", icon: pageDef.navIcon || "", text: navText, url: pageDef.url, sort: navSort++ }], "ContentApi");
+            await ApiHelper.post("/links", [{ churchId, siteId, category: "website", linkType: "url", linkData: "", icon: pageDef.navIcon || "", text: navText, url: pageDef.url, sort: navSort++ }], "ContentApi");
           }
         }
       }
       // Theme the site to the chosen template, but never overwrite a church's own palette.
       if (selected.theme && existingStyle && !existingStyle.palette) {
-        const gs = { ...existingStyle, palette: JSON.stringify(selected.theme.palette), fonts: JSON.stringify(selected.theme.fonts) };
+        const gs: any = { ...existingStyle, palette: JSON.stringify(selected.theme.palette), fonts: JSON.stringify(selected.theme.fonts) };
+        // Copy-on-write: if the loaded row isn't this site's, fork it so we never overwrite the primary.
+        if ((existingStyle.siteId || "") !== siteId) { delete gs.id; gs.siteId = siteId; }
         await ApiHelper.post("/globalStyles", [gs], "ContentApi");
       }
       props.updatedCallback(firstCreatedPageId);

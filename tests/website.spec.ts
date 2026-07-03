@@ -545,7 +545,7 @@ test.describe("Website Management", () => {
       await addBtn.click();
       const name = page.locator('[name="name"]');
       await name.fill("Zacchaeus Test Block");
-      const typeSelectBox = page.locator('[role="combobox"]');
+      const typeSelectBox = page.locator("#mui-component-select-blockType");
       await typeSelectBox.click();
       const typeSelect = page.locator('[data-testid="block-type-section"]');
       await typeSelect.click();

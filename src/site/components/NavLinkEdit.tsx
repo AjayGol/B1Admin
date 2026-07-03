@@ -11,6 +11,7 @@ import type { PageLink } from "../../helpers";
 type Props = {
   link: LinkInterface;
   embedded?: boolean;
+  siteId?: string;
   updatedCallback: (link: LinkInterface | null) => void;
   onDone: () => void;
 };
@@ -78,7 +79,7 @@ export function NavLinkEdit(props: Props) {
     if (props.link) reset({ linkText: props.link.text || "", url: props.link.url || "", parentId: props.link.parentId || "" });
   }, [props.link, reset]);
 
-  useEffect(() => { PageHelper.loadPageTree().then((data) => { setPageTree(PageHelper.flatten(data)); }); }, []);
+  useEffect(() => { PageHelper.loadPageTree(props.siteId || "").then((data) => { setPageTree(PageHelper.flatten(data)); }); }, [props.siteId]);
 
   useEffect(() => {
     const category = props.link?.category || "website";

@@ -10,6 +10,7 @@ type Props = {
   updatedCallback: () => void;
   onDone: () => void;
   requestedSlug?: string;
+  siteId?: string;
 };
 
 interface PageInterface {
@@ -17,6 +18,7 @@ interface PageInterface {
   title?: string;
   url?: string;
   layout?: string;
+  siteId?: string;
 }
 
 export function AddPageModal(props: Props) {
@@ -221,6 +223,7 @@ export function AddPageModal(props: Props) {
       const pageToSave = {
         title: assembledPage.title,
         churchId: church.id,
+        siteId: props.siteId || undefined,
         layout: assembledPage.layout,
         url: SlugHelper.slugifyString(
           "/" + assembledPage.title.toLowerCase().replace(/\s+/g, "-"),
@@ -282,6 +285,7 @@ export function AddPageModal(props: Props) {
         let pageData = null;
         if (pageTemplate !== "link") {
           const p = { ...page };
+          p.siteId = props.siteId || undefined;
           const slugString = link?.text || page.title || "new-page";
           p.url = props.requestedSlug || SlugHelper.slugifyString("/" + slugString.toLowerCase().replace(" ", "-"), "urlPath");
           if (!p.url) p.url = "/untitled";
@@ -293,7 +297,7 @@ export function AddPageModal(props: Props) {
         }
 
         if (props.mode === "navigation") {
-          const l = { ...link };
+          const l: LinkInterface & { siteId?: string } = { ...link, siteId: props.siteId || undefined };
           if (pageTemplate !== "link") l.url = pageData.url;
           await ApiHelper.post("/links", [l], "ContentApi");
         }

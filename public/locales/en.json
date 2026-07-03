@@ -2956,7 +2956,9 @@
       "domMsg4": ".  It can take up to 5 minutes.",
       "domMsgConnect": "connect",
       "domain": "Domain",
-      "domains": "Domains"
+      "domains": "Domains",
+      "mainWebsite": "Main Website",
+      "site": "Website"
     },
     "emailTemplateEdit": {
       "bodyRequired": "Body content is required.",
@@ -4151,6 +4153,10 @@
       "showCampus": "Show Campus",
       "title": "Title"
     },
+    "siteSwitcher": {
+      "mainWebsite": "Main Website",
+      "manageSites": "Manage websites…"
+    },
     "siteTemplates": {
       "back": "Back",
       "create": "Create Site",
@@ -4219,6 +4225,15 @@
       "textColor": "Text Color",
       "title": "Site Widgets",
       "url": "URL"
+    },
+    "sitesDialog": {
+      "add": "Add Website",
+      "deleteConfirm": "Delete this website? Its pages, navigation and appearance will be permanently deleted. Its custom domains will be reassigned to the main website.",
+      "empty": "No additional websites yet.",
+      "name": "Name",
+      "subDomain": "Subdomain",
+      "subDomainHint": "Lowercase letters and numbers only. Becomes {subdomain}.b1.church",
+      "title": "Websites"
     },
     "socialIconsEdit": {
       "alignment": "Alignment",
