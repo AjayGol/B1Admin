@@ -29,11 +29,15 @@ import { useUndoRedo } from "../hooks/useUndoRedo";
 import { HistoryPanel } from "./HistoryPanel";
 import { useThemeMode } from "../../ThemeContext";
 import { SectionTemplatePicker } from "./templates/SectionTemplatePicker";
-import { buildTemplateSection, type SectionTemplateDef } from "./templates/sectionTemplates";
+import { buildTemplateSection, remapSectionContent, type SectionTemplateDef } from "./templates/sectionTemplates";
 import { trackSave, resetSaveStatus, subscribeSaveStatus, getSaveStatus, getLastSavedAt } from "./saveStatusTracker";
 import { EDITOR_HOVER_CSS, getSelectionSuppressCss } from "./editorCss";
 import { AddSectionDivider } from "./AddSectionDivider";
 import { SelectionBreadcrumb, type BreadcrumbCrumb } from "./SelectionBreadcrumb";
+import { AiRewriteDialog } from "../components/AiRewriteDialog";
+import { WEBSITE_ELEMENT_TYPES } from "./websiteContent";
+import { A11yPanel } from "./A11yPanel";
+import { checkPageAccessibility } from "./a11yChecker";
 
 const lightEditorTheme = createTheme({
   palette: { mode: "light", background: { default: "#e5e8ee", paper: "#ffffff" } },
@@ -85,6 +89,7 @@ export function ContentEditor(props: Props) {
     blockId: props.blockId
   });
   const [showHistory, setShowHistory] = useState(false);
+  const [showA11y, setShowA11y] = useState(false);
   const saveStatus = useSyncExternalStore(subscribeSaveStatus, getSaveStatus);
   const lastSavedAt = useSyncExternalStore(subscribeSaveStatus, getLastSavedAt);
 
@@ -162,6 +167,19 @@ export function ContentEditor(props: Props) {
 
   const hoverCss = useMemo(() => EDITOR_HOVER_CSS + getSelectionSuppressCss(selectedElementId), [selectedElementId]);
 
+  const a11yIssueCount = useMemo(() => checkPageAccessibility(container?.sections).length, [container?.sections]);
+
+  const handleA11yHighlight = (sectionId: string) => {
+    const el = document.querySelector(`[data-section-id="${sectionId}"]`) as HTMLElement | null;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.style.transition = "outline-color 0.3s ease";
+    el.style.outline = "3px solid var(--c1)";
+    el.style.outlineOffset = "-3px";
+    window.setTimeout(() => { el.style.outline = "3px solid transparent"; }, 1600);
+    window.setTimeout(() => { el.style.outline = ""; el.style.outlineOffset = ""; }, 2000);
+  };
+
   let elementOnlyMode = false;
   if (props.blockId && container?.sections?.length === 1 && container?.sections[0]?.id === "") elementOnlyMode = true;
 
@@ -235,6 +253,10 @@ export function ContentEditor(props: Props) {
 
 
   const [templateDrop, setTemplateDrop] = useState<{ sort: number; zone: string } | null>(null);
+  const [switchSection, setSwitchSection] = useState<SectionInterface | null>(null);
+  const [rewriteSection, setRewriteSection] = useState<SectionInterface | null>(null);
+  const [rewriteBusy, setRewriteBusy] = useState(false);
+  const [rewriteError, setRewriteError] = useState("");
 
   const handleDrop = (data: any, sort: number, zone: string) => {
     if (container) saveSnapshot(container, "Before adding section");
@@ -289,6 +311,83 @@ export function ContentEditor(props: Props) {
     trackSave(ApiHelper.post("/sections/tree", { section }, "ContentApi")).then(() => {
       loadDataInternal("After adding section");
     });
+  };
+
+  // Re-pour a section's content into another template: build the replacement just
+  // ahead of the original, save it, then delete the original. The gap between the
+  // two writes is non-atomic, but a pre-change snapshot lets undo recover it.
+  const handleSwitchLayout = (template: SectionTemplateDef) => {
+    const source = switchSection;
+    if (!source) return;
+    if (container) saveSnapshot(container, "Before switching layout");
+    const section = remapSectionContent(source, template, {
+      pageId: source.zone === "siteFooter" ? undefined : props.pageId,
+      blockId: props.blockId,
+      zone: source.zone,
+      sort: (source.sort ?? 0) - 0.05
+    });
+    setSwitchSection(null);
+    trackSave(
+      ApiHelper.post("/sections/tree", { section }, "ContentApi")
+        .then(() => ApiHelper.delete(`/sections/${source.id}`, "ContentApi"))
+    ).then(() => {
+      loadDataInternal("After switching layout");
+    });
+  };
+
+  // AI rewrite: ask AskApi to rewrite the section's text-bearing fields, then
+  // (only when the model kept the structure) re-pour the result into a fresh
+  // section just ahead of the original and delete the original — same non-atomic
+  // create-then-delete swap the layout switcher uses, undo-recoverable.
+  const openAiRewrite = (section: SectionInterface) => {
+    setRewriteError("");
+    setRewriteSection(section);
+  };
+
+  const handleAiRewrite = async (instruction: string) => {
+    const source = rewriteSection;
+    if (!source) return;
+    setRewriteBusy(true);
+    setRewriteError("");
+    try {
+      const result: any = await ApiHelper.post("/website/rewriteSection", {
+        section: source,
+        instruction,
+        churchName: context?.userChurch?.church?.name,
+        availableElementTypes: WEBSITE_ELEMENT_TYPES
+      }, "AskApi");
+      if (!result || result.fallback || !result.section) {
+        setRewriteError(result?.error || Locale.label("site.aiRewrite.failed"));
+        setRewriteBusy(false);
+        return;
+      }
+      if (container) saveSnapshot(container, "Before AI rewrite");
+      const rewritten = result.section;
+      const syncAnswers = (el: ElementInterface) => {
+        if ((el as any).answers) el.answersJSON = JSON.stringify((el as any).answers);
+        el.elements?.forEach(syncAnswers);
+      };
+      rewritten.elements?.forEach(syncAnswers);
+      const section: SectionInterface = {
+        ...rewritten,
+        id: undefined,
+        pageId: source.zone === "siteFooter" ? null : props.pageId,
+        blockId: props.blockId,
+        zone: source.zone,
+        sort: (source.sort ?? 0) - 0.05
+      };
+      setRewriteSection(null);
+      setRewriteBusy(false);
+      trackSave(
+        ApiHelper.post("/sections/tree", { section }, "ContentApi")
+          .then(() => ApiHelper.delete(`/sections/${source.id}`, "ContentApi"))
+      ).then(() => {
+        loadDataInternal("After AI rewrite");
+      });
+    } catch (err: any) {
+      setRewriteError(err?.message || Locale.label("site.aiRewrite.failed"));
+      setRewriteBusy(false);
+    }
   };
 
   const handlePublish = () => {
@@ -434,6 +533,8 @@ export function ContentEditor(props: Props) {
             onSectionMove={handleSectionMove}
             onSectionDuplicate={handleSectionDuplicate}
             onSectionDelete={(s) => setPendingDeleteSection(s)}
+            onSectionSwitchLayout={(s) => setSwitchSection(s)}
+            onSectionAiRewrite={openAiRewrite}
             isFirstSection={index === 0}
             isLastSection={index === sections.length - 1}
             isSectionEditing={!!editSection && editSection.id === section.id}
@@ -880,6 +981,8 @@ export function ContentEditor(props: Props) {
           onPublish={handlePublish}
           onDiscardChanges={handleDiscardChanges}
           onUnpublish={handleUnpublish}
+          onShowAccessibility={() => setShowA11y(true)}
+          accessibilityIssueCount={a11yIssueCount}
         />
         <HistoryPanel
           open={showHistory}
@@ -887,6 +990,12 @@ export function ContentEditor(props: Props) {
           history={history}
           currentIndex={currentHistoryIndex}
           onRestore={handleHistoryRestore}
+        />
+        <A11yPanel
+          open={showA11y}
+          sections={container?.sections}
+          onClose={() => setShowA11y(false)}
+          onHighlight={handleA11yHighlight}
         />
 
         <ConfirmDialog
@@ -927,6 +1036,22 @@ export function ContentEditor(props: Props) {
           onClose={() => setTemplateDrop(null)}
           onSelectBlank={handleTemplateBlank}
           onSelectTemplate={handleTemplateSelect}
+        />
+
+        <SectionTemplatePicker
+          open={!!switchSection}
+          switchMode
+          onClose={() => setSwitchSection(null)}
+          onSelectBlank={() => setSwitchSection(null)}
+          onSelectTemplate={handleSwitchLayout}
+        />
+
+        <AiRewriteDialog
+          open={!!rewriteSection}
+          busy={rewriteBusy}
+          error={rewriteError}
+          onCancel={() => { if (!rewriteBusy) { setRewriteSection(null); setRewriteError(""); } }}
+          onRewrite={handleAiRewrite}
         />
 
         <DndProvider backend={HTML5Backend}>

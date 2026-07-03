@@ -18,10 +18,15 @@ const HtmlEditor = (props: any) => (
 import { RowEdit } from "./RowEdit";
 import { FormEdit } from "./FormEdit";
 import { FaqEdit } from "./FaqEdit";
+import { GalleryEdit } from "./GalleryEdit";
+import { TestimonialEdit } from "./TestimonialEdit";
+import { StatsEdit } from "./StatsEdit";
 import { CalendarElementEdit } from "./CalendarElementEdit";
 import { DonateLinkEdit } from "./DonateLinkEdit";
 import { DonationEdit } from "./DonationEdit";
 import { PickColors } from "./PickColors";
+import { ColorPicker } from "../ColorPicker";
+import { IconPicker } from "../../../components/iconPicker/IconPicker";
 import { TableEdit } from "./TableEdit";
 import { StyleList } from "./StyleList";
 import { AnimationsEdit } from "./AnimationsEdit";
@@ -56,7 +61,17 @@ const APPEARANCE_FIELDS: Record<string, string[]> = {
   form: standardAppearance,
   faq: standardAppearance,
   calendar: standardAppearance,
-  image: ["border", "background", "color", "height", "margin", "padding", "width"]
+  image: ["border", "background", "color", "height", "margin", "padding", "width"],
+  iconFeature: ["font", "color", "line", "margin", "padding", "text"],
+  gallery: mediaAppearance,
+  testimonial: fullAppearance,
+  socialIcons: ["color", "margin", "padding", "text"],
+  countdown: fullAppearance,
+  stats: fullAppearance,
+  sermons: standardAppearance,
+  campaignProgress: fullAppearance,
+  staffGrid: standardAppearance,
+  serviceTimes: fullAppearance
 };
 
 type Props = {
@@ -74,6 +89,10 @@ export function ElementEdit(props: Props) {
   const [groupLabelOptions, setGroupLabelOptions] = useState<string[]>([]);
   const [groupCategoryOptions, setGroupCategoryOptions] = useState<string[]>([]);
   const [selectPhotoField, setSelectPhotoField] = React.useState<string>(null);
+  const [showIconPicker, setShowIconPicker] = useState(false);
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [funds, setFunds] = useState<any[]>([]);
+  const [staffGroups, setStaffGroups] = useState<any[]>([]);
   const [element, setElement] = useState<ElementInterface>(null);
   const [errors, setErrors] = useState([]);
   const [innerErrors, setInnerErrors] = useState([]);
@@ -699,6 +718,178 @@ export function ElementEdit(props: Props) {
     </>
   );
 
+  const getIconFeatureFields = () => {
+    const defaultIconColor = "#03a9f4";
+    return (
+      <>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Icon sx={{ fontSize: 40, color: parsedData.iconColor || defaultIconColor }}>{parsedData.icon || "volunteer_activism"}</Icon>
+          <Button variant="outlined" size="small" onClick={() => setShowIconPicker(true)} data-testid="icon-feature-choose-icon">{Locale.label("site.iconFeatureEdit.chooseIcon")}</Button>
+        </div>
+        <TextField fullWidth size="small" label={Locale.label("site.iconFeatureEdit.title")} name="title" value={parsedData.title || ""} onChange={handleChange} onKeyDown={handleKeyDown} data-testid="icon-feature-title-input" />
+        {getRichTextEditor("description")}
+        <div>
+          <InputLabel>{Locale.label("site.iconFeatureEdit.iconColor")}</InputLabel>
+          <ColorPicker color={parsedData?.iconColor || defaultIconColor} updatedCallback={(c) => handleHtmlChange("iconColor", c)} globalStyles={props.globalStyles} />
+        </div>
+        <FormControl fullWidth>
+          <InputLabel>{Locale.label("site.iconFeatureEdit.iconSize")}</InputLabel>
+          <Select fullWidth size="small" label={Locale.label("site.iconFeatureEdit.iconSize")} name="iconSize" value={parsedData.iconSize || "medium"} onChange={handleChange} data-testid="icon-feature-size-select">
+            <MenuItem value="small">{Locale.label("site.iconFeatureEdit.small")}</MenuItem>
+            <MenuItem value="medium">{Locale.label("site.iconFeatureEdit.medium")}</MenuItem>
+            <MenuItem value="large">{Locale.label("site.iconFeatureEdit.large")}</MenuItem>
+          </Select>
+        </FormControl>
+        {getTextAlignment("textAlignment")}
+      </>
+    );
+  };
+
+  const getSocialIconsFields = () => (
+    <>
+      {["facebook", "instagram", "youtube", "x", "tiktok", "vimeo"].map((network) => (
+        <TextField key={network} fullWidth size="small" label={Locale.label("site.socialIconsEdit." + network)} name={network} value={parsedData[network] || ""} onChange={handleChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.page.linkUrl")} data-testid={`social-${network}-input`} />
+      ))}
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.socialIconsEdit.iconStyle")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.socialIconsEdit.iconStyle")} name="iconStyle" value={parsedData.iconStyle || "filled"} onChange={handleChange}>
+          <MenuItem value="filled">{Locale.label("site.socialIconsEdit.filled")}</MenuItem>
+          <MenuItem value="outlined">{Locale.label("site.socialIconsEdit.outlined")}</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.socialIconsEdit.size")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.socialIconsEdit.size")} name="size" value={parsedData.size || "medium"} onChange={handleChange}>
+          <MenuItem value="small">{Locale.label("site.socialIconsEdit.small")}</MenuItem>
+          <MenuItem value="medium">{Locale.label("site.socialIconsEdit.medium")}</MenuItem>
+          <MenuItem value="large">{Locale.label("site.socialIconsEdit.large")}</MenuItem>
+        </Select>
+      </FormControl>
+      {getTextAlignment("alignment", Locale.label("site.socialIconsEdit.alignment"))}
+      <div>
+        <InputLabel>{Locale.label("site.socialIconsEdit.color")}</InputLabel>
+        <ColorPicker color={parsedData?.color || "#444444"} updatedCallback={(c) => handleHtmlChange("color", c)} globalStyles={props.globalStyles} />
+      </div>
+    </>
+  );
+
+  const getCountdownFields = () => (
+    <>
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.countdownEdit.mode")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.countdownEdit.mode")} name="mode" value={parsedData.mode || "weekly"} onChange={handleChange} data-testid="countdown-mode-select">
+          <MenuItem value="weekly">{Locale.label("site.countdownEdit.weekly")}</MenuItem>
+          <MenuItem value="date">{Locale.label("site.countdownEdit.date")}</MenuItem>
+        </Select>
+      </FormControl>
+      {parsedData.mode === "date" && (
+        <TextField fullWidth size="small" type="datetime-local" label={Locale.label("site.countdownEdit.targetDate")} name="targetDate" value={parsedData.targetDate || ""} onChange={handleChange} InputLabelProps={{ shrink: true }} data-testid="countdown-target-date-input" />
+      )}
+      {(!parsedData.mode || parsedData.mode === "weekly") && (
+        <>
+          <FormControl fullWidth>
+            <InputLabel>{Locale.label("site.countdownEdit.dayOfWeek")}</InputLabel>
+            <Select fullWidth size="small" label={Locale.label("site.countdownEdit.dayOfWeek")} name="dayOfWeek" value={(parsedData.dayOfWeek ?? 0).toString()} onChange={handleChange} data-testid="countdown-day-select">
+              <MenuItem value="0">{Locale.label("tasks.conditionDate.sun")}</MenuItem>
+              <MenuItem value="1">{Locale.label("tasks.conditionDate.mon")}</MenuItem>
+              <MenuItem value="2">{Locale.label("tasks.conditionDate.tues")}</MenuItem>
+              <MenuItem value="3">{Locale.label("tasks.conditionDate.wed")}</MenuItem>
+              <MenuItem value="4">{Locale.label("tasks.conditionDate.thurs")}</MenuItem>
+              <MenuItem value="5">{Locale.label("tasks.conditionDate.fri")}</MenuItem>
+              <MenuItem value="6">{Locale.label("tasks.conditionDate.sat")}</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField fullWidth size="small" type="time" label={Locale.label("site.countdownEdit.time")} name="time" value={parsedData.time || "10:00"} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+        </>
+      )}
+      <TextField fullWidth size="small" label={Locale.label("site.countdownEdit.title")} name="title" value={parsedData.title || ""} onChange={handleChange} onKeyDown={handleKeyDown} />
+      <TextField fullWidth size="small" label={Locale.label("site.countdownEdit.completedText")} name="completedText" value={parsedData.completedText || ""} onChange={handleChange} onKeyDown={handleKeyDown} />
+      <FormGroup>
+        <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showDays !== "false" && parsedData.showDays !== false} />} name="showDays" label={Locale.label("site.countdownEdit.showDays")} />
+        <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showHours !== "false" && parsedData.showHours !== false} />} name="showHours" label={Locale.label("site.countdownEdit.showHours")} />
+      </FormGroup>
+    </>
+  );
+
+  const getSermonsFields = () => (
+    <>
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.sermonsEdit.layout")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.sermonsEdit.layout")} name="layout" value={parsedData.layout || "browse"} onChange={handleChange} data-testid="sermons-layout-select">
+          <MenuItem value="browse">{Locale.label("site.sermonsEdit.browse")}</MenuItem>
+          <MenuItem value="grid">{Locale.label("site.sermonsEdit.grid")}</MenuItem>
+          <MenuItem value="list">{Locale.label("site.sermonsEdit.list")}</MenuItem>
+          <MenuItem value="featuredLatest">{Locale.label("site.sermonsEdit.featuredLatest")}</MenuItem>
+        </Select>
+      </FormControl>
+      {parsedData.layout && parsedData.layout !== "browse" && (
+        <>
+          <FormControl fullWidth>
+            <InputLabel>{Locale.label("site.sermonsEdit.playlist")}</InputLabel>
+            <Select fullWidth size="small" label={Locale.label("site.sermonsEdit.playlist")} name="playlistId" value={parsedData.playlistId || ""} onChange={handleChange} data-testid="sermons-playlist-select">
+              <MenuItem value="">{Locale.label("site.sermonsEdit.allPlaylists")}</MenuItem>
+              {playlists.map((p) => (<MenuItem key={p.id} value={p.id}>{p.title}</MenuItem>))}
+            </Select>
+          </FormControl>
+          {parsedData.layout !== "featuredLatest" && (
+            <TextField fullWidth size="small" type="number" label={Locale.label("site.sermonsEdit.itemCount")} name="itemCount" value={parsedData.itemCount ?? 6} onChange={handleChange} />
+          )}
+          <FormGroup>
+            <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showTitles !== "false" && parsedData.showTitles !== false} />} name="showTitles" label={Locale.label("site.sermonsEdit.showTitles")} />
+            <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showDates !== "false" && parsedData.showDates !== false} />} name="showDates" label={Locale.label("site.sermonsEdit.showDates")} />
+          </FormGroup>
+        </>
+      )}
+    </>
+  );
+
+  const getCampaignProgressFields = () => (
+    <>
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.campaignProgressEdit.fund")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.campaignProgressEdit.fund")} name="fundId" value={parsedData.fundId || ""} onChange={handleChange} data-testid="campaign-fund-select">
+          <MenuItem value="">{Locale.label("site.campaignProgressEdit.selectFund")}</MenuItem>
+          {funds.map((f) => (<MenuItem key={f.id} value={f.id}>{f.name}</MenuItem>))}
+        </Select>
+      </FormControl>
+      <TextField fullWidth size="small" type="number" label={Locale.label("site.campaignProgressEdit.goalAmount")} name="goalAmount" value={parsedData.goalAmount ?? ""} onChange={handleChange} onKeyDown={handleKeyDown} data-testid="campaign-goal-input" />
+      <TextField fullWidth size="small" label={Locale.label("site.campaignProgressEdit.title")} name="title" value={parsedData.title || ""} onChange={handleChange} onKeyDown={handleKeyDown} />
+      <TextField fullWidth size="small" type="date" label={Locale.label("site.campaignProgressEdit.startDate")} name="startDate" value={parsedData.startDate || ""} onChange={handleChange} InputLabelProps={{ shrink: true }} data-testid="campaign-start-date-input" />
+      <TextField fullWidth size="small" type="date" label={Locale.label("site.campaignProgressEdit.endDate")} name="endDate" value={parsedData.endDate || ""} onChange={handleChange} InputLabelProps={{ shrink: true }} data-testid="campaign-end-date-input" />
+      <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showAmounts !== "false" && parsedData.showAmounts !== false} />} name="showAmounts" label={Locale.label("site.campaignProgressEdit.showAmounts")} />
+      <TextField fullWidth size="small" label={Locale.label("site.campaignProgressEdit.donateUrl")} name="donateUrl" value={parsedData.donateUrl || ""} onChange={handleChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.page.linkUrl")} />
+    </>
+  );
+
+  const getStaffGridFields = () => (
+    <>
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.staffGridEdit.group")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.staffGridEdit.group")} name="groupId" value={parsedData.groupId || ""} onChange={handleChange} data-testid="staff-grid-group-select">
+          <MenuItem value="">{Locale.label("site.staffGridEdit.selectGroup")}</MenuItem>
+          {staffGroups.map((g) => (<MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>))}
+        </Select>
+      </FormControl>
+      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>{Locale.label("site.staffGridEdit.rosterHint")}</Typography>
+      <FormControl fullWidth>
+        <InputLabel>{Locale.label("site.staffGridEdit.columns")}</InputLabel>
+        <Select fullWidth size="small" label={Locale.label("site.staffGridEdit.columns")} name="columns" value={(parsedData.columns ?? 3).toString()} onChange={handleChange} data-testid="staff-grid-columns-select">
+          <MenuItem value="2">2</MenuItem>
+          <MenuItem value="3">3</MenuItem>
+          <MenuItem value="4">4</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showRoles !== "false" && parsedData.showRoles !== false} />} name="showRoles" label={Locale.label("site.staffGridEdit.showRoles")} />
+    </>
+  );
+
+  const getServiceTimesFields = () => (
+    <>
+      <TextField fullWidth size="small" label={Locale.label("site.serviceTimesEdit.title")} name="title" value={parsedData.title ?? ""} onChange={handleChange} onKeyDown={handleKeyDown} data-testid="service-times-title-input" />
+      <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showCampus !== "false" && parsedData.showCampus !== false} />} name="showCampus" label={Locale.label("site.serviceTimesEdit.showCampus")} />
+    </>
+  );
+
   const getFields = () => {
     let result = getJsonFields();
     switch (element?.elementType) {
@@ -731,7 +922,19 @@ export function ElementEdit(props: Props) {
         result = <FaqEdit parsedData={parsedData} handleChange={handleChange} handleHtmlChange={handleHtmlChange} />;
         break;
       case "map": result = getMapFields(); break;
-      case "sermons": result = <></>; break;
+      case "sermons": result = getSermonsFields(); break;
+      case "iconFeature": result = getIconFeatureFields(); break;
+      case "socialIcons": result = getSocialIconsFields(); break;
+      case "countdown": result = getCountdownFields(); break;
+      case "gallery":
+        result = <GalleryEdit parsedData={parsedData} handleChange={handleChange} handleHtmlChange={handleHtmlChange} />;
+        break;
+      case "testimonial":
+        result = <TestimonialEdit parsedData={parsedData} handleChange={handleChange} handleHtmlChange={handleHtmlChange} />;
+        break;
+      case "stats":
+        result = <StatsEdit parsedData={parsedData} handleChange={handleChange} handleHtmlChange={handleHtmlChange} />;
+        break;
       case "carousel": result = getCarouselFields(); break;
       case "image": result = getImageFields(); break;
       case "whiteSpace": result = getWhiteSpaceFields(); break;
@@ -740,6 +943,9 @@ export function ElementEdit(props: Props) {
         break;
       case "groupList": result = getGroupListFields(); break;
       case "groups": result = getGroupsFields(); break;
+      case "campaignProgress": result = getCampaignProgressFields(); break;
+      case "staffGrid": result = getStaffGridFields(); break;
+      case "serviceTimes": result = getServiceTimesFields(); break;
     }
     return result;
   };
@@ -816,11 +1022,26 @@ export function ElementEdit(props: Props) {
 
   // Auto-save elements that have no settings to edit
   useEffect(() => {
-    const elementHasNoSettings = (elementType: string): boolean => elementType === "sermons";
+    const elementHasNoSettings = (_elementType: string): boolean => false;
     if (element && !el.id && elementHasNoSettings(el.elementType)) {
       handleSave();
     }
   }, [element]);
+
+  useEffect(() => {
+    if (element?.elementType !== "sermons" || playlists.length) return;
+    ApiHelper.get("/playlists", "ContentApi").then((data: any) => { if (Array.isArray(data)) setPlaylists(data); });
+  }, [element?.elementType]);
+
+  useEffect(() => {
+    if (element?.elementType !== "campaignProgress" || funds.length) return;
+    ApiHelper.get("/funds", "GivingApi").then((data: any) => { if (Array.isArray(data)) setFunds(data); });
+  }, [element?.elementType]);
+
+  useEffect(() => {
+    if (element?.elementType !== "staffGrid" || staffGroups.length) return;
+    ApiHelper.get("/groups", "MembershipApi").then((data: any) => { if (Array.isArray(data)) setStaffGroups(data); });
+  }, [element?.elementType]);
 
   // Load existing labels + categories so the Groups element's pre-filter
   // pickers offer real choices instead of free-text "what label is valid?".
@@ -942,6 +1163,7 @@ export function ElementEdit(props: Props) {
         <div id="dialogFormContent">{element?.elementType === "block" ? getBlockFields() : getStandardFields()}</div>
       </FormCard>
       {selectPhotoField && <GalleryModal onClose={() => setSelectPhotoField(null)} onSelect={handlePhotoSelected} aspectRatio={0} />}
+      {showIconPicker && <IconPicker currentIcon={parsedData.icon || "volunteer_activism"} onUpdate={(icon) => handleHtmlChange("icon", icon)} onClose={() => setShowIconPicker(false)} />}
     </>
   );
 

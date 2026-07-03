@@ -8,6 +8,7 @@ import {
   Description as DescriptionIcon,
   Edit as EditIcon,
   ExpandMore as ExpandMoreIcon,
+  AutoAwesome as AutoAwesomeIcon,
   AutoAwesomeMosaic as AutoAwesomeMosaicIcon,
   Public as PublicIcon,
   Transform as TransformIcon,
@@ -16,7 +17,7 @@ import {
 import { ApiHelper, ErrorMessages, PageHeader, UserHelper, Locale, Permissions } from "@churchapps/apphelper";
 import { useWindowWidth } from "@react-hook/window-size";
 import { useNavigate } from "react-router-dom";
-import { AddPageModal, NavLinkEdit } from "./components";
+import { AddPageModal, NavLinkEdit, GenerateSiteModal, SiteSwitcher, SitesDialog, useSiteSelection } from "./components";
 import { SiteTemplatePicker } from "./admin/templates/SiteTemplatePicker";
 import { PageHelper, EnvironmentHelper } from "../helpers";
 import type { PageLink } from "../helpers";
@@ -39,6 +40,9 @@ export const PagesPage = () => {
   const [editLink, setEditLink] = useState<LinkInterface | null>(null);
   const [showLogin, setShowLogin] = useState<GenericSettingInterface>();
   const [showSiteTemplates, setShowSiteTemplates] = useState(false);
+  const [showGenerateSite, setShowGenerateSite] = useState(false);
+  const [showSites, setShowSites] = useState(false);
+  const { siteId, setSiteId, sites, selectedSite, reloadSites } = useSiteSelection();
 
   const getExpandControl = (item: PageLink, level: number) => {
     if (item.children && item.children.length > 0) {
@@ -97,13 +101,13 @@ export const PagesPage = () => {
               <Typography
                 variant="body2"
                 sx={{ fontFamily: "monospace", cursor: "pointer", color: "var(--link)", fontWeight: 500, "&:hover": { textDecoration: "underline" } }}
-                onClick={() => window.open(EnvironmentHelper.B1Url.replace("{subdomain}", UserHelper.currentUserChurch.church.subDomain) + item.url, "_blank")}>
+                onClick={() => window.open(EnvironmentHelper.B1Url.replace("{subdomain}", selectedSite?.subDomain || UserHelper.currentUserChurch.church.subDomain) + item.url, "_blank")}>
                 {item.url}
               </Typography>
               <AppIconButton
                 label={Locale.label("site.pagesPage.previewPage")}
                 icon={<VisibilityIcon sx={{ fontSize: 16 }} />}
-                onClick={() => window.open(EnvironmentHelper.B1Url.replace("{subdomain}", UserHelper.currentUserChurch.church.subDomain) + item.url, "_blank")}
+                onClick={() => window.open(EnvironmentHelper.B1Url.replace("{subdomain}", selectedSite?.subDomain || UserHelper.currentUserChurch.church.subDomain) + item.url, "_blank")}
                 sx={{ p: 0.5 }}
               />
               {!item.custom && <Chip label={Locale.label("site.pagesPage.generated")} size="small" color="default" sx={{ fontSize: "0.7rem", height: 18 }} />}
@@ -120,10 +124,10 @@ export const PagesPage = () => {
   };
 
   const loadData = () => {
-    PageHelper.loadPageTree().then((data) => {
+    PageHelper.loadPageTree(siteId).then((data) => {
       setPageTree(data);
     });
-    ApiHelper.get("/links?category=website", "ContentApi").then((data: any) => {
+    ApiHelper.get("/links?category=website" + (siteId ? "&siteId=" + siteId : ""), "ContentApi").then((data: any) => {
       setLinks(data);
     });
     ApiHelper.get("/settings", "ContentApi").then((data: GenericSettingInterface[]) => {
@@ -155,7 +159,7 @@ export const PagesPage = () => {
           loadData();
         });
       } else {
-        const newLink: LinkInterface = {
+        const newLink: LinkInterface & { siteId?: string } = {
           id: "",
           churchId: UserHelper.currentUserChurch.church.id,
           category: "website",
@@ -165,7 +169,8 @@ export const PagesPage = () => {
           icon: "",
           text: "New Link",
           sort: index,
-          parentId: parentId
+          parentId: parentId,
+          siteId: siteId
         };
         ApiHelper.post("/links", [newLink], "ContentApi").then(() => {
           loadData();
@@ -203,7 +208,7 @@ export const PagesPage = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [siteId]);
 
   const pageStats = getPageStats();
   const checked = showLogin?.value === "true" ? true : false;
@@ -218,6 +223,7 @@ export const PagesPage = () => {
     <>
       <SiteTemplatePicker
         open={showSiteTemplates}
+        siteId={siteId}
         onClose={() => setShowSiteTemplates(false)}
         updatedCallback={(firstCreatedPageId) => {
           setShowSiteTemplates(false);
@@ -225,6 +231,23 @@ export const PagesPage = () => {
           if (firstCreatedPageId) navigate("/site/pages/preview/" + firstCreatedPageId);
         }}
       />
+      {showSites && (
+        <SitesDialog
+          open={showSites}
+          onClose={() => setShowSites(false)}
+          sites={sites}
+          siteId={siteId}
+          onChanged={reloadSites}
+          onSelectSite={setSiteId}
+        />
+      )}
+      {showGenerateSite && (
+        <GenerateSiteModal
+          onDone={() => setShowGenerateSite(false)}
+          updatedCallback={loadData}
+          siteId={siteId}
+        />
+      )}
       {addMode !== "" && (
         <AddPageModal
           updatedCallback={() => {
@@ -238,6 +261,7 @@ export const PagesPage = () => {
           }}
           mode={addMode}
           requestedSlug={requestedSlug}
+          siteId={siteId}
         />
       )}
       {editLink && (
@@ -247,6 +271,7 @@ export const PagesPage = () => {
             setEditLink(null);
           }}
           link={editLink}
+          siteId={siteId}
         />
       )}
       <PageHeader
@@ -257,6 +282,7 @@ export const PagesPage = () => {
           { icon: <EditIcon />, value: pageStats.custom.toString(), label: Locale.label("site.pagesPage.customPages") },
           { icon: <PublicIcon />, value: pageStats.auto.toString(), label: Locale.label("site.pagesPage.autoGenerated") }
         ]}>
+        <SiteSwitcher siteId={siteId} onChange={setSiteId} sites={sites} onManage={() => setShowSites(true)} />
         <Button
           variant="outlined"
           startIcon={<AutoAwesomeMosaicIcon />}
@@ -266,6 +292,16 @@ export const PagesPage = () => {
           data-testid="start-from-template-button"
           sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
           {Locale.label("site.pagesPage.startFromTemplate")}
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<AutoAwesomeIcon />}
+          onClick={() => {
+            setShowGenerateSite(true);
+          }}
+          data-testid="generate-site-button"
+          sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+          {Locale.label("site.generateSite.button")}
         </Button>
         <Button
           variant="outlined"
@@ -303,10 +339,10 @@ export const PagesPage = () => {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, minHeight: 36 }}>
               <h3 style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, minWidth: 0 }}>{Locale.label("site.pagesPage.mainNavigation")}</h3>
               <div style={{ flexShrink: 0, marginLeft: 8 }}>
-                <AppIconButton label={Locale.label("common.add")} icon={<AddIcon />} intent="add" onClick={() => setEditLink({ churchId: UserHelper.currentUserChurch.church.id, category: "website", linkType: "url", sort: 99, linkData: "", icon: "" })} data-testid="add-navigation-link" />
+                <AppIconButton label={Locale.label("common.add")} icon={<AddIcon />} intent="add" onClick={() => setEditLink({ churchId: UserHelper.currentUserChurch.church.id, category: "website", linkType: "url", sort: 99, linkData: "", icon: "", siteId } as LinkInterface)} data-testid="add-navigation-link" />
               </div>
             </div>
-            <SiteNavigation links={links} refresh={loadData} select={() => {}} handleDrop={handleDrop} />
+            <SiteNavigation links={links} refresh={loadData} select={() => {}} handleDrop={handleDrop} siteId={siteId} />
           </DndProvider>
         </Grid>
         <Grid size={{ xs: 12, md: 10 }} style={{ position: "relative", zIndex: 1 }}>

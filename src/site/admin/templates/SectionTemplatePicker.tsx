@@ -9,6 +9,7 @@ interface Props {
   onClose: () => void;
   onSelectBlank: () => void;
   onSelectTemplate: (template: SectionTemplateDef) => void;
+  switchMode?: boolean;
 }
 
 export const SectionTemplatePicker: React.FC<Props> = (props) => {
@@ -29,8 +30,13 @@ export const SectionTemplatePicker: React.FC<Props> = (props) => {
 
   return (
     <Dialog open={props.open} onClose={props.onClose} fullWidth maxWidth="lg">
-      <DialogTitle>{Locale.label("site.sectionTemplates.title")}</DialogTitle>
+      <DialogTitle>{Locale.label(props.switchMode ? "site.sectionTemplates.switchTitle" : "site.sectionTemplates.title")}</DialogTitle>
       <DialogContent dividers>
+        {props.switchMode && (
+          <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", marginBottom: 2 }} data-testid="switch-layout-hint">
+            {Locale.label("site.sectionTemplates.switchHint")}
+          </Typography>
+        )}
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", marginBottom: 2 }}>
           <Chip
             label={Locale.label("site.sectionTemplates.all")}
@@ -49,27 +55,29 @@ export const SectionTemplatePicker: React.FC<Props> = (props) => {
           ))}
         </Box>
         <Grid container spacing={2}>
-          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-            <Box sx={cardSx} onClick={props.onSelectBlank} data-testid="template-blank">
-              <Box
-                sx={{
-                  height: 110,
-                  borderRadius: "6px",
-                  border: "2px dashed",
-                  borderColor: "divider",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "text.secondary"
-                }}
-              >
-                <Icon>add</Icon>
+          {!props.switchMode && (
+            <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+              <Box sx={cardSx} onClick={props.onSelectBlank} data-testid="template-blank">
+                <Box
+                  sx={{
+                    height: 110,
+                    borderRadius: "6px",
+                    border: "2px dashed",
+                    borderColor: "divider",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "text.secondary"
+                  }}
+                >
+                  <Icon>add</Icon>
+                </Box>
+                <Typography sx={{ fontSize: "0.85rem", fontWeight: 500, marginTop: "6px", textAlign: "center" }}>
+                  {Locale.label("site.sectionTemplates.blank")}
+                </Typography>
               </Box>
-              <Typography sx={{ fontSize: "0.85rem", fontWeight: 500, marginTop: "6px", textAlign: "center" }}>
-                {Locale.label("site.sectionTemplates.blank")}
-              </Typography>
-            </Box>
-          </Grid>
+            </Grid>
+          )}
           {templates.map((template) => (
             <Grid size={{ xs: 6, sm: 4, md: 3 }} key={template.key}>
               <Box sx={cardSx} onClick={() => props.onSelectTemplate(template)} data-testid={"template-" + template.key}>

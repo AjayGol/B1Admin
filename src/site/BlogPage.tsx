@@ -1,0 +1,113 @@
+import { useEffect, useState } from "react";
+import { Box, Button, Card, Chip, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { Add as AddIcon, Article as ArticleIcon, Delete as DeleteIcon, Edit as EditIcon, RssFeed as RssFeedIcon, Notes as NotesIcon } from "@mui/icons-material";
+import { ApiHelper, PageHeader, UserHelper, Locale, Permissions } from "@churchapps/apphelper";
+import { useNavigate } from "react-router-dom";
+import { BlogPostEdit } from "./components";
+import { PermissionDenied } from "../components";
+import { AppIconButton } from "../components/ui/AppIconButton";
+import { ConfirmDialog } from "./admin/ConfirmDialog";
+import type { PostInterface } from "../helpers/Interfaces";
+
+export const BlogPage = () => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [posts, setPosts] = useState<PostInterface[]>([]);
+  const [editPost, setEditPost] = useState<PostInterface | null>(null);
+  const [deletePost, setDeletePost] = useState<PostInterface | null>(null);
+
+  const loadData = () => {
+    ApiHelper.get("/posts", "ContentApi").then((data: PostInterface[]) => setPosts(data || []));
+  };
+
+  useEffect(loadData, []);
+
+  const handleDelete = () => {
+    const p = deletePost;
+    if (!p?.id) return;
+    ApiHelper.delete("/posts/" + p.id, "ContentApi").then(() => {
+      const after = () => { setDeletePost(null); loadData(); };
+      if (p.pageId) ApiHelper.delete("/pages/" + p.pageId, "ContentApi").then(after).catch(after);
+      else after();
+    });
+  };
+
+  const formatDate = (value: Date | string | null): string => {
+    if (!value) return "";
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? "" : d.toLocaleDateString();
+  };
+
+  if (!UserHelper.checkAccess(Permissions.contentApi.content.edit)) return <PermissionDenied permissions={[Permissions.contentApi.content.edit]} />;
+
+  return (
+    <>
+      {editPost && <BlogPostEdit post={editPost} updatedCallback={() => { setEditPost(null); loadData(); }} onDone={() => setEditPost(null)} />}
+      <ConfirmDialog
+        open={!!deletePost}
+        title={Locale.label("site.blog.deleteTitle")}
+        message={Locale.label("site.blog.confirmDelete")}
+        confirmLabel={Locale.label("common.delete")}
+        destructive
+        onConfirm={handleDelete}
+        onCancel={() => setDeletePost(null)}
+      />
+      <PageHeader title={Locale.label("site.blog.title")} subtitle={Locale.label("site.blog.subtitle")} statistics={[{ icon: <RssFeedIcon />, value: posts.length.toString(), label: Locale.label("site.blog.posts") }]}>
+        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setEditPost({})} data-testid="add-post-button" sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+          {Locale.label("site.blog.addPost")}
+        </Button>
+      </PageHeader>
+      <Box sx={{ p: 3 }}>
+        <Card sx={{ borderRadius: 2, border: "1px solid", borderColor: "grey.200" }}>
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <RssFeedIcon sx={{ color: "primary.main", fontSize: 20 }} />
+              <Typography variant="h6">{Locale.label("site.blog.title")}</Typography>
+            </Stack>
+          </Box>
+          <Box sx={{ p: 2 }}>
+            {posts.length === 0 ? (
+              <Box sx={{ textAlign: "center", py: 8 }}>
+                <ArticleIcon sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
+                <Typography variant="h6" color="text.secondary" gutterBottom>{Locale.label("site.blog.noPosts")}</Typography>
+                <Button variant="outlined" startIcon={<AddIcon />} onClick={() => setEditPost({})}>{Locale.label("site.blog.addPost")}</Button>
+              </Box>
+            ) : (
+              <Table>
+                <TableHead sx={{ backgroundColor: theme.palette.mode === "light" ? "grey.50" : "grey.700" }}>
+                  <TableRow>
+                    <TableCell sx={{ width: 120 }}><Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{Locale.label("site.pagesPage.actions")}</Typography></TableCell>
+                    <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{Locale.label("common.title")}</Typography></TableCell>
+                    <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{Locale.label("site.blog.state")}</Typography></TableCell>
+                    <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{Locale.label("site.blog.date")}</Typography></TableCell>
+                    <TableCell><Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{Locale.label("site.blogEdit.category")}</Typography></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {posts.map((post) => (
+                    <TableRow key={post.id} sx={{ "&:hover": { backgroundColor: "action.hover" } }}>
+                      <TableCell>
+                        <Stack direction="row">
+                          <AppIconButton label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditPost(post)} data-testid="edit-post-button" />
+                          <AppIconButton label={Locale.label("site.blog.editContent")} icon={<NotesIcon />} onClick={() => post.pageId && navigate("/site/pages/preview/" + post.pageId)} data-testid="edit-post-content-button" />
+                          <AppIconButton label={Locale.label("common.delete")} icon={<DeleteIcon />} intent="remove" onClick={() => setDeletePost(post)} data-testid="delete-post-button" />
+                        </Stack>
+                      </TableCell>
+                      <TableCell><Typography variant="body2">{post.title}</Typography></TableCell>
+                      <TableCell>
+                        <Chip size="small" label={post.publishDate ? Locale.label("site.blogEdit.published") : Locale.label("site.blogEdit.draft")} color={post.publishDate ? "success" : "default"} sx={{ fontSize: "0.7rem", height: 20 }} />
+                      </TableCell>
+                      <TableCell><Typography variant="body2">{formatDate(post.publishDate)}</Typography></TableCell>
+                      <TableCell><Typography variant="body2">{post.category}</Typography></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </Box>
+        </Card>
+      </Box>
+    </>
+  );
+};

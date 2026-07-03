@@ -2,14 +2,21 @@ import { useState, useEffect } from "react";
 import { Box, Grid, Card, CardContent, Stack, Typography } from "@mui/material";
 import { Palette as PaletteIcon, TextFields as TextFieldsIcon, Code as CodeIcon, Image as ImageIcon, SmartButton as SmartButtonIcon, Style as StyleIcon, SpaceBar as SpaceBarIcon, FormatSize as FormatSizeIcon, Menu as MenuIcon } from "@mui/icons-material";
 import { ApiHelper, UserHelper, Locale } from "@churchapps/apphelper";
-import type { GlobalStyleInterface, BlockInterface, GenericSettingInterface } from "../../helpers/Interfaces";
+import type { GlobalStyleInterface, BlockInterface, GenericSettingInterface, SiteInterface } from "../../helpers/Interfaces";
 import { PaletteEdit, FontEdit, CssEdit, Preview, AppearanceEdit, TypographyEdit, SpacingScaleEdit, NavStyleEdit } from "./";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CardWithHeader } from "../../components/ui";
 import React from "react";
 import { EnvironmentHelper } from "../../helpers/EnvironmentHelper";
 
-export function StylesManager() {
+type Props = {
+  siteId: string;
+  selectedSite?: SiteInterface;
+};
+
+export function StylesManager(props: Props) {
+  const siteId = props.siteId || "";
+  const selectedSite = props.selectedSite;
   const navigate = useNavigate();
   const location = useLocation();
   const hash = location.hash?.replace("#", "");
@@ -19,17 +26,29 @@ export function StylesManager() {
   const [currentSettings, setCurrentSettings] = useState<GenericSettingInterface[]>([]);
 
   const clearSiteCache = () => {
-    const subDomain = UserHelper.currentUserChurch?.church?.subDomain;
+    const subDomain = selectedSite?.subDomain || UserHelper.currentUserChurch?.church?.subDomain;
     if (!subDomain) return;
     const b1Url = EnvironmentHelper.B1Url.replace("{subdomain}", subDomain);
     fetch(b1Url + "/api/revalidate/" + subDomain, { method: "POST" }).catch(() => { /* best-effort */ });
+  };
+
+  // Editing a secondary site that still inherits the primary row must fork a new
+  // row (drop the primary's id, stamp this site) so the primary is never overwritten.
+  const prepareForSave = (gs: GlobalStyleInterface): GlobalStyleInterface => {
+    if ((gs.siteId || "") !== siteId) {
+      const copy = { ...gs };
+      delete copy.id;
+      copy.siteId = siteId;
+      return copy;
+    }
+    return gs;
   };
 
   const loadData = () => {
     ApiHelper.getAnonymous("/settings/public/" + UserHelper.currentUserChurch.church.id, "MembershipApi").then((s: any) => setChurchSettings(s));
     ApiHelper.get("/settings", "MembershipApi").then((settings: any) => { setCurrentSettings(settings); });
 
-    ApiHelper.get("/globalStyles", "ContentApi").then((gs: any) => {
+    ApiHelper.get("/globalStyles" + (siteId ? "?siteId=" + siteId : ""), "ContentApi").then((gs: any) => {
       if (gs.palette) setGlobalStyle(gs);
       else {
         setGlobalStyle({
@@ -49,7 +68,7 @@ export function StylesManager() {
 
   const handlePaletteUpdate = (paletteJson: string) => {
     if (paletteJson) {
-      const gs = { ...globalStyle };
+      const gs = prepareForSave({ ...globalStyle });
       gs.palette = paletteJson;
       ApiHelper.post("/globalStyles", [gs], "ContentApi").then(() => { loadData(); clearSiteCache(); });
     }
@@ -58,7 +77,7 @@ export function StylesManager() {
 
   const handleFontsUpdate = (fontsJson: string) => {
     if (fontsJson) {
-      const gs = { ...globalStyle };
+      const gs = prepareForSave({ ...globalStyle });
       gs.fonts = fontsJson;
       ApiHelper.post("/globalStyles", [gs], "ContentApi").then(() => { loadData(); clearSiteCache(); });
     }
@@ -66,13 +85,13 @@ export function StylesManager() {
   };
 
   const handleUpdate = (gs: GlobalStyleInterface) => {
-    if (gs) ApiHelper.post("/globalStyles", [gs], "ContentApi").then(() => { loadData(); clearSiteCache(); });
+    if (gs) ApiHelper.post("/globalStyles", [prepareForSave(gs)], "ContentApi").then(() => { loadData(); clearSiteCache(); });
     setSection("");
   };
 
   const handleTypographyUpdate = (typographyJson: string) => {
     if (typographyJson) {
-      const gs = { ...globalStyle };
+      const gs = prepareForSave({ ...globalStyle });
       gs.typography = typographyJson;
       ApiHelper.post("/globalStyles", [gs], "ContentApi").then(() => { loadData(); clearSiteCache(); });
     }
@@ -81,7 +100,7 @@ export function StylesManager() {
 
   const handleSpacingUpdate = (spacingJson: string) => {
     if (spacingJson) {
-      const gs = { ...globalStyle };
+      const gs = prepareForSave({ ...globalStyle });
       gs.spacing = spacingJson;
       ApiHelper.post("/globalStyles", [gs], "ContentApi").then(() => { loadData(); clearSiteCache(); });
     }
@@ -90,20 +109,21 @@ export function StylesManager() {
 
   const handleNavUpdate = (navStylesJson: string) => {
     if (navStylesJson) {
-      const gs = { ...globalStyle };
+      const gs = prepareForSave({ ...globalStyle });
       gs.navStyles = navStylesJson;
       ApiHelper.post("/globalStyles", [gs], "ContentApi").then(() => { loadData(); clearSiteCache(); });
     }
     setSection("");
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [siteId]);
 
   const getFooter = async () => {
-    const existing = await ApiHelper.get("/blocks/blockType/footerBlock", "ContentApi");
-    if (existing.length > 0) navigate("/site/blocks/" + existing[0].id);
+    const existing = await ApiHelper.get("/blocks/blockType/footerBlock" + (siteId ? "?siteId=" + siteId : ""), "ContentApi");
+    const match = siteId ? existing.find((b: BlockInterface) => (b.siteId || "") === siteId) : existing[0];
+    if (match) navigate("/site/blocks/" + match.id);
     else {
-      const block: BlockInterface = { name: Locale.label("site.stylesManager.siteFooterName"), blockType: "footerBlock" };
+      const block: BlockInterface = { name: Locale.label("site.stylesManager.siteFooterName"), blockType: "footerBlock", siteId: siteId || undefined };
       ApiHelper.post("/blocks", [block], "ContentApi").then((data: any) => {
         navigate("/site/blocks/" + data[0].id);
       });

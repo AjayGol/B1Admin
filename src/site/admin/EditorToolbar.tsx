@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Chip, Divider, Icon, Menu, MenuItem, ListItemIcon, ListItemText, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
+import { Badge, Box, Button, Chip, Divider, Icon, Menu, MenuItem, ListItemIcon, ListItemText, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 import { Undo as UndoIcon, Redo as RedoIcon, MoreVert as MoreVertIcon } from "@mui/icons-material";
 import { Locale } from "@churchapps/apphelper";
 import type { PageInterface, BlockInterface } from "../../helpers/Interfaces";
@@ -27,6 +27,8 @@ interface EditorToolbarProps {
   onPublish?: () => void;
   onDiscardChanges?: () => void;
   onUnpublish?: () => void;
+  onShowAccessibility?: () => void;
+  accessibilityIssueCount?: number;
 }
 
 function formatRelative(ts: number): string {
@@ -59,7 +61,9 @@ export function EditorToolbar(props: EditorToolbarProps) {
     hasUnpublishedChanges,
     onPublish,
     onDiscardChanges,
-    onUnpublish
+    onUnpublish,
+    onShowAccessibility,
+    accessibilityIssueCount
   } = props;
 
   const publishedAt = isPageMode ? (container as PageInterface)?.publishedAt : null;
@@ -285,6 +289,24 @@ export function EditorToolbar(props: EditorToolbarProps) {
         >
           {Locale.label("site.editorToolbar.addContent")}
         </Button>
+
+        {onShowAccessibility && (
+          <Tooltip
+            title={accessibilityIssueCount
+              ? Locale.label("site.a11y.buttonTipIssues").replace("{count}", String(accessibilityIssueCount))
+              : Locale.label("site.a11y.buttonTip")}
+            placement="bottom"
+          >
+            <Badge badgeContent={accessibilityIssueCount || 0} color="warning" overlap="circular" data-testid="a11y-badge">
+              <AppIconButton
+                label={Locale.label("site.a11y.buttonTip")}
+                icon={<Icon>accessibility_new</Icon>}
+                onClick={onShowAccessibility}
+                data-testid="content-editor-a11y-button"
+              />
+            </Badge>
+          </Tooltip>
+        )}
 
         <AppIconButton
           label={Locale.label("common.more", "More")}

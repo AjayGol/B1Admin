@@ -5,7 +5,7 @@ import { Edit as EditIcon, Settings as SettingsIcon } from "@mui/icons-material"
 import { ApiHelper, PageHeader, Locale } from "@churchapps/apphelper";
 import UserContext from "../UserContext";
 import { EnvironmentHelper } from "../helpers/EnvironmentHelper";
-import type { PageInterface } from "../helpers/Interfaces";
+import type { PageInterface, SiteInterface } from "../helpers/Interfaces";
 import type { LinkInterface } from "@churchapps/helpers";
 import { PageLinkEdit } from "./components/PageLinkEdit";
 
@@ -17,6 +17,7 @@ export const PagePreview: React.FC = () => {
   const [pageData, setPageData] = useState<PageInterface | null>(null);
   const [link, setLink] = useState<LinkInterface | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [siteSubDomain, setSiteSubDomain] = useState<string>("");
 
   const loadData = () => {
     if (!id) return;
@@ -58,6 +59,18 @@ export const PagePreview: React.FC = () => {
     loadData();
   }, [id, searchParams]);
 
+  // A secondary-site page previews on its own subdomain, not the church's.
+  useEffect(() => {
+    if (pageData?.siteId) {
+      ApiHelper.get("/sites", "MembershipApi").then((sites: SiteInterface[]) => {
+        const match = (Array.isArray(sites) ? sites : []).find((s) => s.id === pageData.siteId);
+        setSiteSubDomain(match?.subDomain || "");
+      }).catch(() => setSiteSubDomain(""));
+    } else {
+      setSiteSubDomain("");
+    }
+  }, [pageData?.siteId]);
+
   if (!pageData) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -66,7 +79,8 @@ export const PagePreview: React.FC = () => {
     );
   }
 
-  const previewUrl = EnvironmentHelper.B1Url.replace("{subdomain}", context.userChurch?.church?.subDomain || "") + pageData.url + "?t=" + Date.now();
+  const previewSubDomain = siteSubDomain || context.userChurch?.church?.subDomain || "";
+  const previewUrl = EnvironmentHelper.B1Url.replace("{subdomain}", previewSubDomain) + pageData.url + "?t=" + Date.now();
 
   return (
     <>

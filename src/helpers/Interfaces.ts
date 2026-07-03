@@ -254,9 +254,17 @@ export interface ContentProviderAuthInterface {
 
 export type { FileInterface } from "@churchapps/helpers";
 
+export interface SiteInterface {
+  id?: string;
+  churchId?: string;
+  name?: string;
+  subDomain?: string;
+}
+
 export interface GlobalStyleInterface {
   id?: string;
   churchId?: string;
+  siteId?: string;
   fonts?: string;
   palette?: any;
   typography?: string;
@@ -316,16 +324,35 @@ export interface SectionInterface {
 export interface PageInterface {
   id?: string;
   churchId?: string;
+  siteId?: string;
   url?: string;
   title?: string;
   layout?: string;
+  visibility?: string;
+  groupIds?: string;
+  metaDescription?: string;
   publishedAt?: string;
   sections?: SectionInterface[];
+}
+
+export interface PostInterface {
+  id?: string;
+  churchId?: string;
+  pageId?: string;
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  authorId?: string;
+  photoUrl?: string;
+  publishDate?: Date | string | null;
+  category?: string;
+  tags?: string;
 }
 
 export interface BlockInterface {
   id?: string;
   churchId?: string;
+  siteId?: string;
   blockType?: string;
   name?: string;
   sections?: SectionInterface[];

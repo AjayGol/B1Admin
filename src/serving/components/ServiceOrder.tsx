@@ -28,12 +28,13 @@ interface Props {
 
 
 // Helper to get instructions from provider based on its capabilities
-async function getProviderInstructions(provider: IProvider, path: string): Promise<Instructions | null> {
+async function getProviderInstructions(provider: IProvider, path: string, ministryId?: string, providerId?: string): Promise<Instructions | null> {
   const capabilities = provider.capabilities;
-  if (capabilities.instructions && provider.getInstructions) {
-    return provider.getInstructions(path);
+  if (!capabilities.instructions || !provider.getInstructions) return null;
+  if (provider.requiresAuth && ministryId && providerId) {
+    return ApiHelper.post("/providerProxy/getInstructions", { ministryId, providerId, path }, "DoingApi");
   }
-  return null;
+  return provider.getInstructions(path);
 }
 
 // Helper to convert InstructionItem to PlanItemInterface
@@ -227,8 +228,8 @@ export const ServiceOrder = memo((props: Props) => {
       const contentPath = getContentPath();
       if (!contentPath) return;
 
-      const instructions = await getProviderInstructions(provider, contentPath);
       const currentProviderId = props.plan?.providerId;
+      const instructions = await getProviderInstructions(provider, contentPath, props.plan?.ministryId, currentProviderId);
 
       if (instructions?.items && instructions.items.length > 0) {
         // Convert InstructionItems to PlanItemInterface with providerId and providerPath
@@ -250,7 +251,7 @@ export const ServiceOrder = memo((props: Props) => {
     } catch (error) {
       console.error("Error customizing lesson:", error);
     }
-  }, [hasAssociatedContent, getContentPath, provider, props.plan?.providerId, loadData]);
+  }, [hasAssociatedContent, getContentPath, provider, props.plan?.providerId, props.plan?.ministryId, loadData]);
 
   const addHeader = useCallback(async () => {
     // If in preview mode, first customize (import sections only), then add header
@@ -276,12 +277,12 @@ export const ServiceOrder = memo((props: Props) => {
       const contentPath = getContentPath();
       if (!contentPath) return;
 
-      const instructions = await getProviderInstructions(provider, contentPath);
+      const instructions = await getProviderInstructions(provider, contentPath, props.plan?.ministryId, props.plan?.providerId);
       if (instructions?.name) setContentName(instructions.name);
     } catch (error) {
       console.error("Error loading content name:", error);
     }
-  }, [hasAssociatedContent, getContentPath, provider, props.plan?.providerPlanName]);
+  }, [hasAssociatedContent, getContentPath, provider, props.plan?.providerPlanName, props.plan?.ministryId, props.plan?.providerId]);
 
   const loadPreviewLessonItems = useCallback(async () => {
     if (hasAssociatedContent && planItems.length === 0 && provider) {
@@ -292,8 +293,8 @@ export const ServiceOrder = memo((props: Props) => {
           return;
         }
 
-        const instructions = await getProviderInstructions(provider, contentPath);
         const currentProviderId = props.plan?.providerId;
+        const instructions = await getProviderInstructions(provider, contentPath, props.plan?.ministryId, currentProviderId);
 
         if (instructions?.items) {
           // Convert InstructionItems to PlanItemInterface for preview with providerId and providerPath
@@ -310,7 +311,7 @@ export const ServiceOrder = memo((props: Props) => {
     } else {
       setPreviewLessonItems([]);
     }
-  }, [hasAssociatedContent, planItems.length, getContentPath, provider, props.plan?.providerId]);
+  }, [hasAssociatedContent, planItems.length, getContentPath, provider, props.plan?.providerId, props.plan?.ministryId]);
 
   const handleAddContent = useCallback(() => {
     // Always show the LessonHeaderSelector - it now supports provider browsing

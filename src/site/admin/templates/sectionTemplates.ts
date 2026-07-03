@@ -300,6 +300,138 @@ const toElement = (def: TemplateElementDef, sort: number): ElementInterface => (
   elements: def.elements?.map((child, i) => toElement(child, i + 1))
 });
 
+const getAnswers = (source: { answers?: Record<string, any>; answersJSON?: string }): Record<string, any> => {
+  if (source?.answers) return source.answers;
+  if (!source?.answersJSON) return {};
+  try {
+    return JSON.parse(source.answersJSON);
+  } catch {
+    return {};
+  }
+};
+
+interface ExtractedContent {
+  texts: string[];
+  images: { photo: string; photoAlt?: string }[];
+  buttons: Record<string, any>[];
+}
+
+const TEXT_TYPES = ["text", "textWithPhoto", "card"];
+const IMAGE_TYPES = ["image", "textWithPhoto", "card"];
+
+const collectContent = (elements: ElementInterface[] | undefined, into: ExtractedContent) => {
+  const ordered = [...(elements || [])].sort((a, b) => (a.sort || 0) - (b.sort || 0));
+  ordered.forEach((element) => {
+    const type = element.elementType || "";
+    const answers = getAnswers(element);
+    if (TEXT_TYPES.includes(type) && answers.text) into.texts.push(answers.text);
+    else if (type === "faq" && answers.description) into.texts.push(answers.description);
+    if (IMAGE_TYPES.includes(type) && answers.photo) into.images.push({ photo: answers.photo, photoAlt: answers.photoAlt });
+    if (type === "buttonLink" && answers.buttonLinkText) into.buttons.push({ ...answers });
+    if (element.elements?.length) collectContent(element.elements, into);
+  });
+};
+
+export const extractSectionContent = (section: { elements?: ElementInterface[] }): ExtractedContent => {
+  const content: ExtractedContent = { texts: [], images: [], buttons: [] };
+  collectContent(section?.elements, content);
+  return content;
+};
+
+export const hasExtractableContent = (section: { elements?: ElementInterface[] }): boolean => {
+  const c = extractSectionContent(section);
+  return c.texts.length + c.images.length + c.buttons.length > 0;
+};
+
+interface RemapCursors {
+  text: number;
+  image: number;
+  button: number;
+}
+
+const pourInto = (def: TemplateElementDef, content: ExtractedContent, cursors: RemapCursors): TemplateElementDef => {
+  const answers = { ...(def.answers || {}) };
+  const type = def.elementType;
+  if (TEXT_TYPES.includes(type) && cursors.text < content.texts.length) answers.text = content.texts[cursors.text++];
+  else if (type === "faq" && cursors.text < content.texts.length) answers.description = content.texts[cursors.text++];
+  if (IMAGE_TYPES.includes(type) && cursors.image < content.images.length) {
+    const img = content.images[cursors.image++];
+    answers.photo = img.photo;
+    answers.photoAlt = img.photoAlt;
+  }
+  if (type === "buttonLink" && cursors.button < content.buttons.length) Object.assign(answers, content.buttons[cursors.button++]);
+  return { ...def, answers, elements: def.elements?.map((child) => pourInto(child, content, cursors)) };
+};
+
+export const remapSectionContent = (
+  source: { elements?: ElementInterface[] },
+  template: SectionContentDef,
+  target: { pageId?: string; blockId?: string; zone?: string; sort: number }
+): SectionInterface => {
+  const content = extractSectionContent(source);
+  const cursors: RemapCursors = { text: 0, image: 0, button: 0 };
+  const elements = template.elements.map((def) => pourInto(def, content, cursors));
+  return buildTemplateSection({ section: template.section, elements }, target);
+};
+
+// Runnable invariant check for the content-preserving remap; throws on any failure.
+export const assertRemapSelfCheck = (): true => {
+  const src = {
+    elements: [
+      { elementType: "text", answersJSON: JSON.stringify({ text: "T1" }), sort: 1 },
+      { elementType: "buttonLink", answersJSON: JSON.stringify({ buttonLinkText: "B1", buttonLinkUrl: "/b1" }), sort: 2 },
+      {
+        elementType: "row",
+        sort: 3,
+        elements: [
+          {
+            elementType: "column",
+            sort: 1,
+            elements: [
+              { elementType: "text", answersJSON: JSON.stringify({ text: "T2" }), sort: 1 },
+              { elementType: "image", answersJSON: JSON.stringify({ photo: "/p.png", photoAlt: "alt" }), sort: 2 }
+            ]
+          }
+        ]
+      }
+    ]
+  } as { elements: ElementInterface[] };
+
+  const content = extractSectionContent(src);
+  const fail = (msg: string): never => { throw new Error("assertRemapSelfCheck: " + msg); };
+  if (content.texts.join(",") !== "T1,T2") fail("text extraction order wrong: " + content.texts.join(","));
+  if (content.images.length !== 1 || content.images[0].photo !== "/p.png") fail("image extraction wrong");
+  if (content.buttons.length !== 1 || content.buttons[0].buttonLinkText !== "B1") fail("button extraction wrong");
+
+  const first = (s: SectionInterface): any => JSON.parse(s.elements![0].answersJSON || "{}");
+
+  // Fewer slots than content: only the first text survives (lossy drop of the rest).
+  const oneSlot: SectionContentDef = { section: { background: "#FFF", textColor: "dark" }, elements: [text("<h1>placeholder</h1>")] };
+  const lossy = remapSectionContent(src, oneSlot, { sort: 1 });
+  if (first(lossy).text !== "T1") fail("single-slot remap should keep first text");
+
+  // Independent cursors: image slot pulls from images even when it precedes the text slot.
+  const imageFirst: SectionContentDef = {
+    section: { background: "#FFF", textColor: "dark" },
+    elements: [
+      { elementType: "image", answers: { photo: "/placeholder.png" } },
+      text("<h1>placeholder</h1>"),
+      button("Placeholder", "/x")
+    ]
+  };
+  const full = remapSectionContent(src, imageFirst, { sort: 1 });
+  if (JSON.parse(full.elements![0].answersJSON || "{}").photo !== "/p.png") fail("image cursor not independent of text");
+  if (JSON.parse(full.elements![1].answersJSON || "{}").text !== "T1") fail("text slot not filled");
+  if (JSON.parse(full.elements![2].answersJSON || "{}").buttonLinkText !== "B1") fail("button slot not filled");
+
+  // More slots than content: extra template slots keep their placeholder text.
+  const threeText: SectionContentDef = { section: { background: "#FFF", textColor: "dark" }, elements: [text("<p>a</p>"), text("<p>b</p>"), text("<p>keep</p>")] };
+  const padded = remapSectionContent(src, threeText, { sort: 1 });
+  if (JSON.parse(padded.elements![2].answersJSON || "{}").text !== "<p>keep</p>") fail("unfilled slot should keep placeholder");
+
+  return true;
+};
+
 export const buildTemplateSection = (template: SectionContentDef, target: { pageId?: string; blockId?: string; zone?: string; sort: number }): SectionInterface => ({
   pageId: target.pageId,
   blockId: target.blockId,

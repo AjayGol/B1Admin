@@ -3,10 +3,13 @@ import React, { useState, useEffect } from "react";
 import { ErrorMessages, ApiHelper, ArrayHelper, Locale } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
 import type { AnimationsInterface, BlockInterface, GlobalStyleInterface, SectionInterface } from "../../helpers";
-import { Button, Dialog, FormControl, Icon, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Checkbox, Dialog, FormControl, FormControlLabel, Icon, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { PickColors } from "./elements/PickColors";
+import { ColorPicker } from "./ColorPicker";
 import { StylesAnimations } from "./elements/StylesAnimations";
 import { trackSave } from "./saveStatusTracker";
+
+const DIVIDER_SHAPES = ["wave", "waves", "slant", "curve", "triangle", "peaks"];
 
 type Props = {
   section: SectionInterface;
@@ -78,6 +81,45 @@ export function SectionEdit(props: Props) {
     setSection(s);
   };
 
+  const setDividerField = (edge: "dividerTop" | "dividerBottom", field: string, value: any) => {
+    const p = { ...section };
+    const current = { ...(parsedData[edge] || {}) };
+    if (field === "shape" && !value) {
+      delete parsedData[edge];
+    } else {
+      current[field] = value;
+      parsedData[edge] = current;
+    }
+    p.answersJSON = JSON.stringify(parsedData);
+    setSection(p);
+  };
+
+  const getDividerFields = (edge: "dividerTop" | "dividerBottom", label: string) => {
+    const config = parsedData[edge] || {};
+    return (
+      <div style={{ marginBottom: 12 }}>
+        <Typography variant="subtitle2">{label}</Typography>
+        <FormControl fullWidth size="small">
+          <InputLabel>{Locale.label("site.sectionEdit.dividerShape")}</InputLabel>
+          <Select fullWidth size="small" label={Locale.label("site.sectionEdit.dividerShape")} value={config.shape || ""} onChange={(e) => setDividerField(edge, "shape", e.target.value)} data-testid={`${edge}-shape-select`}>
+            <MenuItem value="">{Locale.label("site.sectionEdit.dividerNone")}</MenuItem>
+            {DIVIDER_SHAPES.map((s) => (<MenuItem key={s} value={s}>{Locale.label("site.sectionEdit.divider_" + s)}</MenuItem>))}
+          </Select>
+        </FormControl>
+        {config.shape && (
+          <>
+            <div style={{ marginTop: 8 }}>
+              <InputLabel>{Locale.label("site.sectionEdit.dividerColor")}</InputLabel>
+              <ColorPicker color={config.color || "#ffffff"} updatedCallback={(c) => setDividerField(edge, "color", c)} globalStyles={props.globalStyles} />
+            </div>
+            <TextField fullWidth size="small" type="number" sx={{ marginTop: 1 }} label={Locale.label("site.sectionEdit.dividerHeight")} value={config.height ?? 60} onChange={(e) => setDividerField(edge, "height", e.target.value)} data-testid={`${edge}-height-input`} />
+            <FormControlLabel control={<Checkbox checked={config.flip === true || config.flip === "true"} onChange={(e) => setDividerField(edge, "flip", e.target.checked)} data-testid={`${edge}-flip-toggle`} />} label={Locale.label("site.sectionEdit.dividerFlip")} />
+          </>
+        )}
+      </div>
+    );
+  };
+
   const validate = () => {
     const errors:string[] = [];
     setErrors(errors);
@@ -141,6 +183,15 @@ export function SectionEdit(props: Props) {
     {getAppearanceFields([
       "border", "color", "font", "height", "line", "margin", "padding", "width"
     ])}
+    <Accordion disableGutters sx={{ boxShadow: "none", border: "1px solid var(--border-light)", mt: 2 }} data-testid="section-dividers-accordion">
+      <AccordionSummary expandIcon={<Icon>expand_more</Icon>}>
+        <Typography sx={{ fontWeight: 600, fontSize: "0.9rem" }}>{Locale.label("site.sectionEdit.dividers")}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {getDividerFields("dividerTop", Locale.label("site.sectionEdit.dividerTop"))}
+        {getDividerFields("dividerBottom", Locale.label("site.sectionEdit.dividerBottom"))}
+      </AccordionDetails>
+    </Accordion>
   </>);
 
   const getBlockFields = () => {
