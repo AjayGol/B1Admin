@@ -80,7 +80,7 @@ export const SelectGroup: React.FC<Props> = (props: Props) => {
             </Typography>
           </Stack>
         </TableCell>
-        <TableCell align="right">
+        <TableCell align="right" className="rowActions">
           <AppIconButton
             label={Locale.label("tasks.selectGroup.selectGroupAria")}
             icon={<CheckIcon />}

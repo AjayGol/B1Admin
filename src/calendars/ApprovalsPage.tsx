@@ -40,13 +40,11 @@ export const ApprovalsPage = () => {
     ApiHelper.post("/events/" + id + "/" + action, {}, "ContentApi").then(loadData);
   };
 
-  const headSx = { fontWeight: 600, color: "text.secondary" };
-
   if (!canResolve) return <PermissionDenied permissions={[Permissions.contentApi.content.edit]} />;
 
   return (
     <>
-      <PageHeader title={Locale.label("calendars.approvals.title")} subtitle={Locale.label("calendars.approvals.subtitle")} />
+      <PageHeader icon={<ApprovalsIcon />} title={Locale.label("calendars.approvals.title")} subtitle={Locale.label("calendars.approvals.subtitle")} />
       <Box sx={{ p: 3 }}>
         {loading ? <Loading /> : (
           <Grid container spacing={3}>
@@ -67,9 +65,9 @@ export const ApprovalsPage = () => {
                   <Table size="small" data-testid="pending-bookings-table">
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={headSx}>{Locale.label("calendars.approvals.event")}</TableCell>
-                        <TableCell sx={headSx}>{Locale.label("calendars.approvals.roomResource")}</TableCell>
-                        <TableCell sx={headSx}>{Locale.label("calendars.approvals.status")}</TableCell>
+                        <TableCell>{Locale.label("calendars.approvals.event")}</TableCell>
+                        <TableCell>{Locale.label("calendars.approvals.roomResource")}</TableCell>
+                        <TableCell>{Locale.label("calendars.approvals.status")}</TableCell>
                         <TableCell align="right" />
                       </TableRow>
                     </TableHead>
@@ -93,7 +91,7 @@ export const ApprovalsPage = () => {
                               <Chip label={Locale.label("calendars.approvals.noConflicts")} size="small" sx={{ backgroundColor: "rgba(46, 125, 50, 0.1)", color: "success.main" }} />
                             )}
                           </TableCell>
-                          <TableCell align="right">
+                          <TableCell align="right" className="rowActions">
                             <Stack direction="row" spacing={1} justifyContent="flex-end">
                               <AppIconButton tone="card" label={Locale.label("calendars.approvals.approve")} icon={<ApproveIcon />} onClick={() => resolveBooking(b.id, "approve")} data-testid={`approve-booking-${b.id}`} />
                               <AppIconButton intent="remove" label={Locale.label("calendars.approvals.reject")} icon={<RejectIcon />} onClick={() => resolveBooking(b.id, "reject")} data-testid={`reject-booking-${b.id}`} />
@@ -123,8 +121,8 @@ export const ApprovalsPage = () => {
                   <Table size="small" data-testid="pending-events-table">
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={headSx}>{Locale.label("calendars.approvals.event")}</TableCell>
-                        <TableCell sx={headSx}>{Locale.label("calendars.approvals.description")}</TableCell>
+                        <TableCell>{Locale.label("calendars.approvals.event")}</TableCell>
+                        <TableCell>{Locale.label("calendars.approvals.description")}</TableCell>
                         <TableCell align="right" />
                       </TableRow>
                     </TableHead>
@@ -136,7 +134,7 @@ export const ApprovalsPage = () => {
                             <Typography variant="caption" color="text.secondary">{e.start ? new Date(e.start).toLocaleString() : ""}</Typography>
                           </TableCell>
                           <TableCell>{e.description}</TableCell>
-                          <TableCell align="right">
+                          <TableCell align="right" className="rowActions">
                             <Stack direction="row" spacing={1} justifyContent="flex-end">
                               <AppIconButton tone="card" label={Locale.label("calendars.approvals.approve")} icon={<ApproveIcon />} onClick={() => resolveEvent(e.id, "approve")} data-testid={`approve-event-${e.id}`} />
                               <AppIconButton intent="remove" label={Locale.label("calendars.approvals.reject")} icon={<RejectIcon />} onClick={() => resolveEvent(e.id, "reject")} data-testid={`reject-event-${e.id}`} />

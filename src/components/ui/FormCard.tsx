@@ -16,6 +16,8 @@ interface FormCardProps {
   saveText?: string;
   cancelText?: string;
   deleteText?: string;
+  saveTestId?: string;
+  deleteTestId?: string;
   isSubmitting?: boolean;
   disabled?: boolean;
   headerActions?: ReactNode;
@@ -24,8 +26,6 @@ interface FormCardProps {
   elevation?: number;
 }
 
-/** Card-based form shell: icon + h6 header, padded content, footer divider with
- * right-aligned Cancel/Save and a destructive Delete alone on the left. */
 export const FormCard: React.FC<FormCardProps> = (props) => {
   const icon = typeof props.icon === "string" ? <Icon sx={{ fontSize: 20, color: "primary.main" }}>{props.icon}</Icon> : props.icon;
   const hasFooter = props.onSave || props.onCancel || props.onDelete;
@@ -48,14 +48,14 @@ export const FormCard: React.FC<FormCardProps> = (props) => {
         <Box sx={{ p: 2, borderTop: "1px solid var(--border-light)", ...(props.stickyFooter ? { position: "sticky", bottom: 0, backgroundColor: "background.paper", zIndex: 2 } : {}) }}>
           <Stack direction="row" spacing={1} alignItems="center">
             {props.onDelete && (
-              <Button id="delete" color="error" onClick={props.onDelete} aria-label={props.deleteText || Locale.label("common.delete")}>
+              <Button id="delete" color="error" onClick={props.onDelete} data-testid={props.deleteTestId} aria-label={props.deleteText || Locale.label("common.delete")}>
                 {props.deleteText || Locale.label("common.delete")}
               </Button>
             )}
             <Box sx={{ flex: 1 }} />
             {props.onCancel && <Button onClick={props.onCancel}>{props.cancelText || Locale.label("common.cancel")}</Button>}
             {props.onSave && (
-              <LoadingButton variant="contained" disableElevation loading={!!props.isSubmitting} disabled={props.disabled} onClick={props.onSave}>
+              <LoadingButton variant="contained" disableElevation loading={!!props.isSubmitting} disabled={props.disabled} onClick={props.onSave} data-testid={props.saveTestId}>
                 {props.saveText || Locale.label("common.save")}
               </LoadingButton>
             )}

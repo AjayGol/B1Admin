@@ -50,7 +50,7 @@ import {
 import { SendInviteDialog } from "../../components";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { AppIconButton } from "../../components/ui/AppIconButton";
-import { ExportButton } from "../../components/ui";
+import { ExportButton, hoverRowSx } from "../../components/ui";
 
 interface Props {
   group: GroupInterface;
@@ -205,10 +205,7 @@ export const GroupMembers: React.FC<Props> = memo((props) => {
       rows.push(
         <TableRow
           key={gm.id}
-          sx={{
-            transition: "background-color 0.15s ease",
-            "&:hover": { backgroundColor: "action.hover" }
-          }}>
+          sx={hoverRowSx}>
           <TableCell sx={{ ...cellSx, width: 56 }}>
             <PersonAvatar person={gm.person} size="small" />
           </TableCell>
@@ -254,15 +251,7 @@ export const GroupMembers: React.FC<Props> = memo((props) => {
   }, [groupMembers.data, canEdit, handleToggleLeader, handleRemove]);
 
   const headerCellSx = {
-    fontSize: "0.7rem",
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    color: "text.secondary",
-    borderBottom: "1px solid",
-    borderColor: "divider",
     py: 1,
-    bgcolor: "grey.50",
     "&&:first-of-type": { pl: 2.5 },
     "&&:last-of-type": { pr: 1.5 }
   } as const;

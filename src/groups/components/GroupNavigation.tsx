@@ -8,10 +8,11 @@ interface Props {
   selectedTab: string;
   onTabChange: (tab: string) => void;
   group: GroupInterface;
+  onHeader?: boolean;
 }
 
 export const GroupNavigation = memo((props: Props) => {
-  const { selectedTab, onTabChange, group } = props;
+  const { selectedTab, onTabChange, group, onHeader } = props;
 
   const isStandard = useMemo(() => group?.tags?.indexOf("standard") > -1, [group?.tags]);
 
@@ -32,5 +33,5 @@ export const GroupNavigation = memo((props: Props) => {
     return baseTabs;
   }, [isStandard, group?.trackAttendance]);
 
-  return <NavigationTabs selectedTab={selectedTab} onTabChange={onTabChange} tabs={tabs} />;
+  return <NavigationTabs selectedTab={selectedTab} onTabChange={onTabChange} tabs={tabs} onHeader={onHeader} />;
 });

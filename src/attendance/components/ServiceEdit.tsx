@@ -1,10 +1,11 @@
 import React from "react";
-import { Alert, Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Box, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { type ServiceInterface } from "@churchapps/helpers";
-import { ApiHelper, UniqueIdHelper, Locale } from "@churchapps/apphelper";
+import { ApiHelper, UniqueIdHelper, Locale, ErrorMessages } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
 import { useCampuses } from "../../hooks/useCampuses";
+import { useConfirmDelete, useErrorSummary } from "../../hooks";
 
 interface Props {
   service: ServiceInterface;
@@ -21,9 +22,8 @@ export const ServiceEdit: React.FC<Props> = (props) => {
 
   const { control, register, handleSubmit, reset, formState } = useForm<AnyRecord>({ defaultValues: { name: "", campusId: "" } });
   const e = formState.errors as any;
-  const summaryErrors: string[] = [];
-  if (e.name?.message) summaryErrors.push(e.name.message);
-  if (e.campusId?.message) summaryErrors.push(e.campusId.message);
+  const summaryErrors = useErrorSummary(formState.errors, ["name", "campusId"]);
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
   const onValid = (values: AnyRecord) => {
     setIsSubmitting(true);
@@ -33,8 +33,8 @@ export const ServiceEdit: React.FC<Props> = (props) => {
       .finally(() => { setIsSubmitting(false); });
   };
 
-  const handleDelete = () => {
-    if (window.confirm(Locale.label("attendance.serviceEdit.confirmDelete"))) ApiHelper.delete("/services/" + props.service.id, "AttendanceApi").then(props.updatedFunction);
+  const handleDelete = async () => {
+    if (await confirm(Locale.label("attendance.serviceEdit.confirmDelete"))) ApiHelper.delete("/services/" + props.service.id, "AttendanceApi").then(props.updatedFunction);
   };
 
   const loadData = React.useCallback(() => {
@@ -48,6 +48,7 @@ export const ServiceEdit: React.FC<Props> = (props) => {
 
   return (
     <Box data-cy="service-box">
+      {ConfirmDialogElement}
       <FormCard
         id="serviceBox"
         onCancel={props.updatedFunction}
@@ -57,7 +58,7 @@ export const ServiceEdit: React.FC<Props> = (props) => {
         icon="calendar_month"
         isSubmitting={isSubmitting}
         help="docs/b1-admin/attendance/">
-        {summaryErrors.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{summaryErrors.map((msg) => <div key={msg}>{msg}</div>)}</Alert>}
+        <ErrorMessages errors={summaryErrors} />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>

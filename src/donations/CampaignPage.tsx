@@ -2,13 +2,13 @@ import React from "react";
 import { CurrencyHelper, Loading, Locale, PageHeader, UserHelper, Permissions } from "@churchapps/apphelper";
 import { type FundInterface, type PersonInterface } from "@churchapps/helpers";
 import { useParams, Link } from "react-router-dom";
-import { Box, Card, Chip, LinearProgress, Stack, Table, TableBody, TableCell, TableRow, Typography, Button } from "@mui/material";
+import { Box, Card, Chip, LinearProgress, Stack, Table, TableBody, TableCell, TableRow, Typography } from "@mui/material";
 import { Flag as CampaignIcon, Add as AddIcon, Edit as EditIcon, Person as PersonIcon } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { type CampaignProgressInterface, type PledgeInterface, type PledgeProgressRowInterface, type PledgeStatus } from "../helpers";
 import { CampaignEdit, PledgeEdit } from "./components";
 import { AppIconButton } from "../components/ui/AppIconButton";
-import { CountChip, EmptyState, ExportButton, SortableTableHead, type SortDirection } from "../components/ui";
+import { CardWithHeader, EmptyState, ExportButton, PageHeaderStats, SortableTableHead, HeaderPrimaryButton, HeaderSecondaryButton, hoverRowSx, type SortDirection } from "../components/ui";
 
 const statusColors: Record<PledgeStatus, "default" | "info" | "success" | "warning"> = {
   notStarted: "default",
@@ -109,7 +109,7 @@ export const CampaignPage = () => {
       );
 
       result.push(
-        <TableRow key={i} sx={{ "&:hover": { backgroundColor: "action.hover" }, transition: "background-color 0.2s ease" }}>
+        <TableRow key={i} sx={hoverRowSx}>
           <TableCell>
             <Stack direction="row" spacing={1} alignItems="center">
               <PersonIcon sx={{ color: "text.secondary", fontSize: 18 }} />
@@ -164,47 +164,31 @@ export const CampaignPage = () => {
 
   return (
     <>
-      <PageHeader title={campaign?.name || ""} subtitle={Locale.label("donations.campaignPage.subtitle")}>
+      <PageHeader icon={<CampaignIcon />} title={campaign?.name || ""} subtitle={Locale.label("donations.campaignPage.subtitle")}>
         {progress.data && (
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={{ xs: 2, sm: 4, md: 5 }}
-            sx={{ position: { xs: "static", md: "absolute" }, left: { md: "50%" }, top: { md: "50%" }, transform: { md: "translateY(-50%)" }, right: { md: "24px" }, justifyContent: { md: "space-between" }, flexWrap: "wrap" }}
-          >
-            {campaign?.goalAmount > 0 && (
-              <Stack spacing={0.5} alignItems="center" sx={{ minWidth: 100 }}>
-                <Typography variant="h5" sx={{ color: "#FFF", fontWeight: 700 }}>{CurrencyHelper.formatCurrencyWithLocale(campaign.goalAmount, currency, 0)}</Typography>
-                <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.85)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: 0.5 }}>{Locale.label("donations.campaignsPage.goal")}</Typography>
-              </Stack>
-            )}
-            <Stack spacing={0.5} alignItems="center" sx={{ minWidth: 100 }}>
-              <Typography variant="h5" sx={{ color: "#FFF", fontWeight: 700 }}>{CurrencyHelper.formatCurrencyWithLocale(progress.data.totalPledged || 0, currency, 0)}</Typography>
-              <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.85)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: 0.5 }}>{Locale.label("donations.campaignsPage.pledged")}</Typography>
-            </Stack>
-            <Stack spacing={0.5} alignItems="center" sx={{ minWidth: 100 }}>
-              <Typography variant="h5" sx={{ color: "#FFF", fontWeight: 700 }}>{CurrencyHelper.formatCurrencyWithLocale(progress.data.totalGiven || 0, currency, 0)}</Typography>
-              <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.85)", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: 0.5 }}>{Locale.label("donations.campaignsPage.given")}</Typography>
-            </Stack>
-          </Stack>
+          <PageHeaderStats
+            spread
+            items={[
+              ...(campaign?.goalAmount > 0 ? [{ value: CurrencyHelper.formatCurrencyWithLocale(campaign.goalAmount, currency, 0), label: Locale.label("donations.campaignsPage.goal") }] : []),
+              { value: CurrencyHelper.formatCurrencyWithLocale(progress.data.totalPledged || 0, currency, 0), label: Locale.label("donations.campaignsPage.pledged") },
+              { value: CurrencyHelper.formatCurrencyWithLocale(progress.data.totalGiven || 0, currency, 0), label: Locale.label("donations.campaignsPage.given") }
+            ]}
+          />
         )}
         {canEdit && (
           <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}
+            <HeaderSecondaryButton
               startIcon={<EditIcon />}
               onClick={() => setEditMode("campaign")}
               data-testid="edit-campaign-button">
               {Locale.label("donations.campaignPage.editCampaign")}
-            </Button>
-            <Button
-              variant="outlined"
-              sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}
+            </HeaderSecondaryButton>
+            <HeaderPrimaryButton
               startIcon={<AddIcon />}
               onClick={() => { setEditPledge(null); setEditMode("pledge"); }}
               data-testid="add-pledge-button">
               {Locale.label("donations.campaignPage.addPledge")}
-            </Button>
+            </HeaderPrimaryButton>
           </Stack>
         )}
       </PageHeader>
@@ -223,19 +207,14 @@ export const CampaignPage = () => {
           </Card>
         )}
 
-        <Card>
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={1} alignItems="center">
-                <CampaignIcon sx={{ color: "primary.main", fontSize: 20 }} />
-                <Typography variant="h6">{Locale.label("donations.campaignPage.pledges")}</Typography>
-                {sortedRows.length > 0 && <CountChip count={sortedRows.length} />}
-              </Stack>
-              {progress.data?.rows && <ExportButton data={getExportData()} filename="pledges.csv" text={Locale.label("donations.campaignsPage.export")} />}
-            </Stack>
-          </Box>
-          <Box>{getTable()}</Box>
-        </Card>
+        <CardWithHeader
+          icon={<CampaignIcon sx={{ color: "primary.main", fontSize: 20 }} />}
+          title={Locale.label("donations.campaignPage.pledges")}
+          count={sortedRows.length}
+          actions={progress.data?.rows && <ExportButton data={getExportData()} filename="pledges.csv" text={Locale.label("donations.campaignsPage.export")} />}
+        >
+          {getTable()}
+        </CardWithHeader>
       </Box>
     </>
   );

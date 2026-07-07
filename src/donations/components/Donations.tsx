@@ -1,11 +1,11 @@
 import React from "react";
 import { ArrayHelper, ApiHelper, UserHelper, DateHelper, CurrencyHelper, Permissions, UniqueIdHelper, Loading, Locale } from "@churchapps/apphelper";
 import { type DonationInterface, type DonationBatchInterface, type FundInterface } from "@churchapps/helpers";
-import { Table, TableBody, TableCell, TableRow, TableHead, Typography, Stack, Icon, Box, Chip } from "@mui/material";
+import { Table, TableBody, TableCell, TableRow, TableHead, Typography, Stack, Icon, Chip } from "@mui/material";
 import { Edit as EditIcon, Person as PersonIcon, CalendarMonth as DateIcon, VolunteerActivism as DonationIcon, HourglassEmpty as PendingIcon } from "@mui/icons-material";
 import { IconText, EmptyState } from "../../components";
 import { AppIconButton } from "../../components/ui/AppIconButton";
-import { CountChip, ExportButton } from "../../components/ui";
+import { CardWithHeader, ExportButton, hoverRowSx } from "../../components/ui";
 
 interface Props {
   batch: DonationBatchInterface;
@@ -63,35 +63,12 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
     }
 
     return (
-      <TableHead
-        sx={{
-          backgroundColor: "grey.50",
-          "& .MuiTableCell-root": {
-            borderBottom: "2px solid",
-            borderBottomColor: "divider"
-          }
-        }}>
+      <TableHead>
         <TableRow>
-          <TableCell sx={{ fontWeight: 600 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {Locale.label("donations.donations.tableIdent")}
-            </Typography>
-          </TableCell>
-          <TableCell sx={{ fontWeight: 600 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {Locale.label("common.name")}
-            </Typography>
-          </TableCell>
-          <TableCell sx={{ fontWeight: 600 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {Locale.label("donations.donations.date")}
-            </Typography>
-          </TableCell>
-          <TableCell sx={{ fontWeight: 600 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              {Locale.label("donations.donations.amt")}
-            </Typography>
-          </TableCell>
+          <TableCell>{Locale.label("donations.donations.tableIdent")}</TableCell>
+          <TableCell>{Locale.label("common.name")}</TableCell>
+          <TableCell>{Locale.label("donations.donations.date")}</TableCell>
+          <TableCell align="right">{Locale.label("donations.donations.amt")}</TableCell>
           {canEdit && <TableCell align="right" />}
         </TableRow>
       </TableHead>
@@ -119,7 +96,6 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
       return rows;
     }
 
-    // Add donation rows
     for (let i = 0; i < donations.length; i++) {
       const d = donations[i];
       const editButton = canEdit ? (
@@ -128,13 +104,7 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
 
       const isPending = (d as any).status === "pending";
       rows.push(
-        <TableRow
-          key={i}
-          sx={{
-            "&:hover": { backgroundColor: "action.hover" },
-            transition: "background-color 0.2s ease",
-            opacity: isPending ? 0.8 : 1
-          }}>
+        <TableRow key={i} sx={{ ...hoverRowSx, opacity: isPending ? 0.8 : 1 }}>
           <TableCell>
             <Stack direction="row" spacing={1} alignItems="center">
               <IconText icon={<Icon>receipt</Icon>} iconSize={20} iconColor="primary.main" variant="body2">
@@ -153,17 +123,16 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
               {d.donationDate ? DateHelper.prettyDate(new Date(d.donationDate.split("T")[0] + "T00:00:00")) : ""}
             </IconText>
           </TableCell>
-          <TableCell>
-            <IconText icon={<></>} iconSize={18} iconColor={isPending ? "warning.main" : "success.main"} variant="body2" color={isPending ? "warning.main" : "success.main"}>
-              <span style={{ fontWeight: 600 }}>{CurrencyHelper.formatCurrencyWithLocale(d.amount, currency)}</span>
-            </IconText>
+          <TableCell align="right">
+            <Typography variant="body2" sx={{ fontWeight: 600, color: isPending ? "warning.main" : "success.main" }}>
+              {CurrencyHelper.formatCurrencyWithLocale(d.amount, currency)}
+            </Typography>
           </TableCell>
           {canEdit && <TableCell align="right" className="rowActions">{editButton}</TableCell>}
         </TableRow>
       );
     }
 
-    // Add total row
     rows.push(
       <TableRow key="total" sx={{ borderTop: 2, backgroundColor: "grey.50" }}>
         <TableCell sx={{ fontWeight: "bold", fontSize: 15 }}>
@@ -176,13 +145,10 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
         </TableCell>
         <TableCell></TableCell>
         <TableCell></TableCell>
-        <TableCell>
-          <Stack direction="row" spacing={1} alignItems="center">
-            {/* <MoneyIcon sx={{ color: "success.main", fontSize: 20 }} /> */}
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "success.main" }}>
-              {CurrencyHelper.formatCurrencyWithLocale(donationsTotal, currency)}
-            </Typography>
-          </Stack>
+        <TableCell align="right">
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "success.main" }}>
+            {CurrencyHelper.formatCurrencyWithLocale(donationsTotal, currency)}
+          </Typography>
         </TableCell>
         {canEdit && <TableCell></TableCell>}
       </TableRow>
@@ -200,25 +166,17 @@ export const Donations: React.FC<Props> = ({ currency = "usd", ...props }) => {
     if (!donations) return <Loading />;
 
     return (
-      <>
-        {/* Header with actions */}
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Stack direction="row" spacing={1} alignItems="center">
-              <DonationIcon sx={{ color: "primary.main", fontSize: 20 }} />
-              <Typography variant="h6">{Locale.label("donations.donations.don")}</Typography>
-              {donations?.length > 0 && <CountChip count={donations.length} />}
-            </Stack>
-            {getHeaderActions()}
-          </Stack>
-        </Box>
-
-        {/* Table */}
+      <CardWithHeader
+        icon={<DonationIcon sx={{ color: "primary.main", fontSize: 20 }} />}
+        title={Locale.label("donations.donations.don")}
+        count={donations?.length}
+        actions={getHeaderActions()}
+      >
         <Table sx={{ minWidth: 650 }}>
           {getTableHeader()}
           <TableBody>{getRows()}</TableBody>
         </Table>
-      </>
+      </CardWithHeader>
     );
   }, [donations, getRows, getTableHeader, getHeaderActions]);
 

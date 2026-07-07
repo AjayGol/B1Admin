@@ -85,9 +85,9 @@ export const TeamList = memo((props: Props) => {
         <Paper sx={{ width: "100%", overflow: "hidden" }}>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ backgroundColor: "background.subtle" }}>
+              <TableRow>
                 <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>{Locale.label("common.name")}</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>{Locale.label("plans.teamList.members")}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 600, color: "text.primary" }}>{Locale.label("plans.teamList.members")}</TableCell>
                 <TableCell align="right" sx={{ width: 80 }}></TableCell>
               </TableRow>
             </TableHead>
@@ -114,12 +114,12 @@ export const TeamList = memo((props: Props) => {
                         {g.name}
                       </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="right">
                       <Typography variant="body2" color="text.secondary">
                         {memberCount}
                       </Typography>
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" className="rowActions">
                       <Button
                         size="small"
                         component={Link}

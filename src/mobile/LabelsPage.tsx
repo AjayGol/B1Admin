@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { ApiHelper, Loading, Locale, PageHeader, UserHelper } from "@churchapps/apphelper";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ApiHelper, Loading, Locale, PageHeader } from "@churchapps/apphelper";
 import { Permissions } from "@churchapps/helpers";
-import { Box, Button, Chip, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Box, Chip, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Label as LabelIcon, StarBorder as StarBorderIcon } from "@mui/icons-material";
-import { PermissionDenied } from "../components";
 import { EmptyState } from "../components/ui/EmptyState";
 import { AppIconButton } from "../components/ui/AppIconButton";
+import { HeaderPrimaryButton } from "../components/ui";
+import { useConfirmDelete, useRequirePermission } from "../hooks";
 import { LabelEditor, newBlockId, type LabelTemplateInterface } from "./components/LabelEditor";
 
 // Starters mirror B1Checkin's bundled 1_1x3_5 / pickup_1_1x3_5 HTML labels.
@@ -35,24 +37,16 @@ const starterPickup = (): LabelTemplateInterface => ({
 });
 
 export const LabelsPage = () => {
-  const [templates, setTemplates] = useState<LabelTemplateInterface[]>([]);
   const [editing, setEditing] = useState<LabelTemplateInterface | null>(null);
-  const [loading, setLoading] = useState(true);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
-  const loadData = useCallback(() => {
-    setLoading(true);
-    ApiHelper.get("/labeltemplates", "AttendanceApi").then((data) => {
-      setTemplates(data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
-  useEffect(() => { loadData(); }, [loadData]);
+  const templatesQuery = useQuery<LabelTemplateInterface[]>({ queryKey: ["/labeltemplates", "AttendanceApi"], placeholderData: [] });
+  const templates = templatesQuery.data || [];
 
   const handleUpdated = () => {
     setEditing(null);
-    loadData();
+    templatesQuery.refetch();
   };
 
   const startCreate = (template: LabelTemplateInterface) => {
@@ -60,29 +54,29 @@ export const LabelsPage = () => {
     setEditing(template);
   };
 
-  const handleDelete = (t: LabelTemplateInterface) => {
-    if (window.confirm(Locale.label("attendance.labels.confirmDelete"))) ApiHelper.delete("/labeltemplates/" + t.id, "AttendanceApi").then(loadData);
+  const handleDelete = async (t: LabelTemplateInterface) => {
+    if (await confirm(Locale.label("attendance.labels.confirmDelete"))) ApiHelper.delete("/labeltemplates/" + t.id, "AttendanceApi").then(() => templatesQuery.refetch());
   };
 
   const handleSetDefault = (t: LabelTemplateInterface) => {
-    ApiHelper.post("/labeltemplates", [{ ...t, isDefault: true }], "AttendanceApi").then(loadData);
+    ApiHelper.post("/labeltemplates", [{ ...t, isDefault: true }], "AttendanceApi").then(() => templatesQuery.refetch());
   };
 
-  if (!UserHelper.checkAccess(Permissions.attendanceApi.attendance.edit)) return <PermissionDenied permissions={[Permissions.attendanceApi.attendance.edit]} />;
+  const denied = useRequirePermission(Permissions.attendanceApi.attendance.edit);
+  if (denied) return denied;
 
   return (
     <>
-      <PageHeader title={Locale.label("attendance.labels.title")} subtitle={Locale.label("attendance.labels.subtitle")}>
+      {ConfirmDialogElement}
+      <PageHeader icon={<LabelIcon />} title={Locale.label("attendance.labels.title")} subtitle={Locale.label("attendance.labels.subtitle")}>
         {!editing && (
-          <Button
-            variant="outlined"
+          <HeaderPrimaryButton
             startIcon={<AddIcon />}
             onClick={(e) => setMenuAnchor(e.currentTarget)}
-            sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}
             data-testid="add-label"
           >
             {Locale.label("common.add")}
-          </Button>
+          </HeaderPrimaryButton>
         )}
       </PageHeader>
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
@@ -93,7 +87,7 @@ export const LabelsPage = () => {
       <Box sx={{ p: 3 }}>
         {editing
           ? <LabelEditor template={editing} updatedCallback={handleUpdated} />
-          : loading
+          : templatesQuery.isLoading
             ? <Loading />
             : templates.length === 0
               ? <EmptyState icon={<LabelIcon />} title={Locale.label("attendance.labels.noTemplates")} description={Locale.label("attendance.labels.noTemplatesDesc")} />
@@ -102,9 +96,9 @@ export const LabelsPage = () => {
                   <Table data-testid="labels-table">
                     <TableHead>
                       <TableRow>
-                        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.labels.name")}</TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.labels.type")}</TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.labels.size")}</TableCell>
+                        <TableCell>{Locale.label("attendance.labels.name")}</TableCell>
+                        <TableCell>{Locale.label("attendance.labels.type")}</TableCell>
+                        <TableCell>{Locale.label("attendance.labels.size")}</TableCell>
                         <TableCell align="right" />
                       </TableRow>
                     </TableHead>
@@ -114,7 +108,7 @@ export const LabelsPage = () => {
                           <TableCell>{t.name}</TableCell>
                           <TableCell>{Locale.label(t.labelType === "pickup" ? "attendance.labels.pickup" : "attendance.labels.nametag")}</TableCell>
                           <TableCell>{`${Number(t.width)}" × ${Number(t.height)}"`}</TableCell>
-                          <TableCell align="right">
+                          <TableCell align="right" className="rowActions">
                             {t.isDefault
                               ? <Chip label={Locale.label("attendance.labels.default")} color="primary" size="small" sx={{ mr: 1 }} />
                               : <AppIconButton tone="card" label={Locale.label("attendance.labels.setDefault")} icon={<StarBorderIcon />} onClick={() => handleSetDefault(t)} data-testid={`default-label-${t.id}`} />}

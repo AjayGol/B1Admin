@@ -8,12 +8,14 @@ import { Description as DescriptionIcon, Add as AddIcon, Archive as ArchiveIcon,
 import { PageHeader } from "@churchapps/apphelper";
 import { PermissionDenied } from "../components";
 import { useQuery } from "@tanstack/react-query";
-import { CountChip, SmartTabs } from "../components/ui";
+import { CountChip, NavigationTabs, HeaderPrimaryButton, type NavigationTab } from "../components/ui";
 import { AppIconButton } from "../components/ui/AppIconButton";
+import { useConfirmDelete } from "../hooks";
 
 export const FormsPage = () => {
   const [selectedFormId, setSelectedFormId] = React.useState("notset");
   const [selectedTab, setSelectedTab] = React.useState("forms");
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
   const formPermission = UserHelper.checkAccess(Permissions.membershipApi.forms.admin) || UserHelper.checkAccess(Permissions.membershipApi.forms.edit);
 
   const forms = useQuery<FormInterface[]>({
@@ -28,7 +30,6 @@ export const FormsPage = () => {
 
   const getRows = (isArchived: boolean) => {
     const result: JSX.Element[] = [];
-    // Filter forms based on archived status since the API may return all forms
     const rawData = isArchived ? archivedForms.data : forms.data;
     const formData = rawData?.filter(form => isArchived ? form.archived === true : !form.archived);
 
@@ -70,7 +71,7 @@ export const FormsPage = () => {
             </Box>
           </TableCell>
           <TableCell>{formLink}</TableCell>
-          <TableCell style={{ textAlign: "right" }}>
+          <TableCell align="right" className="rowActions">
             {archiveLink || unarchiveLink} {duplicateLink} {editLink}
           </TableCell>
         </TableRow>
@@ -83,9 +84,9 @@ export const FormsPage = () => {
     ApiHelper.post("/forms/duplicate/" + formId, {}, "MembershipApi").then(() => { forms.refetch(); });
   };
 
-  const handleArchiveChange = (form: FormInterface, archive: boolean) => {
-    const conf = archive ? window.confirm(Locale.label("forms.formsPage.confirmMsg1")) : window.confirm(Locale.label("forms.formsPage.confirmMsg2"));
-    if (!conf) return;
+  const handleArchiveChange = async (form: FormInterface, archive: boolean) => {
+    const message = archive ? Locale.label("forms.formsPage.confirmMsg1") : Locale.label("forms.formsPage.confirmMsg2");
+    if (!(await confirm(message, { destructive: false, confirmLabel: Locale.label("common.confirm", "Confirm") }))) return;
     form.archived = archive;
     ApiHelper.post("/forms", [form], "MembershipApi").then(() => {
       forms.refetch();
@@ -118,10 +119,17 @@ export const FormsPage = () => {
     setSelectedFormId("notset");
   };
 
-  const getSidebar = () => {
+  const getEditSlot = () => {
     if (selectedFormId === "notset" || selectedTab === "archived") return <></>;
     if (selectedTab === "forms") return <FormEdit formId={selectedFormId} updatedFunction={handleUpdate}></FormEdit>;
   };
+
+  const formsCount = forms.data?.filter(form => !form.archived)?.length || 0;
+  const archivedCount = archivedForms.data?.filter(form => form.archived === true)?.length || 0;
+
+  React.useEffect(() => {
+    if (selectedTab === "archived" && archivedCount === 0) setSelectedTab("forms");
+  }, [selectedTab, archivedCount]);
 
   if (!formPermission) return <PermissionDenied permissions={[Permissions.membershipApi.forms.admin, Permissions.membershipApi.forms.edit]} />;
   if (forms.isLoading || archivedForms.isLoading) return <Loading />;
@@ -133,12 +141,8 @@ export const FormsPage = () => {
     </Table>
   );
 
-  // Filter counts to match actual displayed forms
-  const formsCount = forms.data?.filter(form => !form.archived)?.length || 0;
-  const archivedCount = archivedForms.data?.filter(form => form.archived === true)?.length || 0;
-
   const formsCard = (
-    <Card sx={{ mt: getSidebar() ? 2 : 0 }}>
+    <Card sx={{ mt: getEditSlot() ? 2 : 0 }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={1} alignItems="center">
@@ -167,43 +171,30 @@ export const FormsPage = () => {
     </Card>
   );
 
-  const tabs = [
-    {
-      key: "forms",
-      label: Locale.label("forms.formsPage.forms"),
-      content: (
-        <>
-          {getSidebar()}
-          {formsCard}
-        </>
-      )
-    },
-    { key: "archived", label: Locale.label("forms.formsPage.archForms"), content: archivedCard, hidden: archivedCount === 0 }
-  ];
+  const headerTabs: NavigationTab[] = [{ value: "forms", label: Locale.label("forms.formsPage.forms") }];
+  if (archivedCount > 0) headerTabs.push({ value: "archived", label: Locale.label("forms.formsPage.archForms") });
 
   return (
     <>
-      <PageHeader title={Locale.label("forms.formsPage.forms")} subtitle={Locale.label("forms.formsPage.subtitleManage")}>
+      {ConfirmDialogElement}
+      <PageHeader
+        icon={<DescriptionIcon />}
+        title={Locale.label("forms.formsPage.forms")}
+        subtitle={Locale.label("forms.formsPage.subtitleManage")}
+        tabs={<NavigationTabs selectedTab={selectedTab} onTabChange={setSelectedTab} tabs={headerTabs} onHeader />}>
         {formPermission && selectedTab !== "archived" && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setSelectedFormId("");
-            }}
-            sx={{
-              backgroundColor: "#FFF",
-              color: "primary.light",
-              "&:hover": { backgroundColor: "rgba(255,255,255,0.9)" }
-            }}
-            data-testid="add-form-button">
+          <HeaderPrimaryButton startIcon={<AddIcon />} onClick={() => setSelectedFormId("")} data-testid="add-form-button">
             {Locale.label("forms.formsPage.addForm")}
-          </Button>
+          </HeaderPrimaryButton>
         )}
       </PageHeader>
-      {/* Tab Content */}
       <Box sx={{ p: 3 }}>
-        <SmartTabs tabs={tabs} value={selectedTab} onChange={setSelectedTab} ariaLabel="forms-tabs" />
+        {selectedTab === "archived" && archivedCount > 0 ? archivedCard : (
+          <>
+            {getEditSlot()}
+            {formsCard}
+          </>
+        )}
       </Box>
     </>
   );

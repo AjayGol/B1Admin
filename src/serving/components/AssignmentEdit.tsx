@@ -67,7 +67,7 @@ export const AssignmentEdit = (props: Props) => {
               {personName}
             </button>
           </TableCell>
-          <TableCell align="right">
+          <TableCell align="right" className="rowActions">
             <Tooltip title={Locale.label("plans.schedulingPreference.title") || "Scheduling Preferences"}>
               <IconButton
                 size="small"

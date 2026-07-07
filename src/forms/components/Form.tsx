@@ -5,7 +5,7 @@ import { ApiHelper, Permissions, Loading, UserHelper, Locale } from "@churchapps
 import { Icon, Table, TableBody, TableCell, TableRow, TableHead, Box, Typography, Stack, Button, Card } from "@mui/material";
 import { ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon } from "@mui/icons-material";
 import { AppIconButton } from "../../components/ui/AppIconButton";
-import { CountChip } from "../../components/ui";
+import { CountChip, hoverRowSx } from "../../components/ui";
 
 interface Props {
   id: string;
@@ -15,9 +15,7 @@ export const Form: React.FC<Props> = (props) => {
   const [form, setForm] = React.useState<FormInterface>({} as FormInterface);
   const [questions, setQuestions] = React.useState<QuestionInterface[]>(null);
   const [editQuestionId, setEditQuestionId] = React.useState("notset");
-  // Hoisted: the compiler emits non-optional guard reads (questions.length) for closure deps,
-  // which crash while questions is still null.
-  const questionList = questions || [];
+  const questionList = questions || []; // Hoisted to avoid guard reads on closure deps while questions is undefined
   const formPermission = UserHelper.checkAccess(Permissions.membershipApi.forms.admin) || UserHelper.checkAccess(Permissions.membershipApi.forms.edit);
   const questionUpdated = () => {
     loadQuestions();
@@ -91,10 +89,7 @@ export const Form: React.FC<Props> = (props) => {
         <TableRow
           key={i}
           data-index={i}
-          sx={{
-            "&:hover": { backgroundColor: "action.hover" },
-            transition: "background-color 0.2s ease"
-          }}>
+          sx={hoverRowSx}>
           <TableCell>
             <Box
               component="button"
@@ -107,7 +102,7 @@ export const Form: React.FC<Props> = (props) => {
           <TableCell>
             <Typography variant="body2">{questionList[i].fieldType}</Typography>
           </TableCell>
-          <TableCell>
+          <TableCell className="rowActions">
             <Stack direction="row" spacing={0.5} alignItems="center">
               {upArrow}
               {downArrow}
@@ -128,26 +123,10 @@ export const Form: React.FC<Props> = (props) => {
     }
     rows.push(
       <TableRow key="header">
-        <TableCell sx={{ fontWeight: 600 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {Locale.label("forms.form.question")}
-          </Typography>
-        </TableCell>
-        <TableCell sx={{ fontWeight: 600 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {Locale.label("forms.form.type")}
-          </Typography>
-        </TableCell>
-        <TableCell sx={{ fontWeight: 600 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {Locale.label("forms.form.act")}
-          </Typography>
-        </TableCell>
-        <TableCell sx={{ fontWeight: 600 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {Locale.label("forms.form.req")}
-          </Typography>
-        </TableCell>
+        <TableCell>{Locale.label("forms.form.question")}</TableCell>
+        <TableCell>{Locale.label("forms.form.type")}</TableCell>
+        <TableCell>{Locale.label("forms.form.act")}</TableCell>
+        <TableCell>{Locale.label("forms.form.req")}</TableCell>
       </TableRow>
     );
     return rows;
@@ -166,28 +145,16 @@ export const Form: React.FC<Props> = (props) => {
     if (questions) {
       contents = (
         <Table sx={{ minWidth: 650 }}>
-          <TableHead
-            sx={{
-              backgroundColor: "grey.50",
-              "& .MuiTableCell-root": {
-                borderBottom: "2px solid",
-                borderBottomColor: "divider"
-              }
-            }}>
-            {getTableHeader()}
-          </TableHead>
+          <TableHead>{getTableHeader()}</TableHead>
           <TableBody>{getRows()}</TableBody>
         </Table>
       );
     }
     return (
       <>
-        {/* Edit Question Content - Appears above when editing */}
         {getSidebarModules()}
 
-        {/* Main Questions Content - Full Width Card */}
         <Card sx={{ width: "100%" }}>
-          {/* Card Header */}
           <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Stack direction="row" spacing={1} alignItems="center">
@@ -210,7 +177,6 @@ export const Form: React.FC<Props> = (props) => {
             </Stack>
           </Box>
 
-          {/* Card Content */}
           <Box sx={{ p: 0 }}>{contents}</Box>
         </Card>
       </>

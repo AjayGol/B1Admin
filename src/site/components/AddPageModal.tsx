@@ -358,7 +358,8 @@ export function AddPageModal(props: Props) {
             {getTemplateButton("about", "quiz", Locale.label("site.addPageModal.aboutUs"))}
             {getTemplateButton("donate", "volunteer_activism", Locale.label("site.addPageModal.donate"))}
             {getTemplateButton("location", "location_on", Locale.label("site.addPageModal.location"))}
-            {getTemplateButton("ai", "auto_awesome", "AI")}
+            {/* ponytail: AI page generation temporarily disabled — restore to re-enable */}
+            {/* {getTemplateButton("ai", "auto_awesome", "AI")} */}
             {(props.mode === "navigation") && getTemplateButton("link", "link", Locale.label("site.addPageModal.linkType"))}
           </Grid>
 

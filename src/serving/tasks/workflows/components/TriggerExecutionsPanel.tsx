@@ -81,7 +81,7 @@ export const TriggerExecutionsPanel: React.FC<Props> = (props) => {
                 <TableCell>{statusChip(e)}</TableCell>
                 <TableCell align="right">{e.attemptCount ?? 0}</TableCell>
                 {props.canManage && (
-                  <TableCell align="right">
+                  <TableCell align="right" className="rowActions">
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                       {(e.status === "failed" || e.status === "paused") && <AppIconButton label={Locale.label("tasks.executions.retry")} icon={<RetryIcon />} data-testid={"retry-execution-" + e.id} onClick={() => act(e, "retry")} />}
                       {e.status === "pending" && <AppIconButton label={Locale.label("tasks.executions.pause")} icon={<PauseIcon />} data-testid={"pause-execution-" + e.id} onClick={() => act(e, "pause")} />}

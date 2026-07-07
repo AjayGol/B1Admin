@@ -1,17 +1,19 @@
-import { Box, Button, Stack, Paper, Typography, Select, MenuItem, Menu, Tabs, Tab } from "@mui/material";
+import { Box, Button, Stack, Paper, Typography, Select, MenuItem, Menu } from "@mui/material";
 import React from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { ApiHelper, Locale, Loading, PageHeader } from "@churchapps/apphelper";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Add as AddIcon, BarChart as ReportIcon, ArrowBack as BackIcon, Bolt as TriggerIcon, CheckCircle as CompleteIcon, Snooze as SnoozeIcon, Person as PersonIcon, Close as ClearIcon, Edit as EditIcon } from "@mui/icons-material";
+import { Add as AddIcon, BarChart as ReportIcon, ArrowBack as BackIcon, Bolt as TriggerIcon, CheckCircle as CompleteIcon, Snooze as SnoozeIcon, Person as PersonIcon, Close as ClearIcon, Edit as EditIcon, ViewKanban as WorkflowsIcon } from "@mui/icons-material";
 import { WorkflowStepColumn } from "./components/WorkflowStepColumn";
 import { WorkflowStepEdit } from "./components/WorkflowStepEdit";
 import { WorkflowEdit } from "./components/WorkflowEdit";
 import { WorkflowCardDrawer } from "./components/WorkflowCardDrawer";
 import { WorkflowTriggersManager } from "./components/WorkflowTriggersManager";
 import { ContentPicker } from "../components/ContentPicker";
+import { NavigationTabs } from "../../../components/ui/NavigationTabs";
+import { HeaderPrimaryButton, HeaderSecondaryButton } from "../../../components/ui";
 import { type WorkflowBoardInterface, type WorkflowStepInterface, type TaskInterface, type WorkflowInterface, type WorkflowCategoryInterface } from "@churchapps/helpers";
 import { canViewWorkflows, canEditCards, canManageWorkflows } from "./permissions";
 
@@ -22,7 +24,7 @@ export const WorkflowBoardPage = () => {
   const [editStep, setEditStep] = React.useState<WorkflowStepInterface | null>(null);
   const [editWorkflow, setEditWorkflow] = React.useState<WorkflowInterface | null>(null);
   const [openCard, setOpenCard] = React.useState<TaskInterface | null>(null);
-  const [tab, setTab] = React.useState(0); // 0 = Board, 1 = Triggers
+  const [tab, setTab] = React.useState<"board" | "triggers">("board");
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [snoozeAnchor, setSnoozeAnchor] = React.useState<null | HTMLElement>(null);
   const [showBulkReassign, setShowBulkReassign] = React.useState(false);
@@ -53,14 +55,14 @@ export const WorkflowBoardPage = () => {
   };
 
   const handleAddStep = () => {
-    setTab(0);
+    setTab("board");
     setEditWorkflow(null);
     const nextSort = (board.data?.steps?.length || 0) + 1;
     setEditStep({ workflowId, name: "", sort: nextSort });
   };
 
   const handleEditWorkflow = () => {
-    setTab(0);
+    setTab("board");
     setEditStep(null);
     setEditWorkflow(board.data?.workflow || null);
   };
@@ -100,29 +102,38 @@ export const WorkflowBoardPage = () => {
 
   return (
     <>
-      <PageHeader title={board.data?.workflow?.name || Locale.label("tasks.workflowsPage.title")} subtitle={Locale.label("tasks.workflowBoard.subtitle")}>
+      <PageHeader
+        icon={<WorkflowsIcon />}
+        title={board.data?.workflow?.name || Locale.label("tasks.workflowsPage.title")}
+        subtitle={Locale.label("tasks.workflowBoard.subtitle")}
+        tabs={(
+          <NavigationTabs
+            selectedTab={tab}
+            onTabChange={(v) => setTab(v as "board" | "triggers")}
+            testId="board-tabs"
+            onHeader
+            tabs={[
+              { value: "board", label: Locale.label("tasks.workflowBoard.boardTab"), icon: <EditIcon fontSize="small" />, testId: "board-tab" },
+              { value: "triggers", label: Locale.label("tasks.eventTriggers.title"), icon: <TriggerIcon fontSize="small" />, testId: "board-triggers-tab" }
+            ]}
+          />
+        )}
+      >
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<BackIcon />} onClick={() => navigate("/serving/tasks/workflows")} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)" }}>{Locale.label("tasks.workflowsPage.title")}</Button>
-          {canManage && <Button variant="outlined" startIcon={<EditIcon />} data-testid="edit-workflow-button" onClick={handleEditWorkflow} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)" }}>{Locale.label("tasks.workflowEdit.editWorkflow")}</Button>}
-          <Button variant="outlined" startIcon={<ReportIcon />} data-testid="board-reports-button" onClick={() => navigate("/serving/tasks/workflows/" + workflowId + "/reports")} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)" }}>{Locale.label("tasks.workflowReports.title")}</Button>
-          {canManage && tab === 0 && <Button variant="outlined" startIcon={<AddIcon />} data-testid="add-step-button" onClick={handleAddStep} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF" } }}>{Locale.label("tasks.workflowBoard.addStep")}</Button>}
+          <HeaderSecondaryButton startIcon={<BackIcon />} onClick={() => navigate("/serving/tasks/workflows")}>{Locale.label("tasks.workflowsPage.title")}</HeaderSecondaryButton>
+          {canManage && <HeaderSecondaryButton startIcon={<EditIcon />} data-testid="edit-workflow-button" onClick={handleEditWorkflow}>{Locale.label("tasks.workflowEdit.editWorkflow")}</HeaderSecondaryButton>}
+          <HeaderSecondaryButton startIcon={<ReportIcon />} data-testid="board-reports-button" onClick={() => navigate("/serving/tasks/workflows/" + workflowId + "/reports")}>{Locale.label("tasks.workflowReports.title")}</HeaderSecondaryButton>
+          {canManage && tab === "board" && <HeaderPrimaryButton startIcon={<AddIcon />} data-testid="add-step-button" onClick={handleAddStep}>{Locale.label("tasks.workflowBoard.addStep")}</HeaderPrimaryButton>}
         </Stack>
       </PageHeader>
 
-      <Box sx={{ px: 3, pt: 2 }}>
-        <Tabs value={tab} onChange={(_e, v) => setTab(v)} data-testid="board-tabs" sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tab data-testid="board-tab" icon={<EditIcon fontSize="small" />} iconPosition="start" sx={{ textTransform: "none", minHeight: 48 }} label={Locale.label("tasks.workflowBoard.boardTab")} />
-          <Tab data-testid="board-triggers-tab" icon={<TriggerIcon fontSize="small" />} iconPosition="start" sx={{ textTransform: "none", minHeight: 48 }} label={Locale.label("tasks.eventTriggers.title")} />
-        </Tabs>
-      </Box>
-
-      {tab === 1 && (
+      {tab === "triggers" && (
         <Box sx={{ p: 3 }}>
           <WorkflowTriggersManager workflowId={workflowId} canManage={canManage} />
         </Box>
       )}
 
-      {tab === 0 && selectedIds.size > 0 && (
+      {tab === "board" && selectedIds.size > 0 && (
         <Paper data-testid="bulk-action-bar" sx={{ mx: 3, mt: 2, p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "primary.main", backgroundColor: "action.hover" }}>
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
             <Typography variant="body2" sx={{ fontWeight: 600 }} data-testid="bulk-selected-count">{Locale.label("tasks.workflowBoard.selectedCount").replace("{count}", String(selectedIds.size))}</Typography>
@@ -143,7 +154,7 @@ export const WorkflowBoardPage = () => {
         </Paper>
       )}
 
-      {tab === 0 && (
+      {tab === "board" && (
         <Box sx={{ p: 3 }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
             <Box sx={{ flexGrow: 1, overflowX: "auto" }}>
@@ -184,7 +195,8 @@ export const WorkflowBoardPage = () => {
 
             {editStep && canManage && (
               <Box sx={{ width: { xs: "100%", md: 360 }, flexShrink: 0 }}>
-                <WorkflowStepEdit step={editStep} steps={steps} workflows={(workflows.data || []).filter((w) => w.id !== workflowId)} onCancel={() => setEditStep(null)} onSave={() => { setEditStep(null); refetch(); }} onDelete={() => { setEditStep(null); refetch(); }} />
+                <WorkflowStepEdit step={editStep} steps={steps} workflows={(workflows.data || []).filter((w) => w.id !== workflowId)}
+                  onCancel={() => setEditStep(null)} onSave={() => { setEditStep(null); refetch(); }} onDelete={() => { setEditStep(null); refetch(); }} />
               </Box>
             )}
           </Stack>

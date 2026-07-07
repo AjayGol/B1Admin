@@ -49,7 +49,7 @@ export const ChoicesEdit: React.FC<Props> = (props) => {
           <TableRow key={i}>
             <TableCell>{c.value}</TableCell>
             <TableCell>{c.text}</TableCell>
-            <TableCell>
+            <TableCell className="rowActions">
               <AppIconButton intent="remove" label={Locale.label("common.remove")} icon={<DeleteIcon />} onClick={handleRemove} data-index={i} />
             </TableCell>
           </TableRow>

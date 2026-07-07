@@ -52,7 +52,13 @@ const createMdTheme = (mode: PaletteMode) =>
             backgroundColor: "#1e1e1e",
             borderBottom: "1px solid #333"
           },
-          ".google-visualization-tooltip, .google-visualization-tooltip *": { pointerEvents: "none" }
+          ".google-visualization-tooltip, .google-visualization-tooltip *": { pointerEvents: "none" },
+          ".rowActions .MuiIconButton-root": {
+            opacity: 0.45,
+            transition: "opacity 0.12s"
+          },
+          "tr:hover .rowActions .MuiIconButton-root, .rowActions .MuiIconButton-root:focus-visible": { opacity: 1 },
+          "@media (prefers-reduced-motion: reduce)": { ".rowActions .MuiIconButton-root": { transition: "none" } }
         }
       },
       MuiTextField: {
@@ -67,8 +73,9 @@ const createMdTheme = (mode: PaletteMode) =>
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 8,
-            boxShadow: mode === "light" ? "0 2px 8px rgba(0,0,0,0.1)" : "0 2px 8px rgba(0,0,0,0.4)"
+            borderRadius: 10,
+            border: `1px solid ${mode === "light" ? "#dddddd" : "#333333"}`,
+            boxShadow: mode === "light" ? "0 1px 2px rgba(13,32,58,.06), 0 4px 14px rgba(13,32,58,.05)" : "0 1px 2px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35)"
           }
         }
       },
@@ -77,7 +84,17 @@ const createMdTheme = (mode: PaletteMode) =>
           root: {
             padding: "12px 16px",
             borderBottom: "1px solid var(--border-light)"
-          }
+          },
+          head: {
+            fontSize: "11px",
+            fontWeight: 650,
+            textTransform: "uppercase",
+            letterSpacing: ".07em",
+            color: mode === "light" ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.7)",
+            backgroundColor: "transparent",
+            borderBottom: `1px solid ${mode === "light" ? "#dddddd" : "#333333"}`
+          },
+          body: { fontVariantNumeric: "tabular-nums" }
         }
       }
     },

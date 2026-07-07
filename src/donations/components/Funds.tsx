@@ -58,7 +58,7 @@ export const Funds: React.FC = memo(() => {
         <TableBody key={result.length - 1}>
           <TableRow>
             <TableCell> {viewLink}</TableCell>
-            <TableCell align="right"> {editLink}</TableCell>
+            <TableCell align="right" className="rowActions"> {editLink}</TableCell>
           </TableRow>
         </TableBody>
       );

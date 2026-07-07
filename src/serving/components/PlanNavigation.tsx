@@ -8,10 +8,11 @@ interface Props {
   selectedTab: string;
   onTabChange: (tab: string) => void;
   plan: PlanInterface;
+  onHeader?: boolean;
 }
 
 export const PlanNavigation = memo((props: Props) => {
-  const { selectedTab, onTabChange, plan } = props;
+  const { selectedTab, onTabChange, plan, onHeader } = props;
 
   const tabs: NavigationTab[] = useMemo(() => {
     const tabsList = [{ value: "assignments", label: Locale.label("plans.planPage.assignments"), icon: <AssignmentIcon /> }];
@@ -23,5 +24,5 @@ export const PlanNavigation = memo((props: Props) => {
     return tabsList;
   }, [plan]);
 
-  return <NavigationTabs selectedTab={selectedTab} onTabChange={onTabChange} tabs={tabs} />;
+  return <NavigationTabs selectedTab={selectedTab} onTabChange={onTabChange} tabs={tabs} onHeader={onHeader} />;
 });

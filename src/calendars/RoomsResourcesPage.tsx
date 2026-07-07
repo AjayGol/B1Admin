@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { ApiHelper, UserHelper, Loading, PageHeader, Locale } from "@churchapps/apphelper";
+import { ApiHelper, Loading, PageHeader, Locale } from "@churchapps/apphelper";
 import { Permissions, type GroupInterface } from "@churchapps/helpers";
-import { Box, Button, Grid, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Paper } from "@mui/material";
+import { Box, Grid, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Paper } from "@mui/material";
 import { Add as AddIcon, Edit as EditIcon, MeetingRoom as RoomIcon } from "@mui/icons-material";
-import { PermissionDenied } from "../components";
+import { useRequirePermission } from "../hooks";
 import { EmptyState } from "../components/ui/EmptyState";
 import { AppIconButton } from "../components/ui/AppIconButton";
+import { NavigationTabs } from "../components/ui/NavigationTabs";
+import { HeaderPrimaryButton } from "../components/ui/headerButtons";
 import { RoomEdit } from "./components/RoomEdit";
 import { ResourceEdit } from "./components/ResourceEdit";
 import { BlockoutEdit } from "./components/BlockoutEdit";
@@ -24,6 +26,7 @@ export const RoomsResourcesPage = () => {
   const [groups, setGroups] = useState<GroupInterface[]>([]);
   const [editing, setEditing] = useState<Editing>(null);
   const [loading, setLoading] = useState(true);
+  const denied = useRequirePermission(Permissions.contentApi.content.edit);
 
   const loadData = useCallback(() => {
     setLoading(true);
@@ -60,21 +63,20 @@ export const RoomsResourcesPage = () => {
   };
 
   const tableSx = { borderRadius: 2, border: "1px solid", borderColor: "divider" };
-  const headSx = { fontWeight: 600, color: "text.secondary" };
 
   const getRoomsTable = () => (rooms.length === 0
     ? <EmptyState icon={<RoomIcon />} title={Locale.label("calendars.rooms.noRooms")} description={Locale.label("calendars.rooms.noRoomsDesc")} />
     : (
       <TableContainer component={Paper} sx={tableSx}>
         <Table data-testid="rooms-table">
-          <TableHead><TableRow><TableCell sx={headSx}>{Locale.label("calendars.rooms.roomName")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.capacity")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.approvalGroup")}</TableCell><TableCell align="right" /></TableRow></TableHead>
+          <TableHead><TableRow><TableCell>{Locale.label("calendars.rooms.roomName")}</TableCell><TableCell align="right">{Locale.label("calendars.rooms.capacity")}</TableCell><TableCell>{Locale.label("calendars.rooms.approvalGroup")}</TableCell><TableCell align="right" /></TableRow></TableHead>
           <TableBody>
             {rooms.map((r) => (
               <TableRow key={r.id} hover>
                 <TableCell>{r.name}</TableCell>
-                <TableCell>{r.capacity ?? ""}</TableCell>
+                <TableCell align="right">{r.capacity ?? ""}</TableCell>
                 <TableCell>{groupName(r.approvalGroupId)}</TableCell>
-                <TableCell align="right"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "rooms", item: r })} data-testid={`edit-room-${r.id}`} /></TableCell>
+                <TableCell align="right" className="rowActions"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "rooms", item: r })} data-testid={`edit-room-${r.id}`} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -87,14 +89,14 @@ export const RoomsResourcesPage = () => {
     : (
       <TableContainer component={Paper} sx={tableSx}>
         <Table data-testid="resources-table">
-          <TableHead><TableRow><TableCell sx={headSx}>{Locale.label("calendars.rooms.resourceName")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.quantity")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.approvalGroup")}</TableCell><TableCell align="right" /></TableRow></TableHead>
+          <TableHead><TableRow><TableCell>{Locale.label("calendars.rooms.resourceName")}</TableCell><TableCell align="right">{Locale.label("calendars.rooms.quantity")}</TableCell><TableCell>{Locale.label("calendars.rooms.approvalGroup")}</TableCell><TableCell align="right" /></TableRow></TableHead>
           <TableBody>
             {resources.map((r) => (
               <TableRow key={r.id} hover>
                 <TableCell>{r.name}</TableCell>
-                <TableCell>{r.quantity ?? 1}</TableCell>
+                <TableCell align="right">{r.quantity ?? 1}</TableCell>
                 <TableCell>{groupName(r.approvalGroupId)}</TableCell>
-                <TableCell align="right"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "resources", item: r })} data-testid={`edit-resource-${r.id}`} /></TableCell>
+                <TableCell align="right" className="rowActions"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "resources", item: r })} data-testid={`edit-resource-${r.id}`} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -107,7 +109,7 @@ export const RoomsResourcesPage = () => {
     : (
       <TableContainer component={Paper} sx={tableSx}>
         <Table data-testid="blockouts-table">
-          <TableHead><TableRow><TableCell sx={headSx}>{Locale.label("calendars.rooms.blockoutTarget")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.startTime")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.endTime")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.reason")}</TableCell><TableCell align="right" /></TableRow></TableHead>
+          <TableHead><TableRow><TableCell>{Locale.label("calendars.rooms.blockoutTarget")}</TableCell><TableCell>{Locale.label("calendars.rooms.startTime")}</TableCell><TableCell>{Locale.label("calendars.rooms.endTime")}</TableCell><TableCell>{Locale.label("calendars.rooms.reason")}</TableCell><TableCell align="right" /></TableRow></TableHead>
           <TableBody>
             {blockouts.map((b) => (
               <TableRow key={b.id} hover>
@@ -115,7 +117,7 @@ export const RoomsResourcesPage = () => {
                 <TableCell>{b.startTime ? new Date(b.startTime).toLocaleString() : ""}</TableCell>
                 <TableCell>{b.endTime ? new Date(b.endTime).toLocaleString() : ""}</TableCell>
                 <TableCell>{b.reason}</TableCell>
-                <TableCell align="right"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "blockouts", item: b })} data-testid={`edit-blockout-${b.id}`} /></TableCell>
+                <TableCell align="right" className="rowActions"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "blockouts", item: b })} data-testid={`edit-blockout-${b.id}`} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -128,14 +130,14 @@ export const RoomsResourcesPage = () => {
     : (
       <TableContainer component={Paper} sx={tableSx}>
         <Table data-testid="templates-table">
-          <TableHead><TableRow><TableCell sx={headSx}>{Locale.label("calendars.rooms.templateName")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.eventTitle")}</TableCell><TableCell sx={headSx}>{Locale.label("calendars.rooms.durationMinutes")}</TableCell><TableCell align="right" /></TableRow></TableHead>
+          <TableHead><TableRow><TableCell>{Locale.label("calendars.rooms.templateName")}</TableCell><TableCell>{Locale.label("calendars.rooms.eventTitle")}</TableCell><TableCell align="right">{Locale.label("calendars.rooms.durationMinutes")}</TableCell><TableCell align="right" /></TableRow></TableHead>
           <TableBody>
             {templates.map((t) => (
               <TableRow key={t.id} hover>
                 <TableCell>{t.name}</TableCell>
                 <TableCell>{t.title}</TableCell>
-                <TableCell>{t.durationMinutes ?? ""}</TableCell>
-                <TableCell align="right"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "templates", item: t })} data-testid={`edit-template-${t.id}`} /></TableCell>
+                <TableCell align="right">{t.durationMinutes ?? ""}</TableCell>
+                <TableCell align="right" className="rowActions"><AppIconButton tone="card" label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditing({ type: "templates", item: t })} data-testid={`edit-template-${t.id}`} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -143,7 +145,7 @@ export const RoomsResourcesPage = () => {
       </TableContainer>
     ));
 
-  if (!UserHelper.checkAccess(Permissions.contentApi.content.edit)) return <PermissionDenied permissions={[Permissions.contentApi.content.edit]} />;
+  if (denied) return denied;
 
   const getTable = () => {
     switch (tab) {
@@ -166,24 +168,33 @@ export const RoomsResourcesPage = () => {
 
   return (
     <>
-      <PageHeader title={Locale.label("calendars.rooms.title")} subtitle={Locale.label("calendars.rooms.subtitle")}>
-        <Button
-          variant="outlined"
+      <PageHeader
+        icon={<RoomIcon />}
+        title={Locale.label("calendars.rooms.title")}
+        subtitle={Locale.label("calendars.rooms.subtitle")}
+        tabs={(
+          <NavigationTabs
+            selectedTab={tab}
+            onTabChange={(v) => { setTab(v as TabKey); setEditing(null); }}
+            onHeader
+            tabs={[
+              { value: "rooms", label: Locale.label("calendars.rooms.rooms"), testId: "tab-rooms" },
+              { value: "resources", label: Locale.label("calendars.rooms.resources"), testId: "tab-resources" },
+              { value: "blockouts", label: Locale.label("calendars.rooms.blockouts"), testId: "tab-blockouts" },
+              { value: "templates", label: Locale.label("calendars.rooms.templates"), testId: "tab-templates" }
+            ]}
+          />
+        )}
+      >
+        <HeaderPrimaryButton
           startIcon={<AddIcon />}
           onClick={() => setEditing({ type: tab, item: {} })}
-          sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}
           data-testid="add-room-resource"
         >
           {Locale.label("common.add")}
-        </Button>
+        </HeaderPrimaryButton>
       </PageHeader>
       <Box sx={{ p: 3 }}>
-        <Tabs value={tab} onChange={(_e, v) => { setTab(v); setEditing(null); }} sx={{ mb: 2 }}>
-          <Tab label={Locale.label("calendars.rooms.rooms")} value="rooms" data-testid="tab-rooms" />
-          <Tab label={Locale.label("calendars.rooms.resources")} value="resources" data-testid="tab-resources" />
-          <Tab label={Locale.label("calendars.rooms.blockouts")} value="blockouts" data-testid="tab-blockouts" />
-          <Tab label={Locale.label("calendars.rooms.templates")} value="templates" data-testid="tab-templates" />
-        </Tabs>
         {loading ? <Loading /> : (
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: editing ? 8 : 12 }}>{getTable()}</Grid>

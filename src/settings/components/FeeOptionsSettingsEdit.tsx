@@ -14,24 +14,6 @@ interface Props {
 
 type AnyRecord = Record<string, any>;
 
-const stripeCurrencyFees = {
-  usd: { percent: 2.9, fixed: 0.3, symbol: "$" },
-  eur: { percent: 2.9, fixed: 0.25, symbol: "€" },
-  gbp: { percent: 2.9, fixed: 0.2, symbol: "£" },
-  cad: { percent: 2.9, fixed: 0.3, symbol: "C$" },
-  aud: { percent: 2.9, fixed: 0.3, symbol: "A$" },
-  inr: { percent: 2.9, fixed: 3.0, symbol: "₹" },
-  jpy: { percent: 2.9, fixed: 30.0, symbol: "¥" },
-  sgd: { percent: 2.9, fixed: 0.5, symbol: "S$" },
-  hkd: { percent: 2.9, fixed: 2.35, symbol: "元" },
-  sek: { percent: 2.9, fixed: 2.5, symbol: "SEK" },
-  nok: { percent: 2.9, fixed: 2.0, symbol: "NOK" },
-  dkk: { percent: 2.9, fixed: 1.8, symbol: "DKK" },
-  chf: { percent: 2.9, fixed: 0.3, symbol: "CHF" },
-  mxn: { percent: 2.9, fixed: 3.0, symbol: "MXN" },
-  brl: { percent: 3.9, fixed: 0.5, symbol: "R$" }
-};
-
 export const FeeOptionsSettingsEdit: React.FC<Props> = (props) => {
   "use no memo"; // compiler caches register() results, breaking RHF field re-registration after reset()
   const [flatRateCC, setFlatRateCC] = React.useState<GenericSettingInterface>(null);
@@ -48,6 +30,8 @@ export const FeeOptionsSettingsEdit: React.FC<Props> = (props) => {
 
   const { register, reset, getValues, setValue } = useForm<AnyRecord>({ defaultValues: { flatRateCC: "0.30", transFeeCC: "2.9", flatRateACH: "0.8", hardLimitACH: "5", flatRatePayPal: "0.30", transFeePayPal: "2.9", flatRateKF: "0.30", transFeeKF: "2.9" } });
 
+  const defaultFees = props.provider ? getPaymentProvider(props.provider).descriptor.defaultFees : undefined;
+
   const loadData = async () => {
     const currentCurrency = (props.currency || "usd").toLowerCase();
     const allSettings: GenericSettingInterface[] = await ApiHelper.get("/settings", "MembershipApi");
@@ -55,13 +39,13 @@ export const FeeOptionsSettingsEdit: React.FC<Props> = (props) => {
 
     const creditCardFlatRate = allSettings.filter((s) => s.keyName === "flatRateCC");
     if (creditCardFlatRate.length > 0) { setFlatRateCC(creditCardFlatRate[0]); next.flatRateCC = creditCardFlatRate[0].value; } else {
-      const fees = stripeCurrencyFees[currentCurrency as keyof typeof stripeCurrencyFees];
+      const fees = defaultFees?.[currentCurrency];
       if (fees) next.flatRateCC = fees.fixed.toString();
     }
 
     const creditCardTransactionFee = allSettings.filter((s) => s.keyName === "transFeeCC");
     if (creditCardTransactionFee.length > 0) { setTransFeeCC(creditCardTransactionFee[0]); next.transFeeCC = creditCardTransactionFee[0].value; } else {
-      const fees = stripeCurrencyFees[currentCurrency as keyof typeof stripeCurrencyFees];
+      const fees = defaultFees?.[currentCurrency];
       if (fees) next.transFeeCC = fees.percent.toString();
     }
 
@@ -85,7 +69,7 @@ export const FeeOptionsSettingsEdit: React.FC<Props> = (props) => {
 
     reset(next);
     setLoadedCurrency(currentCurrency);
-    const fees = stripeCurrencyFees[currentCurrency as keyof typeof stripeCurrencyFees];
+    const fees = defaultFees?.[currentCurrency];
     if (fees) setSymbol(fees.symbol);
     setHasLoadedData(true);
   };
@@ -132,7 +116,7 @@ export const FeeOptionsSettingsEdit: React.FC<Props> = (props) => {
   React.useEffect(() => {
     if (!hasLoadedData) return;
     const currentCurrency = (props.currency || "usd").toLowerCase();
-    const fees = stripeCurrencyFees[currentCurrency as keyof typeof stripeCurrencyFees];
+    const fees = defaultFees?.[currentCurrency];
     if (!fees) return;
     // Always keep the symbol in sync — loadData can run before the real currency propagates.
     setSymbol(fees.symbol);

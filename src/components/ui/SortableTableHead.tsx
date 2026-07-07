@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { TableHead, TableRow, TableCell, TableSortLabel, Typography } from "@mui/material";
+import { TableHead, TableRow, TableCell, TableSortLabel } from "@mui/material";
 
 export type SortDirection = "asc" | "desc";
 
@@ -21,23 +21,12 @@ interface SortableTableHeadProps {
 }
 
 export const SortableTableHead: React.FC<SortableTableHeadProps> = ({ columns, sortBy, sortDirection = "asc", onSort, leading }) => (
-  <TableHead
-    sx={{
-      "& .MuiTableCell-root": {
-        backgroundColor: "var(--bg-sub)",
-        borderBottom: "2px solid var(--border-main)",
-        whiteSpace: "nowrap"
-      }
-    }}>
+  <TableHead sx={{ "& .MuiTableCell-root": { whiteSpace: "nowrap" } }}>
     <TableRow>
       {leading}
       {columns.map((c) => {
         const active = sortBy === c.key;
-        const label = (
-          <Typography component="span" variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {c.label}
-          </Typography>
-        );
+        const label = c.label;
         return (
           <TableCell key={c.key} align={c.align} sx={{ minWidth: c.minWidth }} sortDirection={active ? sortDirection : false}>
             {c.sortable && onSort ? (

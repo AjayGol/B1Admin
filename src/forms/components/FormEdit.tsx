@@ -1,8 +1,9 @@
-import { Alert, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useMountedState, ApiHelper, DateHelper, Locale } from "@churchapps/apphelper";
+import { useMountedState, ApiHelper, DateHelper, Locale, ErrorMessages } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
+import { useConfirmDelete, useErrorSummary } from "../../hooks";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Props {
@@ -38,10 +39,8 @@ export function FormEdit(props: Props) {
   const { control, register, handleSubmit, reset, watch, formState } = useForm<AnyRecord>({ defaultValues: { name: "", contentType: "person", thankYouMessage: "", restricted: false, accessStartTime: null, accessEndTime: null, displayMode: "standard", autoCreatePerson: false, followUpSubject: "", followUpBody: "" } });
 
   const e = formState.errors as any;
-  const summaryErrors: string[] = [];
-  if (e.name?.message) summaryErrors.push(e.name.message);
-  if (e.accessStartTime?.message) summaryErrors.push(e.accessStartTime.message);
-  if (e.accessEndTime?.message) summaryErrors.push(e.accessEndTime.message);
+  const summaryErrors = useErrorSummary(formState.errors, ["name", "accessStartTime", "accessEndTime"]);
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
   const watchedId = watch("id");
   const autoCreatePerson = watch("autoCreatePerson");
@@ -98,15 +97,16 @@ export function FormEdit(props: Props) {
     saveFormMutation.mutate(f);
   };
 
-  function handleDelete() {
-    if (window.confirm(Locale.label("forms.formEdit.confirmMsg"))) {
+  async function handleDelete() {
+    if (await confirm(Locale.label("forms.formEdit.confirmMsg"))) {
       deleteFormMutation.mutate(watchedId!);
     }
   }
 
   return (
     <FormCard id="formBox" icon="format_align_left" title={Locale.label("forms.formEdit.editForm")} onSave={handleSubmit(onValid)} isSubmitting={saveFormMutation.isPending || deleteFormMutation.isPending} onCancel={props.updatedFunction} onDelete={props.formId ? handleDelete : undefined}>
-      {summaryErrors.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{summaryErrors.map((msg) => <div key={msg}>{msg}</div>)}</Alert>}
+      {ConfirmDialogElement}
+      <ErrorMessages errors={summaryErrors} />
       <TextField fullWidth label={Locale.label("forms.formEdit.name")} type="text" placeholder={Locale.label("placeholders.form.name")} data-testid="form-name-input" aria-label={Locale.label("forms.formEdit.formNameAria")} error={!!e.name} helperText={e.name?.message} {...register("name", { required: Locale.label("forms.formEdit.nameReqMsg") })} />
       {!props.formId && (
         <FormControl fullWidth>

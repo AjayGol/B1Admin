@@ -3,13 +3,9 @@ import { loggedInTest as test, expect } from "./helpers/test-fixtures";
 import { navigateToRoomsResources, navigateToApprovals, navigateToCalendars } from "./helpers/navigation";
 import { login } from "./helpers/auth";
 import { STORAGE_STATE_PATH } from "./global-setup";
+import { confirmDelete } from "./helpers/fixtures";
 
-// Rooms & resources admin (roadmap 2.7/2.8): room/resource/blockout/template
-// CRUD, double-booking conflict warnings, approval-group routing with the
-// approvals inbox, and .ics import. Demo User belongs to no groups, so a room
-// whose approval group is "High School Youth" always queues bookings as
-// pending (the auto-approve-if-member path stays off).
-
+// Rooms & resources admin (roadmap 2.7/2.8): CRUD, double-booking warnings, approval routing, .ics import.
 const HALL = "Zacchaeus Hall";
 const RESTRICTED_ROOM = "Zacchaeus Restricted Room";
 const PROJECTOR = "Zacchaeus Projector";
@@ -75,8 +71,8 @@ async function deleteViaEdit(page: Page, editButton: import("@playwright/test").
   await editButton.click();
   const deleteBtn = page.locator(`[data-testid="${deleteTestId}"]`);
   await deleteBtn.waitFor({ state: "visible", timeout: 10000 });
-  page.once("dialog", async (d) => { await d.accept(); });
   await deleteBtn.click();
+  await confirmDelete(page);
 }
 
 test.describe.serial("Rooms, resources & approvals", () => {
@@ -156,7 +152,7 @@ test.describe.serial("Rooms, resources & approvals", () => {
     await page.locator('[data-testid="save-calendar-button"]').click();
     const row = page.locator("table tbody tr").filter({ hasText: CALENDAR }).first();
     await expect(row).toBeVisible({ timeout: 15000 });
-    await row.click();
+    await row.locator("a").first().click();
     await page.waitForURL(/\/calendars\/[\w-]+/, { timeout: 10000 });
 
     await page.locator('[data-testid="new-event-button"]').click();
@@ -236,7 +232,7 @@ test.describe.serial("Rooms, resources & approvals", () => {
   test("imports events from a pasted .ics calendar", async () => {
     await navigateToCalendars(page);
     const row = page.locator("table tbody tr").filter({ hasText: CALENDAR }).first();
-    await row.click();
+    await row.locator("a").first().click();
     await page.waitForURL(/\/calendars\/[\w-]+/, { timeout: 10000 });
     await page.locator('[data-testid="import-ics-button"]').click();
     await selectOption(page, "import-ics-group-select", APPROVAL_GROUP);
@@ -252,8 +248,8 @@ test.describe.serial("Rooms, resources & approvals", () => {
     if (await calEditBtn.count().then((c) => c > 0).catch(() => false)) {
       await calEditBtn.click();
       await page.locator('[data-testid="calendar-name-input"] input').waitFor({ state: "visible", timeout: 10000 });
-      page.once("dialog", async (d) => { await d.accept(); });
       await page.locator('[data-testid="delete-calendar-button"]').click();
+      await confirmDelete(page);
     }
     await expect(page.locator("table tbody tr").filter({ hasText: CALENDAR })).toHaveCount(0, { timeout: 15000 });
 

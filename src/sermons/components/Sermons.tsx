@@ -13,7 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { SermonEdit } from "./SermonEdit";
 import { PlaylistEdit } from "./PlaylistEdit";
 import { AppIconButton } from "../../components/ui/AppIconButton";
-import { CountChip } from "../../components/ui";
+import { CountChip, HeaderPrimaryButton } from "../../components/ui";
+import { hoverRowSx } from "../../components/ui/tableStyles";
 
 export const Sermons = () => {
   const [sermons, setSermons] = React.useState<SermonInterface[]>([]);
@@ -26,7 +27,6 @@ export const Sermons = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
-  // Playlist panel (right column) state
   const [currentPlaylist, setCurrentPlaylist] = React.useState<PlaylistInterface>(null);
   const [playlistSearch, setPlaylistSearch] = React.useState<string>("");
   const [showPlaylistSearch, setShowPlaylistSearch] = React.useState<boolean>(false);
@@ -61,23 +61,14 @@ export const Sermons = () => {
 
   const getActionButtons = () => (
     <>
-      <Button
-        variant="outlined"
+      <HeaderPrimaryButton
         startIcon={<AddIcon />}
         endIcon={<ArrowDropDownIcon />}
         onClick={handleMenuClick}
         data-testid="add-sermon-button"
-        sx={{
-          color: "#FFF",
-          borderColor: "rgba(255,255,255,0.5)",
-          "&:hover": {
-            borderColor: "#FFF",
-            backgroundColor: "rgba(255,255,255,0.1)"
-          }
-        }}
       >
         {Locale.label("sermons.addSermon")}
-      </Button>
+      </HeaderPrimaryButton>
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -145,6 +136,7 @@ export const Sermons = () => {
       v.videoData = Locale.label("sermons.sermonEdit.channelIdPlaceholder");
       v.title = Locale.label("sermons.sermonEdit.currentLiveService");
     }
+    setCurrentPlaylist(null);
     setCurrentSermon(v);
     loadData();
   };
@@ -157,8 +149,6 @@ export const Sermons = () => {
     }
     return result;
   };
-
-  // ----- Playlist panel handlers -----
 
   const handlePlaylistUpdated = () => { setCurrentPlaylist(null); loadData(); };
 
@@ -174,6 +164,7 @@ export const Sermons = () => {
 
   const handleAddPlaylist = () => {
     const v: PlaylistInterface = { churchId: UserHelper.currentUserChurch.church.id, title: Locale.label("sermons.playlists.playlistEdit.newPlaylist"), description: "", publishDate: new Date(), thumbnail: "" };
+    setCurrentSermon(null);
     setCurrentPlaylist(v);
   };
 
@@ -183,10 +174,7 @@ export const Sermons = () => {
       rows.push(
         <TableRow
           key={video.id}
-          sx={{
-            "&:hover": { backgroundColor: "action.hover" },
-            transition: "background-color 0.2s ease"
-          }}
+          sx={hoverRowSx}
         >
           <TableCell>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -213,7 +201,7 @@ export const Sermons = () => {
             <AppIconButton
               label={Locale.label("common.edit")}
               icon={<EditIcon />}
-              onClick={() => { setCurrentSermon(video); }}
+              onClick={() => { setCurrentPlaylist(null); setCurrentSermon(video); }}
               data-testid={`edit-sermon-${video.id}`}
             />
           </TableCell>
@@ -253,16 +241,7 @@ export const Sermons = () => {
     else {
       return (
         <Table sx={{ minWidth: 650 }}>
-          <TableHead
-            sx={{
-              backgroundColor: "background.paper",
-              "& .MuiTableCell-root": {
-                borderBottom: "2px solid",
-                borderBottomColor: "divider",
-                fontWeight: 600
-              }
-            }}
-          >
+          <TableHead>
             <TableRow>
               <TableCell sx={{ width: "25%" }}>{Locale.label("sermons.playlist")}</TableCell>
               <TableCell sx={{ width: "45%" }}>{Locale.label("sermons.sermon")}</TableCell>
@@ -308,11 +287,7 @@ export const Sermons = () => {
     return displayed.map((playlist) => (
       <TableRow
         key={playlist.id}
-        sx={{
-          "&:hover": { backgroundColor: "action.hover" },
-          transition: "background-color 0.2s ease",
-          "&:last-child td": { borderBottom: 0 }
-        }}
+        sx={{ ...hoverRowSx, "&:last-child td": { borderBottom: 0 } }}
       >
         <TableCell>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -324,7 +299,7 @@ export const Sermons = () => {
             label={Locale.label("common.edit")}
             icon={<EditIcon />}
             tone="card"
-            onClick={() => setCurrentPlaylist(playlist)}
+            onClick={() => { setCurrentSermon(null); setCurrentPlaylist(playlist); }}
           />
         </TableCell>
       </TableRow>
@@ -352,32 +327,11 @@ export const Sermons = () => {
     </div>
   );
 
-  if (currentSermon !== null) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <SermonEdit currentSermon={currentSermon} updatedFunction={handleUpdated} />
-      </Box>
-    );
-  }
-
-  if (currentPlaylist !== null) {
-    return (
-      <Box sx={{ p: 3 }}>
-        {imageEditor}
-        <PlaylistEdit
-          currentPlaylist={currentPlaylist}
-          updatedFunction={handlePlaylistUpdated}
-          showPhotoEditor={showPhotoEditor}
-          updatedPhoto={(photoType === "playlist" && photoUrl) || null}
-        />
-      </Box>
-    );
-  }
-
   return (
     <>
       <Box sx={{ mb: 3 }}>
         <PageHeader
+          icon={<LiveTvIcon />}
           title={Locale.label("sermons.title")}
           subtitle={Locale.label("sermons.subtitle")}
         >
@@ -399,6 +353,11 @@ export const Sermons = () => {
       <Box sx={{ px: 3 }}>
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 8 }}>
+            {currentSermon !== null && (
+              <Box sx={{ mb: 3 }}>
+                <SermonEdit currentSermon={currentSermon} updatedFunction={handleUpdated} />
+              </Box>
+            )}
             <Card sx={{
               borderRadius: 2,
               border: "1px solid",
@@ -451,6 +410,17 @@ export const Sermons = () => {
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
+            {currentPlaylist !== null && (
+              <Box sx={{ mb: 3 }}>
+                {imageEditor}
+                <PlaylistEdit
+                  currentPlaylist={currentPlaylist}
+                  updatedFunction={handlePlaylistUpdated}
+                  showPhotoEditor={showPhotoEditor}
+                  updatedPhoto={(photoType === "playlist" && photoUrl) || null}
+                />
+              </Box>
+            )}
             <Card data-testid="playlists-panel" sx={{
               borderRadius: 2,
               border: "1px solid",

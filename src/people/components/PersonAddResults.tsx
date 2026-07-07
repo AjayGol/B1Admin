@@ -49,7 +49,7 @@ export const PersonAddResults: React.FC<Props> = (props: Props) => {
             </>
           )}
         </TableCell>
-        <TableCell>
+        <TableCell align="right" className="rowActions">
           <AppIconButton intent="add" label={Locale.label("common.add")} icon={<PersonAddIcon />} onClick={() => handleAdd(sr)} data-testid={`add-person-button-${sr.id || "new"}`} />
         </TableCell>
       </TableRow>

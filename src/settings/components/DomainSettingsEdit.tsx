@@ -192,10 +192,10 @@ export const DomainSettingsEdit: React.FC<Props> = (props) => {
 
       <Table size="small" sx={{ "& .MuiTableCell-root": { borderColor: "divider" } }}>
         <TableHead>
-          <TableRow sx={{ bgcolor: "action.hover" }}>
-            <TableCell sx={{ fontWeight: 600, py: 1.5 }}>{Locale.label("settings.domainSettingsEdit.domain")}</TableCell>
-            {sites.length > 0 && <TableCell sx={{ fontWeight: 600, py: 1.5 }}>{Locale.label("settings.domainSettingsEdit.site")}</TableCell>}
-            <TableCell sx={{ fontWeight: 600, py: 1.5, width: 50 }}></TableCell>
+          <TableRow>
+            <TableCell sx={{ py: 1.5 }}>{Locale.label("settings.domainSettingsEdit.domain")}</TableCell>
+            {sites.length > 0 && <TableCell sx={{ py: 1.5 }}>{Locale.label("settings.domainSettingsEdit.site")}</TableCell>}
+            <TableCell sx={{ py: 1.5, width: 50 }}></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

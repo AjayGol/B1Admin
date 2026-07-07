@@ -107,7 +107,7 @@ export const FormMembers: React.FC<Props> = memo((props) => {
               </Button>
             </Stack>
           </TableCell>
-          <TableCell>
+          <TableCell className="rowActions">
             {
               <Box
                 component="button"

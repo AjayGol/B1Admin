@@ -39,17 +39,37 @@ import {
   Assignment as CustomFieldIcon
 } from "@mui/icons-material";
 import { getMembershipStatusOptions } from "../helpers/MembershipStatusOptions";
+import { type PersonFieldInterface } from "../../helpers/Interfaces";
+
+// Maps a first-class custom field's fieldType to a filter config, mirroring the
+// form-question operator sets. Yes/No stores "True"/"False" (form-answer convention).
+const getPersonFieldConfig = (fieldType?: string, rawChoices?: string | null): { type: "text" | "select" | "number" | "date"; operators: string[]; options?: Array<{ value: string; label: string }> } => {
+  switch (fieldType) {
+    case "Whole Number":
+    case "Decimal":
+      return { type: "number", operators: ["equals", "greaterThan", "greaterThanEqual", "lessThan", "lessThanEqual"] };
+    case "Date":
+      return { type: "date", operators: ["equals", "greaterThan", "lessThan"] };
+    case "Yes/No":
+      return { type: "select", operators: ["equals"], options: [{ value: "True", label: Locale.label("common.yes") }, { value: "False", label: Locale.label("common.no") }] };
+    case "Multiple Choice": {
+      let choices: Array<{ value?: string; text?: string }> = [];
+      if (rawChoices) { try { const p = JSON.parse(rawChoices); if (Array.isArray(p)) choices = p; } catch { /* ignore */ } }
+      return { type: "select", operators: ["equals", "contains"], options: choices.map((c) => ({ value: c.value || c.text || "", label: c.text || "" })) };
+    }
+    default:
+      return { type: "text", operators: ["contains", "equals", "startsWith", "endsWith"] };
+  }
+};
 
 interface Props {
   updateSearchResults: (people: PersonInterface[]) => void;
   toggleFunction?: () => void;
   updatedFunction?: () => void;
   embedded?: boolean;
-  // When provided, seeds the search with a saved List's filter spec and re-runs it live.
+  // Seeds search with saved List filter spec.
   initialFilters?: Record<string, ActiveFilter>;
-  // Reports the current high-level filter spec (or null when cleared) so a parent can
-  // offer "Save as List". We report activeFilters — not the converted conditions — so
-  // saved lists re-resolve live each time they are opened.
+  // Reports activeFilters (not converted conditions) so saved lists re-resolve live on reopen.
   onReportCriteria?: (filters: Record<string, ActiveFilter> | null) => void;
 }
 
@@ -157,13 +177,12 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
   // Lazy-loaded options
   const [groups, setGroups] = useState<GroupInterface[]>([]);
   const [funds, setFunds] = useState<FundInterface[]>([]);
-  // Church-wide (Membership) campuses — used both for the "belongs to campus"
-  // condition and the "attended a campus" complex filter. Campuses are mastered
-  // in the membership module (the attendance copy is frozen/deprecated).
+  // Membership campuses mastered in membership module; attendance copy is deprecated.
   const membershipCampuses = useCampuses();
   const [services, setServices] = useState<ServiceInterface[]>([]);
   const [serviceTimes, setServiceTimes] = useState<ServiceTimeInterface[]>([]);
   const [customFieldQuestions, setCustomFieldQuestions] = useState<QuestionInterface[]>([]);
+  const [personFields, setPersonFields] = useState<PersonFieldInterface[]>([]);
   const [loadedCategories, setLoadedCategories] = useState<string[]>([]);
 
 
@@ -272,51 +291,53 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
         }
       ],
       activity: [],
-      customFields: customFieldQuestions
-        .filter((q) => q.fieldType !== "Heading" && q.fieldType !== "Payment")
-        .map((q) => {
-          // Map field types to appropriate input types and operators
-          let type: "text" | "select" | "number" | "date" = "text";
-          let operators: string[] = ["contains", "equals", "startsWith", "endsWith"];
-          let options: Array<{ value: string; label: string }> | undefined;
+      customFields: [
+        ...customFieldQuestions
+          .filter((q) => q.fieldType !== "Heading" && q.fieldType !== "Payment")
+          .map((q) => {
+            let type: "text" | "select" | "number" | "date" = "text";
+            let operators: string[] = ["contains", "equals", "startsWith", "endsWith"];
+            let options: Array<{ value: string; label: string }> | undefined;
 
-          switch (q.fieldType) {
-            case "Whole Number":
-            case "Decimal":
-              type = "number";
-              operators = ["equals", "greaterThan", "greaterThanEqual", "lessThan", "lessThanEqual"];
-              break;
-            case "Date":
-              type = "date";
-              operators = ["equals", "greaterThan", "lessThan"];
-              break;
-            case "Yes/No":
-              type = "select";
-              operators = ["equals"];
-              options = [
-                { value: "Yes", label: Locale.label("common.yes") },
-                { value: "No", label: Locale.label("common.no") }
-              ];
-              break;
-            case "Multiple Choice":
-            case "Checkbox":
-              type = "select";
-              operators = ["equals", "contains"];
-              options = q.choices?.map((c: any) => ({ value: c.value || c.text, label: c.text })) || [];
-              break;
-            default:
-              // Textbox, Text Area, Email, Phone Number - keep as text
-              break;
-          }
+            switch (q.fieldType) {
+              case "Whole Number":
+              case "Decimal":
+                type = "number";
+                operators = ["equals", "greaterThan", "greaterThanEqual", "lessThan", "lessThanEqual"];
+                break;
+              case "Date":
+                type = "date";
+                operators = ["equals", "greaterThan", "lessThan"];
+                break;
+              case "Yes/No":
+                type = "select";
+                operators = ["equals"];
+                options = [
+                  { value: "Yes", label: Locale.label("common.yes") },
+                  { value: "No", label: Locale.label("common.no") }
+                ];
+                break;
+              case "Multiple Choice":
+              case "Checkbox":
+                type = "select";
+                operators = ["equals", "contains"];
+                options = q.choices?.map((c: any) => ({ value: c.value || c.text, label: c.text })) || [];
+                break;
+              default:
+                // Textbox, Text Area, Email, Phone Number - keep as text
+                break;
+            }
 
-          return {
-            key: `customField_${q.id}`,
-            label: q.title,
-            type,
-            operators,
-            options
-          };
-        })
+            return {
+              key: `customField_${q.id}`,
+              label: q.title,
+              type,
+              operators,
+              options
+            };
+          }),
+        ...personFields.map((f) => ({ key: `personField_${f.id}`, label: f.name || "", ...getPersonFieldConfig(f.fieldType, f.choices) }))
+      ]
     };
 
     // Add group membership if permissions allow
@@ -351,7 +372,7 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
     }
 
     return categories;
-  }, [groups, membershipCampuses, customFieldQuestions]);
+  }, [groups, membershipCampuses, customFieldQuestions, personFields]);
 
   const loadCategoryData = useCallback(async (category: string) => {
     if (loadedCategories.includes(category)) return;
@@ -379,7 +400,10 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
     }
 
     if (category === "customFields") {
-      const forms = await ApiHelper.get("/forms?contentType=person", "MembershipApi");
+      const [forms, fields] = await Promise.all([
+        ApiHelper.get("/forms?contentType=person", "MembershipApi"),
+        ApiHelper.get("/personfields", "MembershipApi").catch(() => [])
+      ]);
       const personForms = forms.filter((f: any) => f.contentType === "person");
       const allQuestions: QuestionInterface[] = [];
       for (const form of personForms) {
@@ -387,6 +411,7 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
         allQuestions.push(...questions);
       }
       setCustomFieldQuestions(allQuestions);
+      setPersonFields(fields || []);
     }
 
     setLoadedCategories((prev) => [...prev, category]);
@@ -455,8 +480,7 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
     }
   };
 
-  // Auto-search when filters change, and report the active spec so the parent can
-  // offer "Save as List" (or clear the offer when no filters remain).
+  // Auto-search on filter change; report spec for "Save as List" offer.
   useEffect(() => {
     if (Object.keys(activeFilters).length > 0) {
       props.onReportCriteria?.(activeFilters);
@@ -548,7 +572,12 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
           result.push({ field: "id", operator: "in", value: attendeeIds.join(",") });
           break;
         default:
-          // Handle custom field filters
+          // First-class custom fields are resolved server-side by the "field" provider.
+          if (filter.field.startsWith("personField_")) {
+            result.push({ field: filter.field, operator: filter.operator, value: filter.value });
+            break;
+          }
+          // Handle form-question-backed custom field filters (client-side, legacy path)
           if (filter.field.startsWith("customField_")) {
             const questionId = filter.field.replace("customField_", "");
             const question = customFieldQuestions.find(q => q.id === questionId);
@@ -781,15 +810,12 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
     loadCategoryData("demographics");
   }, []);
 
-  // Seed the search from a saved List. Only the option-backed filter keys need their
-  // category preloaded so convertConditions() can resolve them; derive that set from
-  // the seeded keys (rather than loading all categories) and let the auto-search
-  // effect re-run the query live against current data.
+  // Seed from saved List: preload only option-backed categories; let auto-search re-run live.
   useEffect(() => {
     if (!props.initialFilters) return;
     const categories = new Set<string>();
     Object.keys(props.initialFilters).forEach((key) => {
-      if (key.startsWith("customField_")) categories.add("customFields");
+      if (key.startsWith("customField_") || key.startsWith("personField_")) categories.add("customFields");
       else if (key === "groupMember") categories.add("membership");
       else if (key === "memberDonations" || key === "memberAttendance") categories.add("activity");
     });
@@ -808,7 +834,6 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
   const renderContent = () => (
     <>
 
-      {/* Active Filters Summary */}
       {Object.keys(activeFilters).length > 0 && (
         <Paper elevation={0} sx={styles.activeFiltersPaper}>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
@@ -848,7 +873,6 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
 
       <Box>
         {Object.entries(filterCategories).map(([categoryKey, fields]) => {
-          // Skip empty categories, except customFields which loads dynamically
           if (fields.length === 0 && categoryKey !== "customFields") return null;
           const activeCount = getActiveFilterCount(categoryKey);
 
@@ -1105,7 +1129,6 @@ export const AdvancedPeopleSearch = memo(function AdvancedPeopleSearch(props: Pr
         {renderContent()}
       </FormCard>
 
-      {/* Complex Filter Dialog */}
       <Dialog open={complexFilterDialog.open} onClose={() => setComplexFilterDialog({ open: false, field: null })} maxWidth="sm" fullWidth>
         <DialogTitle>
           {complexFilterDialog.field === "memberDonations" ? Locale.label("people.editCondition.memDon") : Locale.label("people.editCondition.memAtt")}

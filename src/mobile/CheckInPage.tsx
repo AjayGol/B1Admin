@@ -2,11 +2,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Icon, Stack, Switch, TextField, Typography } from "@mui/material";
 import { ApiHelper, Locale, PageHeader, UniqueIdHelper, UserHelper, Permissions } from "@churchapps/apphelper";
+import { HowToReg as CheckInIcon } from "@mui/icons-material";
 import type { GenericSettingInterface } from "@churchapps/helpers";
 import { QRCodeCanvas } from "qrcode.react";
-import { PermissionDenied } from "../components";
 import { FormCard } from "../components/ui";
 import { EnvironmentHelper } from "../helpers";
+import { useRequirePermission } from "../hooks";
 import { KioskThemeEdit } from "./KioskThemeEdit";
 
 export const CheckInPage: React.FC = () => {
@@ -19,8 +20,7 @@ export const CheckInPage: React.FC = () => {
 
   const churchId = UserHelper.currentUserChurch?.church?.id;
   const subDomain = UserHelper.currentUserChurch?.church?.subDomain || "";
-  // The kiosk QR points guests at the public self-registration page; serviceId from the
-  // kiosk is ignored there, so a plain per-church link is enough for flyers/signage.
+  // Plain per-church link suffices for signage (serviceId ignored at guest-register endpoint)
   const registrationUrl = subDomain ? `${EnvironmentHelper.B1Url.replace("{subdomain}", subDomain)}/guest-register` : "";
 
   const loadData = React.useCallback(async () => {
@@ -35,7 +35,8 @@ export const CheckInPage: React.FC = () => {
 
   React.useEffect(() => { loadData(); }, [loadData]);
 
-  if (!UserHelper.checkAccess(Permissions.membershipApi.settings.edit)) return <PermissionDenied permissions={[Permissions.membershipApi.settings.edit]} />;
+  const denied = useRequirePermission(Permissions.membershipApi.settings.edit);
+  if (denied) return denied;
 
   const handleSave = async () => {
     setSaving(true);
@@ -70,7 +71,7 @@ export const CheckInPage: React.FC = () => {
 
   return (
     <>
-      <PageHeader title={Locale.label("mobile.checkInPage.title")} subtitle={Locale.label("mobile.checkInPage.subtitle")} />
+      <PageHeader icon={<CheckInIcon />} title={Locale.label("mobile.checkInPage.title")} subtitle={Locale.label("mobile.checkInPage.subtitle")} />
       <Box sx={{ p: 3 }}>
         <FormCard title={Locale.label("mobile.checkInPage.qrGuestRegistration")} icon="qr_code_2" onSave={handleSave} isSubmitting={saving}>
           <Typography variant="body2" color="text.secondary">{Locale.label("mobile.checkInPage.qrTooltip")}</Typography>

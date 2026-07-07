@@ -340,9 +340,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@churchapps/apphelper@npm:^0.19.0":
-  version: 0.19.0
-  resolution: "@churchapps/apphelper@npm:0.19.0"
+"@churchapps/apphelper@npm:^0.22.0":
+  version: 0.22.0
+  resolution: "@churchapps/apphelper@npm:0.22.0"
   dependencies:
     "@emotion/cache": "npm:^11.14.0"
     "@emotion/react": "npm:^11.14.0"
@@ -403,20 +403,20 @@ __metadata:
       optional: true
     react-google-recaptcha:
       optional: true
-  checksum: 10c0/979e63637ee8e6233b0c001b2cfd7ef3d327f48aaadc45427be962f72538d41bc16e2019cd51f0fc02fc5d565b244c2ddd96bb5b5903768b410323aacb1789fc
+  checksum: 10c0/24bb651d845e64f98f1a63d0d03b5cfc24c870a211a1b3676930365784a70b987da4c9ef9b0dc0d66561741393df34149be585bcda5821ea9c554c595a3dfc6e
   languageName: node
   linkType: hard
 
-"@churchapps/content-providers@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@churchapps/content-providers@npm:0.5.0"
-  checksum: 10c0/44b01e632e36361515650de340dd20726b8e1f2fc1f4dc1bcd7bfb8004e09379de563ab63b1024b9a9fa02d1c0ce2eaa35afb77ef276c0ee76f3bd8b62a75da9
+"@churchapps/content-providers@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@churchapps/content-providers@npm:0.5.1"
+  checksum: 10c0/00e97adeb25d2fffae5ad18e5dc52a50a8f30c988ef336edb53fec48f21d7a80a0861b3ec0956e58e148a85cef9e7c5854fb59245c194e19b946f1e31a69023f
   languageName: node
   linkType: hard
 
-"@churchapps/helpers@npm:^1.9.2":
-  version: 1.9.2
-  resolution: "@churchapps/helpers@npm:1.9.2"
+"@churchapps/helpers@npm:^1.10.1":
+  version: 1.10.1
+  resolution: "@churchapps/helpers@npm:1.10.1"
   dependencies:
     dayjs: "npm:^1.11.20"
   peerDependencies:
@@ -424,7 +424,7 @@ __metadata:
   peerDependenciesMeta:
     rrule:
       optional: true
-  checksum: 10c0/a3f47d662ccb5b11259c1dde2f87a4ad253835d606d3714df1e7b3f878f08489c952353ce020669047567a15d9ccd224a3a82eae0ef862ee0fb72dfd8ec84e59
+  checksum: 10c0/d2abb501fd8100231bd5e2142a4029e0189565958eb160a7b8c1ef9670599ed80660cb33a6a89fdd05003086843a76484ec14e9c81ad50ab3d76a31ac579d026
   languageName: node
   linkType: hard
 
@@ -2009,23 +2009,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/react-stripe-js@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "@stripe/react-stripe-js@npm:3.10.0"
+"@stripe/react-stripe-js@npm:^6.6.0":
+  version: 6.6.0
+  resolution: "@stripe/react-stripe-js@npm:6.6.0"
   dependencies:
     prop-types: "npm:^15.7.2"
   peerDependencies:
-    "@stripe/stripe-js": ">=1.44.1 <8.0.0"
+    "@stripe/stripe-js": ">=9.5.0 <10.0.0"
     react: ">=16.8.0 <20.0.0"
     react-dom: ">=16.8.0 <20.0.0"
-  checksum: 10c0/d7629436629571883e1ab44b1fdbdd5bc002c9020400bbad212caccddad5eaedefbdb171e970bd34276b72d9c23deac86d1e0898db11961de2a7e8951bf9711a
+  checksum: 10c0/fb093073d19efb15c18cd4b4007b886bfff4bbee17b270fabb86c82e1dad0377ebb15d58bab37c41c3ea01599fc0a5117747611226ac232e1350ebbfeecb17a7
   languageName: node
   linkType: hard
 
-"@stripe/stripe-js@npm:^7.9.0":
-  version: 7.9.0
-  resolution: "@stripe/stripe-js@npm:7.9.0"
-  checksum: 10c0/ca7dd386df944ed05be115422dde9f5a2b04846e508f482d996db273d95bf8ac8ab5078e58480534b8bc6e29c26c67e16c7e75e478c3112813f971ec6aba49f8
+"@stripe/stripe-js@npm:^9.8.0":
+  version: 9.8.0
+  resolution: "@stripe/stripe-js@npm:9.8.0"
+  checksum: 10c0/90c473b938800a3c7f5794e052b22b2a277e1e61a1b54353a8117c3fd630e42cba2530d42ca12a9e06b674cd3ad5d74adf815b54763dc14726aeb05056592031
   languageName: node
   linkType: hard
 
@@ -2578,9 +2578,9 @@ __metadata:
   resolution: "b1admin@workspace:."
   dependencies:
     "@babel/core": "npm:^8.0.1"
-    "@churchapps/apphelper": "npm:^0.19.0"
-    "@churchapps/content-providers": "npm:^0.5.0"
-    "@churchapps/helpers": "npm:^1.9.2"
+    "@churchapps/apphelper": "npm:^0.22.0"
+    "@churchapps/content-providers": "npm:^0.5.1"
+    "@churchapps/helpers": "npm:^1.10.1"
     "@eslint/js": "npm:^10.0.1"
     "@mui/icons-material": "npm:^7.3.11"
     "@mui/material": "npm:^7.3.11"
@@ -2589,8 +2589,8 @@ __metadata:
     "@react-hook/window-size": "npm:^3.1.1"
     "@rolldown/plugin-babel": "npm:^0.2.3"
     "@sentry/react": "npm:^10.52.0"
-    "@stripe/react-stripe-js": "npm:^3.10.0"
-    "@stripe/stripe-js": "npm:^7.9.0"
+    "@stripe/react-stripe-js": "npm:^6.6.0"
+    "@stripe/stripe-js": "npm:^9.8.0"
     "@tanstack/react-query": "npm:^5.100.9"
     "@tanstack/react-query-devtools": "npm:^5.100.9"
     "@types/babel__core": "npm:^7.20.5"

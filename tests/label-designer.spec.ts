@@ -2,11 +2,9 @@ import type { Page } from "@playwright/test";
 import { loggedInTest as test, expect } from "./helpers/test-fixtures";
 import { login } from "./helpers/auth";
 import { STORAGE_STATE_PATH } from "./global-setup";
+import { confirmDelete } from "./helpers/fixtures";
 
-// Check-in label designer (roadmap 3.3): starter template creation, block
-// palette/properties editing on the canvas, save via POST array, set-default
-// and delete from the template list.
-
+// Check-in label designer (roadmap 3.3): template creation, editing, saving, and deletion.
 const TEMPLATE = "Zacchaeus Nametag";
 
 const labelTemplatesPost = (page: Page) => page.waitForResponse((r) => r.url().includes("/labeltemplates") && r.request().method() === "POST" && r.status() === 200);
@@ -69,8 +67,8 @@ test.describe.serial("Check-in label designer", () => {
 
   test("deletes the template", async () => {
     const row = page.locator('[data-testid="labels-table"] tbody tr').filter({ hasText: TEMPLATE });
-    page.once("dialog", async (d) => { await d.accept(); });
     await row.locator('[data-testid^="delete-label-"]').click();
+    await confirmDelete(page);
     await expect(page.locator('[data-testid="labels-table"] tbody tr').filter({ hasText: TEMPLATE })).toHaveCount(0, { timeout: 15000 });
   });
 });

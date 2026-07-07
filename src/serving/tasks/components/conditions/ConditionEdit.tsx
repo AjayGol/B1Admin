@@ -7,6 +7,7 @@ import { ConditionDate } from "./ConditionDate";
 import { ConditionSelect } from "./ConditionSelect";
 import { ConditionText } from "./ConditionText";
 import { Rule as ConditionIcon, Save as SaveIcon, Cancel as CancelIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { useConfirmDelete } from "../../../../hooks";
 
 interface Props {
   condition: ConditionInterface;
@@ -17,6 +18,7 @@ interface Props {
 export const ConditionEdit = (props: Props) => {
   const [condition, setCondition] = React.useState<ConditionInterface>(null);
   const [errors, setErrors] = React.useState([]);
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
   const init = () => {
     setCondition(props.condition);
@@ -71,7 +73,7 @@ export const ConditionEdit = (props: Props) => {
   };
 
   const handleDelete = async () => {
-    const conf = window.confirm(Locale.label("tasks.conditionEdit.confirmMsg"));
+    const conf = await confirm(Locale.label("tasks.conditionEdit.confirmMsg"));
     if (!conf) return;
     await ApiHelper.delete("/conditions/" + condition.id, "DoingApi");
     props.onSave(null);
@@ -88,8 +90,8 @@ export const ConditionEdit = (props: Props) => {
         "&:hover": { boxShadow: 2 }
       }}>
       <CardContent>
+        {ConfirmDialogElement}
         <Stack spacing={3}>
-          {/* Header */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <ConditionIcon sx={{ color: "primary.main" }} />
@@ -99,10 +101,8 @@ export const ConditionEdit = (props: Props) => {
             </Stack>
           </Box>
 
-          {/* Error Messages */}
           {errors.length > 0 && <ErrorMessages errors={errors} />}
 
-          {/* Form Fields */}
           <Stack spacing={2}>
             <FormControl fullWidth variant="outlined">
               <InputLabel>{Locale.label("tasks.conditionEdit.conType")}</InputLabel>
@@ -150,7 +150,6 @@ export const ConditionEdit = (props: Props) => {
 
             <Divider />
 
-            {/* Condition Details */}
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, color: "text.secondary" }}>
                 {Locale.label("tasks.conditionEdit.conDetails")}
@@ -159,7 +158,6 @@ export const ConditionEdit = (props: Props) => {
             </Box>
           </Stack>
 
-          {/* Action Buttons */}
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             {condition?.id && (
               <Button

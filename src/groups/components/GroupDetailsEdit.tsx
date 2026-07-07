@@ -3,9 +3,10 @@ import { useForm, Controller, useFormState } from "react-hook-form";
 import { CategorySelect, ServiceTimesEdit } from ".";
 import { ApiHelper, ErrorMessages, Locale } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
+import { useConfirmDelete, useErrorSummary } from "../../hooks";
 import { GalleryModal } from "../../components/gallery";
 import { Navigate } from "react-router-dom";
-import { Button, FormControl, Grid, InputLabel, MenuItem, Select, Stack, TextField, Box, Typography } from "@mui/material";
+import { Button, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, Stack, TextField, Box, Typography } from "@mui/material";
 import { PhotoCamera as PhotoCameraIcon } from "@mui/icons-material";
 import { type GroupInterface } from "@churchapps/helpers";
 import { useMountedState } from "@churchapps/apphelper";
@@ -46,15 +47,24 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
       campusId: "",
       joinPolicy: "open",
       publicRoster: "false",
+      confidential: "false",
       minYears: "",
       minMonths: "",
       maxYears: "",
       maxMonths: "",
       minGrade: "",
-      maxGrade: ""
+      maxGrade: "",
+      capacity: "",
+      guestCapacity: "",
+      checkinClosed: "false",
+      volunteerRatio: "",
+      minVolunteers: ""
     }
   });
 
+  const numToField = (n?: number) => (n == null ? "" : String(n));
+  // null (not undefined) so clearing a numeric field survives JSON and reaches the update SQL.
+  const fieldToNum = (v: string): number | null => ((v ?? "") === "" ? null : Number(v));
   const monthsToParts = (m?: number) => (m == null ? { years: "", months: "" } : { years: String(Math.floor(m / 12)), months: String(m % 12) });
   const partsToMonths = (years: string, months: string): number | null => {
     // null (not undefined) so clearing a limit survives JSON and reaches the update SQL.
@@ -64,13 +74,8 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
 
   const { errors } = useFormState({ control });
   const e = errors as any;
-
-  const summaryErrors: string[] = React.useMemo(() => {
-    const errs: string[] = [];
-    if (e.categoryName?.message) errs.push(e.categoryName.message);
-    if (e.name?.message) errs.push(e.name.message);
-    return errs;
-  }, [errors]);
+  const summaryErrors = useErrorSummary(errors, ["categoryName", "name"]);
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
   React.useEffect(() => {
     if (isMounted() && props.group) {
@@ -87,12 +92,18 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
         campusId: props.group.campusId || "",
         joinPolicy: props.group.joinPolicy || "open",
         publicRoster: (props.group as AnyRecord).publicRoster?.toString() || "false",
+        confidential: (props.group as AnyRecord).confidential?.toString() || "false",
         minYears: monthsToParts(props.group.minAgeMonths).years,
         minMonths: monthsToParts(props.group.minAgeMonths).months,
         maxYears: monthsToParts(props.group.maxAgeMonths).years,
         maxMonths: monthsToParts(props.group.maxAgeMonths).months,
         minGrade: props.group.minGrade || "",
-        maxGrade: props.group.maxGrade || ""
+        maxGrade: props.group.maxGrade || "",
+        capacity: numToField((props.group as AnyRecord).capacity),
+        guestCapacity: numToField((props.group as AnyRecord).guestCapacity),
+        checkinClosed: (props.group as AnyRecord).checkinClosed ? "true" : "false",
+        volunteerRatio: numToField((props.group as AnyRecord).volunteerRatio),
+        minVolunteers: numToField((props.group as AnyRecord).minVolunteers)
       });
       setAbout(props.group.about || "");
       setPhotoUrl(props.group.photoUrl || "");
@@ -127,19 +138,26 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
     // Cast until the published GroupInterface includes attendanceReminders.
     (group as AnyRecord).attendanceReminders = values.attendanceReminders === "true";
     (group as AnyRecord).publicRoster = values.publicRoster === "true";
+    // Explicit boolean (never undefined) so the un-set path persists — Kysely drops undefined.
+    (group as AnyRecord).confidential = values.confidential === "true";
+    (group as AnyRecord).capacity = fieldToNum(values.capacity);
+    (group as AnyRecord).guestCapacity = fieldToNum(values.guestCapacity);
+    (group as AnyRecord).checkinClosed = values.checkinClosed === "true";
+    (group as AnyRecord).volunteerRatio = fieldToNum(values.volunteerRatio);
+    (group as AnyRecord).minVolunteers = fieldToNum(values.minVolunteers);
     ApiHelper.post("/groups", [group], "MembershipApi").then(() => {
       props.updatedFunction();
     });
   };
 
-  const handleDelete = () => {
-    if (window.confirm(Locale.label("groups.groupDetailsEdit.confirmMsg"))) {
+  const handleDelete = async () => {
+    if (await confirm(Locale.label("groups.groupDetailsEdit.confirmMsg"))) {
       ApiHelper.delete("/groups/" + props.group.id.toString(), "MembershipApi").then(() => setRedirect("/groups"));
     }
   };
 
-  const handleArchive = () => {
-    if (window.confirm(Locale.label("groups.groupDetailsEdit.confirmArchive"))) {
+  const handleArchive = async () => {
+    if (await confirm(Locale.label("groups.groupDetailsEdit.confirmArchive"), { destructive: false, confirmLabel: Locale.label("common.confirm", "Confirm") })) {
       const group: GroupInterface = { ...props.group, archived: true };
       ApiHelper.post("/groups", [group], "MembershipApi").then(() => setRedirect("/groups"));
     }
@@ -226,6 +244,7 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
 
   return (
     <>
+      {ConfirmDialogElement}
       {galleryModal}
       <FormCard id="groupDetailsBox" title={Locale.label("groups.groupDetailsEdit.groupDet")} icon="group" onSave={handleSubmit(onValid)} onCancel={handleCancel} onDelete={handleDelete} help="docs/b1-admin/groups/"
         headerActions={
@@ -342,6 +361,18 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
                   )} />
                 </FormControl>
               </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel>{Locale.label("groups.groupDetailsEdit.confidential")}</InputLabel>
+                  <Controller name="confidential" control={control} render={({ field }) => (
+                    <Select {...field} value={field.value ?? "false"} label={Locale.label("groups.groupDetailsEdit.confidential")} data-testid="confidential-select">
+                      <MenuItem value="false">{Locale.label("common.no")}</MenuItem>
+                      <MenuItem value="true">{Locale.label("common.yes")}</MenuItem>
+                    </Select>
+                  )} />
+                  <FormHelperText>{Locale.label("groups.groupDetailsEdit.confidentialHelp")}</FormHelperText>
+                </FormControl>
+              </Grid>
             </Grid>
             <Box sx={{ backgroundColor: "primary.light", color: "primary.contrastText", p: 1.25, my: 2.5 }}>
               <b>{Locale.label("groups.groupDetailsEdit.ageGrade")}</b>
@@ -379,6 +410,34 @@ export const GroupDetailsEdit: React.FC<Props> = (props) => {
                     <Select {...field} value={field.value ?? ""} id="maxGrade" labelId="maxGrade-label" label={Locale.label("groups.groupDetailsEdit.maxGrade")} data-testid="max-grade-select">
                       <MenuItem value="">{Locale.label("groups.groupDetailsEdit.noLimit")}</MenuItem>
                       {GRADE_OPTIONS.map((g) => <MenuItem key={g} value={g}>{g}</MenuItem>)}
+                    </Select>
+                  )} />
+                </FormControl>
+              </Grid>
+            </Grid>
+            <Box sx={{ backgroundColor: "primary.light", color: "primary.contrastText", p: 1.25, my: 2.5 }}>
+              <b>{Locale.label("groups.groupDetailsEdit.checkinCapacity")}</b>
+            </Box>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField fullWidth type="number" label={Locale.label("groups.groupDetailsEdit.capacity")} slotProps={{ htmlInput: { min: 0 } }} data-testid="capacity-input" {...register("capacity")} />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField fullWidth type="number" label={Locale.label("groups.groupDetailsEdit.guestCapacity")} slotProps={{ htmlInput: { min: 0 } }} data-testid="guest-capacity-input" {...register("guestCapacity")} />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField fullWidth type="number" label={Locale.label("groups.groupDetailsEdit.volunteerRatio")} slotProps={{ htmlInput: { min: 0 } }} data-testid="volunteer-ratio-input" {...register("volunteerRatio")} />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField fullWidth type="number" label={Locale.label("groups.groupDetailsEdit.minVolunteers")} slotProps={{ htmlInput: { min: 0 } }} data-testid="min-volunteers-input" {...register("minVolunteers")} />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel>{Locale.label("groups.groupDetailsEdit.checkinClosed")}</InputLabel>
+                  <Controller name="checkinClosed" control={control} render={({ field }) => (
+                    <Select {...field} value={field.value ?? "false"} label={Locale.label("groups.groupDetailsEdit.checkinClosed")} data-testid="checkin-closed-select">
+                      <MenuItem value="false">{Locale.label("common.no")}</MenuItem>
+                      <MenuItem value="true">{Locale.label("common.yes")}</MenuItem>
                     </Select>
                   )} />
                 </FormControl>

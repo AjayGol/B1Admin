@@ -6,10 +6,11 @@ import { UserHelper, Permissions, Locale } from "@churchapps/apphelper";
 interface Props {
   selectedTab: string;
   onTabChange: (tab: string) => void;
+  onHeader?: boolean;
 }
 
 export const AttendanceNavigation = memo((props: Props) => {
-  const { selectedTab, onTabChange } = props;
+  const { selectedTab, onTabChange, onHeader } = props;
 
   const tabs: NavigationTab[] = useMemo(() => {
     const tabsList = [];
@@ -23,5 +24,5 @@ export const AttendanceNavigation = memo((props: Props) => {
     return tabsList;
   }, []);
 
-  return <NavigationTabs selectedTab={selectedTab} onTabChange={onTabChange} tabs={tabs} />;
+  return <NavigationTabs selectedTab={selectedTab} onTabChange={onTabChange} tabs={tabs} onHeader={onHeader} />;
 });

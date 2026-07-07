@@ -5,14 +5,15 @@ import { ApiHelper, Locale } from "@churchapps/apphelper";
 import { PeopleSearchResults, PeopleColumns } from "./components";
 import { Grid, Box, Typography, Card, Stack, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, CircularProgress, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from "@mui/material";
 import { B1AdminPersonHelper, EnvironmentHelper } from "../helpers";
+import { CreatePerson } from "../components";
 import { PeopleSearch } from "./components/PeopleSearch";
 import { SavedLists, type ListConditions, type ListInterface } from "./components/SavedLists";
 import { buildRulesFromCriteria } from "./components/listRules";
 import { type ActiveFilter } from "./components/AdvancedPeopleSearch";
-import { People as PeopleIcon, PersonAdd as PersonAddIcon, Print as PrintIcon, BookmarkAdd as SaveListIcon, BarChart as BarChartIcon } from "@mui/icons-material";
+import { People as PeopleIcon, PersonAdd as PersonAddIcon, Print as PrintIcon, BookmarkAdd as SaveListIcon, BarChart as BarChartIcon, Close as CloseIcon } from "@mui/icons-material";
 import { PageHeader } from "@churchapps/apphelper";
 import { AppIconButton } from "../components/ui/AppIconButton";
-import { CountChip, ExportButton } from "../components/ui";
+import { CountChip, ExportButton, HeaderPrimaryButton, HeaderSecondaryButton } from "../components/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AISearch } from "./components/AISearch";
 import { PeopleBulkActions } from "./components/bulk/PeopleBulkActions";
@@ -81,8 +82,7 @@ export const PeoplePage = memo(() => {
   const [selectedColumns, setSelectedColumns] = React.useState<string[]>(["photo", "displayName"]);
   const [isSearchPerformed, setIsSearchPerformed] = React.useState(false);
   const [selectedListFilters, setSelectedListFilters] = React.useState<Record<string, ActiveFilter> | undefined>(undefined);
-  // The query behind the current results (advanced filter spec or simple/AI conditions),
-  // so it can be saved as a List. Null when results aren't from a search.
+  // Query behind current results; null when not from a search.
   const [saveableCriteria, setSaveableCriteria] = React.useState<ListConditions | null>(null);
   const emptySaveListDialog = { open: false, name: "", category: "", scope: "org", match: "all" as "all" | "any", householdInclusion: "none", autoRefresh: false, notifyOnChange: false, saving: false };
   const [saveListDialog, setSaveListDialog] = React.useState(emptySaveListDialog);
@@ -102,6 +102,8 @@ export const PeoplePage = memo(() => {
   });
   const canEdit = UserHelper.checkAccess(Permissions.membershipApi.people.edit);
   const currentPersonId = UserHelper.currentUserChurch?.person?.id || "";
+  const [showCreatePerson, setShowCreatePerson] = React.useState(false);
+  const createPersonRef = React.useRef<HTMLDivElement>(null);
 
   const peopleQuery = useQuery<PersonInterface[]>({
     queryKey: [loadAll ? "/people/list" : `/people/list?pageSize=${INITIAL_PAGE_SIZE}`, "MembershipApi"],
@@ -111,6 +113,20 @@ export const PeoplePage = memo(() => {
   const refetch = useCallback(() => {
     peopleQuery.refetch();
   }, [peopleQuery]);
+
+  const handlePersonCreated = useCallback((person: PersonInterface) => {
+    setShowCreatePerson(false);
+    navigate("/people/" + person.id);
+  }, [navigate]);
+
+  React.useEffect(() => {
+    if (!showCreatePerson) return;
+    const timer = setTimeout(() => {
+      createPersonRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      (createPersonRef.current?.querySelector("input") as HTMLElement | null)?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [showCreatePerson]);
 
   const columns = [
     { key: "photo", label: Locale.label("people.peoplePage.photo"), shortName: "" },
@@ -180,9 +196,7 @@ export const PeoplePage = memo(() => {
   const handleSelectList = useCallback((list: ListInterface) => {
     const conditions = list.conditions;
     setIsSearchPerformed(true);
-    // Match-any / household-inclusion semantics only exist server-side; those lists
-    // evaluate via the rules engine. Plain all-match lists keep the client flow so
-    // the advanced panel stays seeded and editable.
+    // Server-eval for match-any and household-inclusion; client-eval for plain all-match.
     const needsServerEval = !!list.id && !!list.rules && (list.rules.match !== "all" || (!!list.householdInclusion && list.householdInclusion !== "none"));
     if (needsServerEval) {
       setSaveableCriteria(null);
@@ -197,7 +211,7 @@ export const PeoplePage = memo(() => {
         setSearchResults(data.map((d: PersonInterface) => B1AdminPersonHelper.getExpandedPersonObject(d)));
       });
     } else {
-      // Advanced list: seed the advanced panel (new ref each time so re-selecting re-seeds).
+      // New ref on re-select to re-seed advanced panel.
       setSaveableCriteria(conditions);
       setSelectedListFilters({ ...conditions });
     }
@@ -216,8 +230,7 @@ export const PeoplePage = memo(() => {
     if (!saveableCriteria || !saveListDialog.name.trim()) return;
     setSaveListDialog((d) => ({ ...d, saving: true }));
     try {
-      // The rules tree is the canonical server-evaluable query; the conditions blob is
-      // kept alongside so the advanced panel can be re-seeded for editing.
+      // Rules tree is canonical server query; conditions blob allows re-seeding for edit.
       const rules = buildRulesFromCriteria(saveableCriteria, saveListDialog.match);
       await ApiHelper.post("/lists", [
         {
@@ -350,6 +363,7 @@ export const PeoplePage = memo(() => {
   return (
     <>
       <PageHeader
+        icon={<PeopleIcon />}
         title={Locale.label("people.peoplePage.searchPpl")}
         subtitle={
           searchResults
@@ -360,48 +374,13 @@ export const PeoplePage = memo(() => {
               ? Locale.label("people.peoplePage.loading")
               : Locale.label("people.peoplePage.noPeopleFound")
         }>
-        <Button
-          variant="outlined"
-          sx={{
-            color: "#FFF",
-            borderColor: "rgba(255,255,255,0.5)",
-            mr: 1,
-            "&:hover": {
-              borderColor: "#FFF",
-              backgroundColor: "rgba(255,255,255,0.1)"
-            }
-          }}
-          startIcon={<BarChartIcon />}
-          onClick={() => navigate("/people/demographics")}
-          data-testid="demographics-button">
+        <HeaderSecondaryButton startIcon={<BarChartIcon />} onClick={() => navigate("/people/demographics")} data-testid="demographics-button">
           {Locale.label("people.demographics.title")}
-        </Button>
+        </HeaderSecondaryButton>
         {canEdit && (
-          <Button
-            variant="outlined"
-            sx={{
-              color: "#FFF",
-              borderColor: "rgba(255,255,255,0.5)",
-              "&:hover": {
-                borderColor: "#FFF",
-                backgroundColor: "rgba(255,255,255,0.1)"
-              }
-            }}
-            startIcon={<PersonAddIcon />}
-            onClick={() => {
-              const createPersonSection = document.querySelector('[data-cy="createPerson"]') || document.querySelector(".create-person") || document.getElementById("createPersonForm");
-              if (createPersonSection) {
-                createPersonSection.scrollIntoView({ behavior: "smooth", block: "start" });
-                setTimeout(() => {
-                  const firstInput = createPersonSection.querySelector("input") as HTMLElement;
-                  if (firstInput) firstInput.focus();
-                }, 500);
-              } else {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-              }
-            }}>
+          <HeaderPrimaryButton startIcon={<PersonAddIcon />} onClick={() => setShowCreatePerson(true)} data-testid="add-person-button">
             {Locale.label("people.peoplePage.addPerson")}
-          </Button>
+          </HeaderPrimaryButton>
         )}
       </PageHeader>
 
@@ -409,6 +388,22 @@ export const PeoplePage = memo(() => {
       <Box sx={{ p: 3 }}>
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 3 }}>
+            {showCreatePerson && (
+              <Card ref={createPersonRef} sx={{ mb: 3 }} data-testid="create-person-panel">
+                <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <PersonAddIcon sx={{ color: "primary.main", fontSize: 20 }} />
+                      <Typography variant="h6">{Locale.label("people.peoplePage.addPerson")}</Typography>
+                    </Stack>
+                    <AppIconButton label={Locale.label("common.cancel")} icon={<CloseIcon />} tone="card" onClick={() => setShowCreatePerson(false)} data-testid="cancel-create-person" />
+                  </Stack>
+                </Box>
+                <Box sx={{ p: 2 }}>
+                  <CreatePerson onCreate={handlePersonCreated} />
+                </Box>
+              </Card>
+            )}
             <PeopleSearch
               updateSearchResults={(people) => {
                 setSearchResults(people);

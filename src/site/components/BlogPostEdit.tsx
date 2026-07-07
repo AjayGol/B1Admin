@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Box, Button, Dialog, FormControlLabel, Grid, Icon, Stack, Switch, TextField, Typography } from "@mui/material";
 import { ApiHelper, UserHelper, Locale } from "@churchapps/apphelper";
+import { MarkdownEditor } from "@churchapps/apphelper/markdown";
 import { Permissions } from "@churchapps/helpers";
 import { FormCard } from "../../components/ui";
 import { GalleryModal } from "../../components/gallery";
@@ -54,21 +55,9 @@ export function BlogPostEdit(props: Props) {
     setIsSubmitting(true);
     try {
       const slug = kebab(post.slug);
-      const churchId = UserHelper.currentUserChurch.church.id;
-      let pageId = post.pageId;
-
-      if (!pageId) {
-        const savedPage = await ApiHelper.post("/pages", [{ churchId, url: "/blog/" + slug, title: post.title, layout: "headerFooter" }], "ContentApi");
-        pageId = savedPage[0].id;
-      } else if (slug !== kebab(props.post.slug || "")) {
-        const existing = await ApiHelper.get("/pages/" + pageId, "ContentApi");
-        if (existing?.id) await ApiHelper.post("/pages", [{ ...existing, url: "/blog/" + slug }], "ContentApi");
-      }
-
       const toSave: PostInterface = {
         ...post,
         slug,
-        pageId,
         publishDate: published ? (post.publishDate || new Date()) : null
       };
       await ApiHelper.post("/posts", [toSave], "ContentApi");
@@ -81,7 +70,7 @@ export function BlogPostEdit(props: Props) {
   };
 
   return (
-    <Dialog open={true} onClose={props.onDone} className="dialogForm">
+    <Dialog open={true} onClose={props.onDone} className="dialogForm" maxWidth="md" fullWidth>
       <FormCard id="blogPostEdit" title={props.post.id ? Locale.label("site.blogEdit.editPost") : Locale.label("site.blogEdit.newPost")} icon="rss_feed" onSave={handleSave} onCancel={props.onDone} isSubmitting={isSubmitting} elevation={0} data-testid="blog-post-edit">
         {errors.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{errors.map((m) => <div key={m}>{m}</div>)}</Alert>}
         <Grid container spacing={2} style={{ minWidth: 500 }}>
@@ -93,6 +82,10 @@ export function BlogPostEdit(props: Props) {
           </Grid>
           <Grid size={{ xs: 12 }}>
             <TextField size="small" fullWidth multiline minRows={2} label={Locale.label("site.blogEdit.excerpt")} value={post.excerpt || ""} onChange={(ev) => setPost((p) => ({ ...p, excerpt: ev.target.value }))} />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <Typography variant="body2" sx={{ mb: 0.5 }}>{Locale.label("site.blogEdit.content")}</Typography>
+            <MarkdownEditor value={post.content || ""} onChange={(val) => setPost((p) => ({ ...p, content: val }))} style={{ maxHeight: 300, overflowY: "scroll" }} />
           </Grid>
           <Grid size={{ xs: 6 }}>
             <TextField size="small" fullWidth label={Locale.label("site.blogEdit.category")} value={post.category || ""} onChange={(ev) => setPost((p) => ({ ...p, category: ev.target.value }))} />

@@ -6,7 +6,6 @@ import { Box } from "@mui/material";
 import { PageSkeleton } from "./components/ui/PageSkeleton";
 import UserContext from "./UserContext";
 
-// Lazy load all page components for code splitting
 const PeoplePage = React.lazy(() => import("./people/PeoplePage").then((module) => ({ default: module.PeoplePage })));
 const PersonPage = React.lazy(() => import("./people/PersonPage").then((module) => ({ default: module.PersonPage })));
 const DemographicsPage = React.lazy(() => import("./people/demographics/DemographicsPage").then((module) => ({ default: module.DemographicsPage })));
@@ -63,9 +62,7 @@ const RegistrationsPage = React.lazy(() => import("./registrations/Registrations
 const RegistrationDetailsPage = React.lazy(() => import("./registrations/RegistrationDetailsPage").then((module) => ({ default: module.RegistrationDetailsPage })));
 const Site = React.lazy(() => import("./site").then((module) => ({ default: module.Site })));
 const Mobile = React.lazy(() => import("./mobile").then((module) => ({ default: module.Mobile })));
-const EmailTemplatesPage = React.lazy(() => import("./settings/EmailTemplatesPage").then((module) => ({ default: module.EmailTemplatesPage })));
 
-// Suspense fallback shown while a route's lazy chunk loads.
 const LoadingFallback: React.FC = () => <PageSkeleton />;
 
 export const Authenticated: React.FC = () => {
@@ -78,9 +75,7 @@ export const Authenticated: React.FC = () => {
   UserHelper.user = context.user;
   UserHelper.person = context.person;
 
-  // One WebSocket per tab tied to the active userChurch — drives real-time refresh of
-  // notes/conversations and the unread bell count. Re-runs on church switch via
-  // NotificationService.initialize's internal change detection.
+  // One WebSocket per tab drives real-time refresh and unread bell count.
   React.useEffect(() => {
     if (!context.person?.id || !context.userChurch?.church?.id) return;
     NotificationService.getInstance().initialize(context).catch((err) => {
@@ -93,7 +88,6 @@ export const Authenticated: React.FC = () => {
       <Wrapper>
         <ErrorBoundary>
           <Suspense fallback={<LoadingFallback />}>
-            {/* This renders the nested child route */}
             <Outlet />
           </Suspense>
         </ErrorBoundary>
@@ -132,7 +126,7 @@ export const Authenticated: React.FC = () => {
           <Route path="/forms" element={<FormsPage />} />
           <Route path="/reports/:keyName" element={<ReportPage />} />
           <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/email-templates" element={<EmailTemplatesPage />} />
+          <Route path="/email-templates" element={<Navigate to="/settings/email-templates" replace />} />
           <Route path="/settings/*" element={<Settings />} />
           <Route path="/serving/tasks/workflows/:id/reports" element={<WorkflowReportsPage />} />
           <Route path="/serving/tasks/workflows/:id" element={<WorkflowBoardPage />} />

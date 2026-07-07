@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Icon, Table, TableBody, TableCell, TableRow, TableHead, Paper, Box, Typography, Button, Stack } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { AppIconButton } from "../../components/ui/AppIconButton";
+import { hoverRowSx } from "../../components/ui";
 import {
   type AttendanceInterface,
   type CampusInterface,
@@ -107,11 +108,11 @@ export const AttendanceSetup = memo(() => {
     if (attendance.data.length === 0 && campuses.length === 0) return [];
     return [
       <TableRow key="header">
-        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.attendancePage.campus")}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.attendancePage.service")}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.attendancePage.time")}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.attendancePage.category")}</TableCell>
-        <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>{Locale.label("attendance.attendancePage.group")}</TableCell>
+        <TableCell>{Locale.label("attendance.attendancePage.campus")}</TableCell>
+        <TableCell>{Locale.label("attendance.attendancePage.service")}</TableCell>
+        <TableCell>{Locale.label("attendance.attendancePage.time")}</TableCell>
+        <TableCell>{Locale.label("attendance.attendancePage.category")}</TableCell>
+        <TableCell>{Locale.label("attendance.attendancePage.group")}</TableCell>
       </TableRow>
     ];
   }, [attendance.data.length, campuses.length]);
@@ -230,7 +231,7 @@ export const AttendanceSetup = memo(() => {
       const result = (
         <TableRow
           key={key}
-          sx={{ "&:hover": { backgroundColor: "action.hover" } }}>
+          sx={hoverRowSx}>
           <TableCell sx={{ py: 0.5, border: 0 }}>{campusHtml}</TableCell>
           <TableCell sx={{ py: 0.5, border: 0 }}>{serviceHtml}</TableCell>
           <TableCell sx={{ py: 0.5, border: 0 }}>{serviceTimeHtml}</TableCell>
@@ -282,8 +283,6 @@ export const AttendanceSetup = memo(() => {
       </TableRow>
     );
 
-    // Group the attendance tree's services/service-times by campus id. Campus
-    // names come from the membership master, not the (frozen) tree payload.
     const servicesByCampus: { [campusId: string]: { [serviceName: string]: { service: any; serviceTimes: any[] } } } = {};
     attendance.data.forEach((a) => {
       if (!a.service) return; // campus-only tree row; the campus comes from the membership list below
@@ -326,12 +325,10 @@ export const AttendanceSetup = memo(() => {
             }
           });
 
-          // Add "Add Service Time" button after each service
           rows.push(getAddServiceTimeRow(serviceGroup.service, `add-st-${campusIdx}-${serviceIdx}`));
         });
       }
 
-      // Add "Add Service" button after each campus
       rows.push(getAddServiceRow(campus, `add-svc-${campusIdx}`));
     });
 
@@ -354,7 +351,7 @@ export const AttendanceSetup = memo(() => {
           borderColor: "divider"
         }}>
         <Table size="medium">
-          <TableHead sx={{ backgroundColor: "background.subtle" }}>{tableHeader}</TableHead>
+          <TableHead>{tableHeader}</TableHead>
           <TableBody sx={{ whiteSpace: "nowrap" }}>{getRows()}</TableBody>
         </Table>
       </Paper>
@@ -366,7 +363,6 @@ export const AttendanceSetup = memo(() => {
       <ServiceEdit service={selectedService} updatedFunction={handleUpdated} />
       <ServiceTimeEdit serviceTime={selectedServiceTime} updatedFunction={handleUpdated} />
 
-      {/* Modern Header Section */}
       <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={1} alignItems="center">
@@ -378,7 +374,6 @@ export const AttendanceSetup = memo(() => {
         </Stack>
       </Box>
 
-      {/* Table Section */}
       <Box sx={{ p: 0 }}>{table}</Box>
     </>
   );

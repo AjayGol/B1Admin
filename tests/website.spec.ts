@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { siteTest as test, expect } from "./helpers/test-fixtures";
-import { trashIconButton } from "./helpers/fixtures";
+import { trashIconButton, confirmDelete } from "./helpers/fixtures";
 import { login } from "./helpers/auth";
 import { navigateToSite, navigateToCalendars } from "./helpers/navigation";
 import { STORAGE_STATE_PATH } from "./global-setup";
@@ -52,9 +52,7 @@ test.describe("Website Management", () => {
       const name = page.locator('[name="title"]');
       await name.fill("Zacchaeus Test Page");
       const saveBtn = page.locator("button").getByText("Save");
-      // Wait for the create-page POST to complete before asserting on the UI;
-      // under load the table refetch can lag behind the dialog close, leaving
-      // a race where toHaveCount(1) hits the empty state.
+      // Wait for POST to avoid race where table refetch lags behind dialog close.
       const pagePost = page.waitForResponse(r => r.url().includes("/content/pages") && r.request().method() === "POST", { timeout: 15000 });
       await saveBtn.click();
       await pagePost;
@@ -81,8 +79,9 @@ test.describe("Website Management", () => {
       await name.fill("Zebedee Test Page");
       const saveBtn = page.locator("button").getByText("Save");
       await saveBtn.click();
+      // Redesign: the "Previewing: …" banner is now a paragraph, so only the page-card h6 carries the title.
       const validatedPage = page.locator("h6").getByText("Zebedee Test Page");
-      await expect(validatedPage).toHaveCount(2);
+      await expect(validatedPage).toHaveCount(1);
     });
 
     test("should cancel editing page title", async () => {
@@ -128,8 +127,7 @@ test.describe("Website Management", () => {
       const contentBtn = page.locator("button").getByText("Edit Content");
       await contentBtn.click();
       const addBtn = page.locator('[data-testid="content-editor-add-button"]');
-      // Open the elements panel — it's a toggle, so guard against accidental
-      // double-click closing it.
+      // Guard against accidental double-click closing the toggle.
       const ensurePanelOpen = async () => {
         const sectionVisible = await page.locator('[data-testid="draggable-element-section"]')
           .isVisible({ timeout: 500 }).catch(() => false);
@@ -144,13 +142,13 @@ test.describe("Website Management", () => {
       await page.mouse.move(-10, -10);
       await dropzone.hover();
       await page.mouse.up();
-      // Dropping a section now opens the template picker; choose a blank section.
+      // Dropping a section opens template picker; choose blank.
       const blankTemplate = page.locator('[data-testid="template-blank"]');
       await expect(blankTemplate).toBeVisible({ timeout: 10000 });
       await blankTemplate.click();
       const saveBtn = page.locator("button").getByText("Save");
       await saveBtn.click();
-      //add text to confirm
+      // Add text element to confirm content persists.
       await ensurePanelOpen();
       const text = page.locator('[data-testid="draggable-element-text"]');
       await expect(text).toBeVisible({ timeout: 10000 });
@@ -194,7 +192,6 @@ test.describe("Website Management", () => {
       await templateCard.click();
       const treeResponse = await treePost;
       expect(treeResponse.status()).toBe(200);
-      // Template content (heading + the three service-time cards) renders in the canvas.
       await expect(page.getByText("Join Us This Weekend")).toBeVisible({ timeout: 10000 });
       await expect(page.getByText("Sunday 9:00 AM")).toBeVisible({ timeout: 10000 });
       await expect(page.getByText("Wednesday 6:30 PM")).toBeVisible({ timeout: 10000 });
@@ -207,7 +204,6 @@ test.describe("Website Management", () => {
       await contentBtn.click();
       const textElement = page.locator("p").getByText("Zacchaeus Test Text");
       await expect(textElement).toBeVisible({ timeout: 10000 });
-      // Single click selects the element and opens its property panel.
       await textElement.click();
       const hideOnMobile = page.locator('[data-testid="hide-on-mobile-switch"]');
       await expect(hideOnMobile).toBeVisible({ timeout: 10000 });
@@ -225,7 +221,6 @@ test.describe("Website Management", () => {
       // Desktop preview is unaffected.
       await page.locator('[data-testid="device-type-desktop"]').click();
       await expect(page.locator(`#el-${elementId}`)).toHaveCSS("opacity", "1");
-      // The saved flag round-trips into the editor.
       await textElement.click();
       await expect(page.locator('[data-testid="hide-on-mobile-switch"] input')).toBeChecked();
     });
@@ -246,7 +241,6 @@ test.describe("Website Management", () => {
       await expect(statusPill).toHaveAttribute("data-status", "published");
       await expect(publishBtn).toHaveText(/Published/);
 
-      // Make a draft-only edit after publishing.
       const addBtn = page.locator('[data-testid="content-editor-add-button"]');
       const ensurePanelOpen = async () => {
         const textVisible = await page.locator('[data-testid="draggable-element-text"]')
@@ -269,15 +263,11 @@ test.describe("Website Management", () => {
       await expect(page.locator("p").getByText("Draft Only Text")).toBeVisible({ timeout: 10000 });
       await expect(page.locator('[data-testid="publish-status-pill"]')).toHaveAttribute("data-status", "unpublished-changes");
 
-      // Discard restores the editor to the published version.
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        await dialog.accept();
-      });
       await page.locator('[data-testid="content-editor-overflow-button"]').click();
       const discardItem = page.locator('[data-testid="discard-changes-menu-item"]');
       await expect(discardItem).toBeVisible({ timeout: 10000 });
       const discardPost = page.waitForResponse(r => /\/content\/pages\/[^/]+\/discard/.test(r.url()) && r.request().method() === "POST", { timeout: 15000 });
+      page.once("dialog", async dialog => { await dialog.accept(); });
       await discardItem.click();
       expect((await discardPost).status()).toBe(200);
       await expect(page.locator("p").getByText("Draft Only Text")).toHaveCount(0, { timeout: 10000 });
@@ -285,18 +275,14 @@ test.describe("Website Management", () => {
       await expect(page.locator('[data-testid="publish-status-pill"]')).toHaveAttribute("data-status", "published");
 
       // Turn publishing back off so later tests see live-on-save behavior.
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        await dialog.accept();
-      });
       await page.locator('[data-testid="content-editor-overflow-button"]').click();
       const disableItem = page.locator('[data-testid="disable-publish-menu-item"]');
       await expect(disableItem).toBeVisible({ timeout: 10000 });
       const unpublishDelete = page.waitForResponse(r => /\/content\/pages\/[^/]+\/published/.test(r.url()) && r.request().method() === "DELETE", { timeout: 15000 });
+      page.once("dialog", async dialog => { await dialog.accept(); });
       await disableItem.click();
       expect((await unpublishDelete).status()).toBe(200);
       await expect(page.locator('[data-testid="publish-status-pill"]')).toHaveAttribute("data-status", "live-on-save");
-      // Menu items for published pages disappear once publishing is off.
       await page.locator('[data-testid="content-editor-overflow-button"]').click();
       await expect(page.locator('[data-testid="discard-changes-menu-item"]')).toHaveCount(0);
       await page.keyboard.press("Escape");
@@ -396,7 +382,6 @@ test.describe("Website Management", () => {
       const moveBackPost = page.waitForResponse(r => r.url().endsWith("/content/sections") && r.request().method() === "POST", { timeout: 15000 });
       await sectionWrapper.locator('[data-testid="section-toolbar-move-down"]').click();
       expect((await moveBackPost).status()).toBe(200);
-      // Duplicate, then delete the copy.
       await sectionWrapper.hover();
       const duplicatePost = page.waitForResponse(r => r.url().includes("/content/sections/duplicate/") && r.request().method() === "POST", { timeout: 15000 });
       await sectionWrapper.locator('[data-testid="section-toolbar-duplicate"]').click();
@@ -449,17 +434,13 @@ test.describe("Website Management", () => {
     });
 
     test("should cancel deleting page", async () => {
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        await dialog.dismiss();
-      });
-
       const editBtn = page.locator('[data-testid="edit-page-button"]').last();
       await editBtn.click();
       const settingsBtn = page.locator("button").getByText("Page Settings");
       await settingsBtn.click();
       const deleteBtn = page.locator("button").getByText("Delete");
       await deleteBtn.click();
+      await page.locator('div[role="dialog"]').last().getByRole("button", { name: "Cancel" }).click();
       // After dismiss, we should still be on the page editor with the renamed page intact.
       await expect(page).toHaveURL(/\/site\/pages\/preview\/[^/]+/);
       const stillExists = page.locator("h6").getByText("Zebedee Test Page");
@@ -467,18 +448,13 @@ test.describe("Website Management", () => {
     });
 
     test("should delete page", async () => {
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        expect(dialog.message()).toContain("Are you sure");
-        await dialog.accept();
-      });
-
       const editBtn = page.locator('[data-testid="edit-page-button"]').last();
       await editBtn.click();
       const settingsBtn = page.locator("button").getByText("Page Settings");
       await settingsBtn.click();
       const deleteBtn = page.locator("button").getByText("Delete");
       await deleteBtn.click();
+      await confirmDelete(page);
 
       const validatedDeletion = page.locator("td").getByText("Zebedee Test Page");
       await expect(validatedDeletion).toHaveCount(0);
@@ -596,7 +572,7 @@ test.describe("Website Management", () => {
       await blankTemplate.click();
       const saveBtn = page.locator("button").getByText("Save");
       await saveBtn.click();
-      //add text to confirm
+      // Add text element to confirm content persists.
       await ensurePanelOpen();
       const text = page.locator('[data-testid="draggable-element-text"]');
       await expect(text).toBeVisible({ timeout: 10000 });
@@ -787,7 +763,7 @@ test.describe("Website Management", () => {
       // Demo data seeds a solid-nav linkColor override (see globalStyles in demo.sql), so
       // the field starts enabled rather than disabled — just ensure the toggle is on
       // (check() is a no-op if already checked) instead of assuming a disabled start state.
-      await linkToggle.check();
+      if (!(await linkToggle.isChecked())) await linkToggle.check({ force: true });
       await expect(linkInput).toBeEnabled();
       // `fill` does not work on type=color; use React's native setter.
       await linkInput.evaluate((el: HTMLInputElement) => {
@@ -854,16 +830,10 @@ test.describe("Website Management", () => {
     });
 
     test("should remove file", async () => {
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        expect(dialog.message()).toContain("Are you sure");
-        await dialog.accept();
-      });
-
-      // Find the row with logo.png (uploaded by previous test) and click its delete button.
       const targetRow = page.locator("tr", { has: page.locator("td").getByText("logo.png", { exact: true }) }).first();
       const deleteBtn = targetRow.locator("button[aria-label]").last();
       await deleteBtn.click();
+      await confirmDelete(page);
       const validatedDeletion = page.locator("td").getByText("logo.png", { exact: true });
       await expect(validatedDeletion).toHaveCount(0);
     });
@@ -898,7 +868,7 @@ test.describe("Website Management", () => {
       await name.fill("Zacchaeus Test Calendar");
       const saveBtn = page.locator('[data-testid="save-calendar-button"]');
       await saveBtn.click();
-      const validatedCalendar = page.locator("h6").getByText("Zacchaeus Test Calendar");
+      const validatedCalendar = page.getByRole("link", { name: "Zacchaeus Test Calendar" });
       await expect(validatedCalendar).toHaveCount(1);
     });
 
@@ -935,16 +905,11 @@ test.describe("Website Management", () => {
     });
 
     test("should remove group events from calendar", async () => {
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        expect(dialog.message()).toContain("Are you sure");
-        await dialog.accept();
-      });
-
       const editBtn = page.locator('[aria-label="Manage Events"]').last();
       await editBtn.click();
       const removeBtn = trashIconButton(page).first();
       await removeBtn.click();
+      await confirmDelete(page);
       const validatedDeletion = page.locator("td").getByText("Adult Bible Class");
       await expect(validatedDeletion).toHaveCount(0);
     });
@@ -956,7 +921,7 @@ test.describe("Website Management", () => {
       await name.fill("Zebedee Test Calendar");
       const saveBtn = page.locator('[data-testid="save-calendar-button"]');
       await saveBtn.click();
-      const validatedChange = page.locator("h6").getByText("Zebedee Test Calendar");
+      const validatedChange = page.getByRole("link", { name: "Zebedee Test Calendar" });
       await expect(validatedChange).toHaveCount(1);
     });
 
@@ -971,16 +936,11 @@ test.describe("Website Management", () => {
     });
 
     test("should delete calendar", async () => {
-      page.once("dialog", async dialog => {
-        expect(dialog.type()).toBe("confirm");
-        expect(dialog.message()).toContain("Are you sure");
-        await dialog.accept();
-      });
-
       const editBtn = page.locator('[aria-label="Edit"]').last();
       await editBtn.click();
       const deleteBtn = page.locator('[data-testid="delete-calendar-button"]');
       await deleteBtn.click();
+      await confirmDelete(page);
       const validatedDeletion = page.locator("h6").getByText("Zebedee Test Calendar");
       await expect(validatedDeletion).toHaveCount(0);
     });

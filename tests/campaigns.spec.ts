@@ -1,15 +1,10 @@
-﻿import { type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import { donationsTest as test, expect } from "./helpers/test-fixtures";
 import { fillFundForm } from "./helpers/donations";
 import { login } from "./helpers/auth";
 import { navigateToDonations } from "./helpers/navigation";
+import { confirmDelete } from "./helpers/fixtures";
 import { STORAGE_STATE_PATH } from "./global-setup";
-
-// campaigns.spec.ts:
-//   Pledge Campaigns (serial) â€” create a dedicated fund, create a campaign against it,
-//   add/edit/delete an admin-entered pledge on the campaign detail page (verifying the
-//   pledge status chip), then delete the campaign and fund. Covers the admin half of
-//   master-roadmap item 2.5 (pledge campaigns).
 
 const TEST_FUND = "Zacchaeus Building Fund";
 const TEST_CAMPAIGN = "Zacchaeus Capital Campaign";
@@ -48,7 +43,6 @@ test.describe.serial("Pledge Campaigns", () => {
     await page?.context().close();
   });
 
-  // The chain shares created entities â€” a retry would duplicate them.
   test.describe.configure({ retries: 0 });
 
   test("should create fund for campaign", async () => {
@@ -103,7 +97,6 @@ test.describe.serial("Pledge Campaigns", () => {
 
     const pledgeRow = page.locator("tr").filter({ hasText: TEST_PERSON });
     await expect(pledgeRow).toHaveCount(1, { timeout: 10000 });
-    // The campaign fund is brand new, so nothing has been given against the pledge yet.
     await expect(pledgeRow.getByText("Not Started")).toBeVisible({ timeout: 10000 });
     await expect(pledgeRow.getByText(/\$\s?500\.00/)).toBeVisible({ timeout: 10000 });
   });
@@ -133,12 +126,9 @@ test.describe.serial("Pledge Campaigns", () => {
 
     const box = page.locator("#pledgeBox");
     await expect(box).toBeVisible({ timeout: 10000 });
-    page.once("dialog", async (dialog) => {
-      expect(dialog.type()).toBe("confirm");
-      await dialog.accept();
-    });
     const pledgeDelete = page.waitForResponse((r) => r.url().includes("/giving/pledges") && r.request().method() === "DELETE", { timeout: 15000 });
     await box.getByRole("button", { name: "Delete" }).click();
+    await confirmDelete(page);
     await pledgeDelete;
 
     await expect(page.getByText("No pledges have been made to this campaign yet.")).toBeVisible({ timeout: 10000 });
@@ -155,22 +145,15 @@ test.describe.serial("Pledge Campaigns", () => {
 
     const box = page.locator("#campaignBox");
     await expect(box).toBeVisible({ timeout: 10000 });
-    page.once("dialog", async (dialog) => {
-      expect(dialog.type()).toBe("confirm");
-      await dialog.accept();
-    });
     const campaignDelete = page.waitForResponse((r) => r.url().includes("/giving/campaigns") && r.request().method() === "DELETE", { timeout: 15000 });
     await box.getByRole("button", { name: "Delete" }).click();
+    await confirmDelete(page);
     await campaignDelete;
 
     await expect(page.locator("a").getByText(TEST_CAMPAIGN, { exact: true })).toHaveCount(0, { timeout: 10000 });
   });
 
   test("should delete fund", async () => {
-    page.once("dialog", async (dialog) => {
-      expect(dialog.type()).toBe("confirm");
-      await dialog.accept();
-    });
     await openFundsTab(page);
     const editBtn = fundRowEditButton(page, TEST_FUND);
     await expect(editBtn).toBeVisible({ timeout: 10000 });
@@ -179,6 +162,7 @@ test.describe.serial("Pledge Campaigns", () => {
     await expect(box).toBeVisible({ timeout: 10000 });
     const fundDelete = page.waitForResponse((r) => r.url().includes("/giving/funds") && r.request().method() === "DELETE", { timeout: 15000 });
     await box.getByRole("button", { name: "Delete" }).click();
+    await confirmDelete(page);
     await fundDelete;
     await expect(page.locator("a").getByText(TEST_FUND, { exact: true })).toHaveCount(0, { timeout: 10000 });
   });

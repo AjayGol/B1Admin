@@ -197,6 +197,7 @@ const PeopleSearchResults = memo(function PeopleSearchResults(props: Props) {
       columns.forEach((c) => {
         if (selectedColumns.indexOf(c.key) > -1) {
           if (c.key === "deleteOption") result.push(<TableCell key={c.key} align="right" className="rowActions">{getColumn(p, c.key)}</TableCell>);
+          else if (c.key === "age") result.push(<TableCell key={c.key} align="right">{getColumn(p, c.key)}</TableCell>);
           else result.push(<TableCell key={c.key}>{getColumn(p, c.key)}</TableCell>);
         }
       });
@@ -337,7 +338,7 @@ const PeopleSearchResults = memo(function PeopleSearchResults(props: Props) {
           label: c.key === "deleteOption" ? "" : c.shortName,
           sortable: c.key !== "photo" && c.key !== "deleteOption",
           minWidth: c.key === "photo" ? 88 : 160,
-          align: c.key === "deleteOption" ? "right" : undefined
+          align: c.key === "deleteOption" || c.key === "age" ? "right" : undefined
         });
       }
     });

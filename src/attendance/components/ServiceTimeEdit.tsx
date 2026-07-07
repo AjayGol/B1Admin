@@ -1,10 +1,11 @@
 import React from "react";
-import { Alert, Box, FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 import { TextField } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { type ServiceTimeInterface, type ServiceInterface } from "@churchapps/helpers";
-import { useMountedState, ApiHelper, Locale } from "@churchapps/apphelper";
+import { useMountedState, ApiHelper, Locale, ErrorMessages } from "@churchapps/apphelper";
 import { FormCard } from "../../components/ui";
+import { useErrorSummary } from "../../hooks";
 
 interface Props {
   serviceTime: ServiceTimeInterface;
@@ -21,9 +22,7 @@ export const ServiceTimeEdit: React.FC<Props> = (props) => {
 
   const { control, register, handleSubmit, reset, formState } = useForm<AnyRecord>({ defaultValues: { name: "", serviceId: "" } });
   const e = formState.errors as any;
-  const summaryErrors: string[] = [];
-  if (e.name?.message) summaryErrors.push(e.name.message);
-  if (e.serviceId?.message) summaryErrors.push(e.serviceId.message);
+  const summaryErrors = useErrorSummary(formState.errors, ["name", "serviceId"]);
 
   const onValid = (values: AnyRecord) => {
     setIsSubmitting(true);
@@ -59,7 +58,7 @@ export const ServiceTimeEdit: React.FC<Props> = (props) => {
         isSubmitting={isSubmitting}
         icon="schedule"
         help="docs/b1-admin/attendance/">
-        {summaryErrors.length > 0 && <Alert severity="error" sx={{ mb: 2 }}>{summaryErrors.map((msg) => <div key={msg}>{msg}</div>)}</Alert>}
+        <ErrorMessages errors={summaryErrors} />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>

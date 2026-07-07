@@ -60,7 +60,8 @@ export const SectionToolbar: React.FC<Props> = (props) => (
     {props.onSwitchLayout && (
       <AppIconButton label={Locale.label("site.sectionToolbar.switchLayout")} icon={<ViewQuilt sx={{ fontSize: 14 }} />} onClick={props.onSwitchLayout} sx={actionButtonSx} data-testid="section-toolbar-switch-layout" />
     )}
-    {props.onAiRewrite && (
+    {/* ponytail: AI rewrite temporarily disabled — restore to re-enable */}
+    {false && props.onAiRewrite && (
       <AppIconButton label={Locale.label("site.sectionToolbar.aiRewrite")} icon={<AutoAwesome sx={{ fontSize: 14 }} />} onClick={props.onAiRewrite} sx={actionButtonSx} data-testid="section-toolbar-ai-rewrite" />
     )}
     <AppIconButton label={Locale.label("site.sectionToolbar.delete")} icon={<Delete sx={{ fontSize: 14 }} />} intent="remove" onClick={props.onDelete} sx={actionButtonSx} data-testid="section-toolbar-delete" />

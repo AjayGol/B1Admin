@@ -8,10 +8,11 @@ import { LibraryMusic as MusicIcon, Add as AddIcon, QueueMusic as ArrangementIco
 import { AppIconButton } from "../../components/ui/AppIconButton";
 import { Arrangement } from "./components/Arrangement";
 import { EmptyState } from "../../components/ui/EmptyState";
-import { CountChip } from "../../components/ui";
+import { CountChip, HeaderPrimaryButton } from "../../components/ui";
 import { SongDetailsEdit } from "./components/SongDetailsEdit";
 import { SongDetailLinks } from "./components/SongDetailLinks";
 import { SongDetailLinksEdit } from "./components/SongDetailLinksEdit";
+import { useConfirmDelete } from "../../hooks";
 
 export const SongPage = memo(() => {
   const canEdit = UserHelper.checkAccess(Permissions.contentApi.content.edit);
@@ -20,6 +21,7 @@ export const SongPage = memo(() => {
   const [selectedArrangement, setSelectedArrangement] = React.useState(null);
   const params = useParams();
   const navigate = useNavigate();
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
   const song = useQuery<SongInterface>({
     queryKey: ["/songs/" + params.id, "ContentApi"],
@@ -56,25 +58,30 @@ export const SongPage = memo(() => {
   const refetch = useCallback(async () => {
     const results = await Promise.all([song.refetch(), arrangements.refetch(), songDetail.refetch()]);
 
-    // Update selected arrangement with fresh data after refetch
     if (selectedArrangement?.id) {
       const arrangementResult = results[1];
       if (arrangementResult.data) {
         const updatedArrangement = arrangementResult.data.find((arr) => arr.id === selectedArrangement.id);
         if (updatedArrangement) {
           setSelectedArrangement(updatedArrangement);
+        } else {
+          const nextArrangement = arrangementResult.data.length > 0 ? arrangementResult.data[0] : null;
+          setSelectedArrangement(nextArrangement);
+          if (!nextArrangement) {
+            navigate("/serving/songs");
+          }
         }
       }
     }
-  }, [song, arrangements, songDetail, selectedArrangement?.id]);
+  }, [song, arrangements, songDetail, selectedArrangement?.id, navigate]);
 
-  const handleDeleteSong = useCallback(() => {
-    if (window.confirm(Locale.label("songs.deleteSong.confirm"))) {
+  const handleDeleteSong = useCallback(async () => {
+    if (await confirm(Locale.label("songs.deleteSong.confirm"))) {
       ApiHelper.delete("/songs/" + song.data?.id, "ContentApi").then(() => {
         navigate("/serving/songs");
       });
     }
-  }, [song.data?.id, navigate]);
+  }, [song.data?.id, navigate, confirm]);
 
   const handleAddArrangement = useCallback(async () => {
     if (!song.data?.id) return;
@@ -160,7 +167,6 @@ export const SongPage = memo(() => {
           </CardContent>
         </Card>
 
-        {/* External Links Card */}
         <Card sx={{ height: "fit-content", borderRadius: 2 }}>
           <CardContent>
             {songDetail.data &&
@@ -200,7 +206,8 @@ export const SongPage = memo(() => {
 
   return (
     <>
-      <PageHeader title={songDetail.data?.title || song.data?.name || Locale.label("songs.songPage.loading")} subtitle={Locale.label("songs.songPage.subtitle")}>
+      {ConfirmDialogElement}
+      <PageHeader icon={<MusicIcon />} title={songDetail.data?.title || song.data?.name || Locale.label("songs.songPage.loading")} subtitle={Locale.label("songs.songPage.subtitle")}>
         {canEdit && (
           <AppIconButton label={Locale.label("common.edit")} icon={<EditIcon />} tone="header" onClick={() => setEditSongDetails(true)} />
         )}
@@ -208,20 +215,9 @@ export const SongPage = memo(() => {
           <AppIconButton label={Locale.label("common.delete")} icon={<DeleteIcon />} tone="header" intent="remove" onClick={handleDeleteSong} />
         )}
         {canEdit && (
-          <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={handleAddArrangement}
-            sx={{
-              color: "#FFF",
-              borderColor: "rgba(255,255,255,0.5)",
-              "&:hover": {
-                borderColor: "#FFF",
-                backgroundColor: "rgba(255,255,255,0.1)"
-              }
-            }}>
+          <HeaderPrimaryButton startIcon={<AddIcon />} onClick={handleAddArrangement}>
             {Locale.label("songs.songPage.addArrangement")}
-          </Button>
+          </HeaderPrimaryButton>
         )}
       </PageHeader>
 
@@ -238,9 +234,9 @@ export const SongPage = memo(() => {
           />
         ) : (
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 3 }}>{arrangementNavigation}</Grid>
-
             <Grid size={{ xs: 12, md: 9 }}>{currentContent}</Grid>
+
+            <Grid size={{ xs: 12, md: 3 }}>{arrangementNavigation}</Grid>
           </Grid>
         )}
       </Box>

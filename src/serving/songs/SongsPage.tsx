@@ -5,8 +5,10 @@ import { Button, Box, Card, CardContent, Typography, Stack, Avatar, Chip, IconBu
 import { MusicNote as MusicIcon, LibraryMusic as LibraryIcon, Add as AddIcon, Search as SearchIcon, PlayCircle as PlayIcon, Timer as TimerIcon, Person as ArtistIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { SongSearchDialog } from "./SongSearchDialog";
 import { EmptyState } from "../../components/ui/EmptyState";
+import { HeaderPrimaryButton, HeaderSecondaryButton } from "../../components/ui";
 import { type ArrangementInterface, type ArrangementKeyInterface, type SongDetailInterface, type SongInterface } from "../../helpers";
 import { useQuery } from "@tanstack/react-query";
+import { useConfirmDelete } from "../../hooks";
 
 export const SongsPage = memo(() => {
   const [showSearch, setShowSearch] = React.useState(false);
@@ -16,6 +18,7 @@ export const SongsPage = memo(() => {
   const [showSearchField, setShowSearchField] = React.useState(false);
   const [failedImages, setFailedImages] = React.useState<Set<string>>(new Set());
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const { confirm, ConfirmDialogElement } = useConfirmDelete();
 
   const songs = useQuery<SongDetailInterface[]>({
     queryKey: ["/songDetails", "ContentApi"],
@@ -70,11 +73,11 @@ export const SongsPage = memo(() => {
 
   const handleBulkDelete = useCallback(async () => {
     if (selected.size === 0) return;
-    if (!window.confirm(Locale.label("songs.songsPage.deleteSelectedConfirm") || "Delete the selected songs? This cannot be undone.")) return;
+    if (!(await confirm(Locale.label("songs.songsPage.deleteSelectedConfirm") || "Delete the selected songs? This cannot be undone."))) return;
     await Promise.all([...selected].map((id) => ApiHelper.delete("/songs/" + id, "ContentApi")));
     setSelected(new Set());
     songs.refetch();
-  }, [selected, songs]);
+  }, [selected, songs, confirm]);
 
   const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const imgSrc = e.currentTarget.src;
@@ -89,9 +92,7 @@ export const SongsPage = memo(() => {
 
   const filteredSongs = useMemo(() => {
     if (!songs.data) return null;
-    // The /songDetails endpoint joins songs→arrangements→songDetails, so a song
-    // with multiple arrangements appears once per arrangement. Dedupe by songId
-    // (each row from that join carries `songId` from the song table).
+    // Dedupe by songId: /songDetails join produces one row per arrangement.
     const seen = new Set<string>();
     const unique = songs.data.filter((song) => {
       const id = (song as any).songId || song.id;
@@ -141,7 +142,6 @@ export const SongsPage = memo(() => {
                       aria-label={Locale.label("common.select") || "Select"}
                     />
                   )}
-                  {/* Thumbnail/Avatar */}
                   <Avatar
                     src={songDetail.thumbnail && !failedImages.has(songDetail.thumbnail) ? songDetail.thumbnail : undefined}
                     sx={{ width: 60, height: 60, bgcolor: "primary.light" }}
@@ -149,7 +149,6 @@ export const SongsPage = memo(() => {
                     <MusicIcon sx={{ fontSize: 28, color: "primary.main" }} />
                   </Avatar>
 
-                  {/* Song Info */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
                       variant="h6"
@@ -176,7 +175,6 @@ export const SongsPage = memo(() => {
                     </Stack>
                   </Box>
 
-                  {/* Action Button */}
                   <Tooltip title={`Play ${songDetail.title}`}>
                     <IconButton
                       component={Link}
@@ -201,34 +199,24 @@ export const SongsPage = memo(() => {
 
   return (
     <>
-      <PageHeader title={Locale.label("songs.title") || Locale.label("songs.songsPage.songs")} subtitle={Locale.label("songs.songsPage.subtitle")}>
-        <Button
-          variant="outlined"
-          startIcon={<SearchIcon />}
-          onClick={() => setShowSearchField(!showSearchField)}
-          sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+      {ConfirmDialogElement}
+      <PageHeader icon={<MusicIcon />} title={Locale.label("songs.title") || Locale.label("songs.songsPage.songs")} subtitle={Locale.label("songs.songsPage.subtitle")}>
+        <HeaderSecondaryButton startIcon={<SearchIcon />} onClick={() => setShowSearchField(!showSearchField)}>
           {Locale.label("songs.songsPage.search")}
-        </Button>
+        </HeaderSecondaryButton>
         {canEdit && selected.size > 0 && (
-          <Button
-            onClick={handleBulkDelete}
-            variant="outlined"
-            startIcon={<DeleteIcon />}
-            data-testid="delete-selected-button"
-            sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+          <HeaderSecondaryButton onClick={handleBulkDelete} startIcon={<DeleteIcon />} data-testid="delete-selected-button">
             {(Locale.label("songs.songsPage.deleteSelected") || "Delete Selected") + " (" + selected.size + ")"}
-          </Button>
+          </HeaderSecondaryButton>
         )}
         {canEdit && (
-          <Button
+          <HeaderPrimaryButton
             onClick={() => setShowSearch(true)}
-            variant="outlined"
             startIcon={<AddIcon />}
             data-testid="add-song-button"
-            aria-label={Locale.label("songs.songsPage.addSongAria")}
-            sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+            aria-label={Locale.label("songs.songsPage.addSongAria")}>
             {Locale.label("songs.addSong") || "Add Song"}
-          </Button>
+          </HeaderPrimaryButton>
         )}
       </PageHeader>
 

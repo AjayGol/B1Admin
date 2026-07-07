@@ -130,7 +130,6 @@ export const RequestedChanges = (props: Props) => {
       }}>
       <CardContent>
         <Stack spacing={3}>
-          {/* Header */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <ChangesIcon sx={{ color: "primary.main", fontSize: 20 }} />
@@ -154,7 +153,6 @@ export const RequestedChanges = (props: Props) => {
             )}
           </Box>
 
-          {/* Changes Table */}
           <Paper
             sx={{
               overflow: "hidden",
@@ -163,7 +161,7 @@ export const RequestedChanges = (props: Props) => {
             }}>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "grey.50" }}>
+                <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>{Locale.label("tasks.requestedChanges.field")}</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>{Locale.label("tasks.requestedChanges.value")}</TableCell>
                 </TableRow>

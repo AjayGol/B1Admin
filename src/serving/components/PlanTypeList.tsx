@@ -96,7 +96,7 @@ export const PlanTypeList = React.memo(({ ministry }: Props) => {
         <Paper sx={{ width: "100%", overflow: "hidden" }}>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ backgroundColor: "background.subtle" }}>
+              <TableRow>
                 <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>{Locale.label("common.name")}</TableCell>
                 {canEdit && <TableCell align="right" sx={{ width: 50 }}></TableCell>}
               </TableRow>

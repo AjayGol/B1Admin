@@ -1,9 +1,9 @@
-import { Grid, Typography, Card, CardContent, Stack, Box, Button, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import { Grid, Typography, Card, CardContent, Stack, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import React from "react";
 import { ApiHelper, Locale, Loading, PageHeader } from "@churchapps/apphelper";
 import { EmptyState } from "../../../components/ui/EmptyState";
 import { AppIconButton } from "../../../components/ui/AppIconButton";
-import { CountChip } from "../../../components/ui";
+import { CountChip, HeaderPrimaryButton, HeaderSecondaryButton } from "../../../components/ui";
 import { WorkflowEdit } from "./components/WorkflowEdit";
 import { type WorkflowInterface, type WorkflowCategoryInterface } from "@churchapps/helpers";
 import { useQuery } from "@tanstack/react-query";
@@ -93,15 +93,15 @@ export const WorkflowsPage = () => {
 
   return (
     <>
-      <PageHeader title={Locale.label("tasks.workflowsPage.title")} subtitle={Locale.label("tasks.workflowsPage.subtitle")}>
+      <PageHeader icon={<WorkflowsIcon />} title={Locale.label("tasks.workflowsPage.title")} subtitle={Locale.label("tasks.workflowsPage.subtitle")}>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<MyCardsIcon />} onClick={() => navigate("/serving/tasks")} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF" } }}>
+          <HeaderSecondaryButton startIcon={<MyCardsIcon />} onClick={() => navigate("/serving/tasks")}>
             {Locale.label("tasks.myCards.title")}
-          </Button>
+          </HeaderSecondaryButton>
           {canManage && (
-            <Button variant="outlined" startIcon={<AddIcon />} data-testid="add-workflow-button" onClick={(e) => setAddAnchor(e.currentTarget)} sx={{ color: "#FFF", borderColor: "rgba(255,255,255,0.5)", "&:hover": { borderColor: "#FFF", backgroundColor: "rgba(255,255,255,0.1)" } }}>
+            <HeaderPrimaryButton startIcon={<AddIcon />} data-testid="add-workflow-button" onClick={(e) => setAddAnchor(e.currentTarget)}>
               {Locale.label("tasks.workflowsPage.addWorkflow")}
-            </Button>
+            </HeaderPrimaryButton>
           )}
         </Stack>
       </PageHeader>

@@ -84,13 +84,11 @@ export const PersonAttendance: React.FC<Props> = memo((props) => {
     );
     const dates = Object.entries(grouped).sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime());
 
-    const headCell = (label: string, key: string) => (
-      <TableCell key={key}><Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{label}</Typography></TableCell>
-    );
+    const headCell = (label: string, key: string) => <TableCell key={key}>{label}</TableCell>;
 
     return (
       <Table>
-        <TableHead sx={{ backgroundColor: "grey.50", "& .MuiTableCell-root": { borderBottom: "2px solid", borderBottomColor: "divider" } }}>
+        <TableHead>
           <TableRow>
             {headCell("Date", "date")}
             {hasCampus && headCell("Campus", "campus")}
