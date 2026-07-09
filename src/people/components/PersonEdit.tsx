@@ -1,6 +1,6 @@
 import React, { useState, memo, useCallback } from "react";
 import { useForm, Controller, useFormState } from "react-hook-form";
-import { MuiTelInput, matchIsValidTel } from "mui-tel-input";
+import { MuiTelInput } from "mui-tel-input";
 import { B1AdminPersonHelper, UpdateHouseHold } from ".";
 import { type PersonInterface } from "@churchapps/helpers";
 import { PersonHelper, DateHelper, ApiHelper, Loading, ErrorMessages, Locale, PersonAvatar } from "@churchapps/apphelper";
@@ -38,22 +38,21 @@ export function formattedPhoneNumber(value: string) {
 
 const phoneSlotProps = { htmlInput: { "aria-describedby": "errorMsg", "aria-labelledby": "tel-label errorMsg" } };
 const phoneMenuProps = { "aria-label": "phone-number" };
-const phoneRules = (v: string) => !v || v.length <= 4 || matchIsValidTel(v.split("x")[0]) || Locale.label("people.personEdit.invalForm");
-const phoneHelperText = (hasError: boolean) => (
-  <div id="errorMsg">{hasError && <Box component="p" sx={{ margin: 0, color: "error.main" }}>{Locale.label("people.personEdit.invalForm")}</Box>}</div>
-);
 
 // Normalize legacy phone formats like "(217) 555-2504" or "217-555-2504" into E.164
-// so MuiTelInput can render them with country flag and spacing.
+// so MuiTelInput can render them with country flag and spacing. Anything that isn't a
+// US 10/11-digit number or already "+"-prefixed is left as-is — forcing "+" onto a
+// 7-digit partial makes the widget misread it as a foreign country code.
 const normalizePhone = (raw: string | null | undefined): string => {
   if (!raw) return "";
   const [base, ext] = raw.split("x");
-  const digits = (base ?? "").replace(/\D/g, "");
+  const trimmed = (base ?? "").trim();
+  const digits = trimmed.replace(/\D/g, "");
   if (!digits) return ext ? "x" + ext : "";
-  const normalized = (base ?? "").trim().startsWith("+") ? "+" + digits
+  const normalized = trimmed.startsWith("+") ? "+" + digits
     : digits.length === 10 ? "+1" + digits
       : digits.length === 11 && digits.startsWith("1") ? "+" + digits
-        : "+" + digits;
+        : trimmed;
   return ext ? normalized + "x" + ext : normalized;
 };
 
@@ -337,10 +336,10 @@ export const PersonEdit = memo((props: Props) => {
           <Grid size={{ md: 3 }}>
             <div className="section">{Locale.label("person.phone")}</div>
             {(["homePhone", "workPhone", "mobilePhone"] as const).map((field) => {
-              const labelKey = field === "homePhone" ? "people.personEdit.home" : field === "workPhone" ? "people.personEdit.work" : "people.personEdit.mobile";
+              const labelKey = field === "homePhone" ? "people.personView.home" : field === "workPhone" ? "people.personView.work" : "people.personView.mobile";
               return (
-                <Controller key={field} name={`contactInfo.${field}`} control={control} rules={{ validate: phoneRules }} render={({ field: f, fieldState }) => (
-                  <MuiTelInput fullWidth id={field} label={Locale.label(labelKey)} value={f.value?.split("x")[0] ?? ""} onChange={(v) => { const ext = f.value?.split("x")[1] ?? ""; f.onChange(ext ? v + "x" + ext : v); }} defaultCountry="US" focusOnSelectCountry slotProps={phoneSlotProps} error={!!fieldState.error} MenuProps={phoneMenuProps} helperText={phoneHelperText(!!fieldState.error)} />
+                <Controller key={field} name={`contactInfo.${field}`} control={control} render={({ field: f }) => (
+                  <MuiTelInput fullWidth id={field} label={Locale.label(labelKey)} value={f.value?.split("x")[0] ?? ""} onChange={(v) => { const ext = f.value?.split("x")[1] ?? ""; f.onChange(ext ? v + "x" + ext : v); }} defaultCountry="US" forceCallingCode focusOnSelectCountry slotProps={phoneSlotProps} MenuProps={phoneMenuProps} />
                 )} />
               );
             })}
@@ -349,7 +348,7 @@ export const PersonEdit = memo((props: Props) => {
           <Grid size={{ md: 1 }}>
             <div className="section">{Locale.label("people.personEdit.exten")}</div>
             {(["homePhone", "workPhone", "mobilePhone"] as const).map((field) => {
-              const labelKey = field === "homePhone" ? "people.personEdit.home" : field === "workPhone" ? "people.personEdit.work" : "people.personEdit.mobile";
+              const labelKey = field === "homePhone" ? "people.personView.home" : field === "workPhone" ? "people.personView.work" : "people.personView.mobile";
               return (
                 <Controller key={field} name={`contactInfo.${field}`} control={control} render={({ field: f }) => (
                   <TextField fullWidth label={Locale.label(labelKey)} value={f.value?.split("x")[1] ?? ""} onChange={(ev) => { const base = f.value?.split("x")[0] ?? ""; f.onChange(base + "x" + ev.target.value); }} InputProps={{ inputProps: { maxLength: 4 } }} placeholder={Locale.label("placeholders.person.phoneExt")} />
