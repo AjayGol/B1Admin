@@ -2795,6 +2795,8 @@
       "churchesSubtitle": "Search and manage all churches",
       "impersonateSubtitle": "Log in as another user for support",
       "impersonateUser": "Impersonate User",
+      "jobs": "Background Jobs",
+      "jobsSubtitle": "Last run and failures for scheduled jobs",
       "location": "Location",
       "noChurch": "No churches found.  Please search for a different name.",
       "noUsers": "No users found. Please search for a different name or email.",
@@ -2813,6 +2815,8 @@
       "translationSubtitle": "Look up translated locale strings",
       "usageSubtitle": "View trends in server usage",
       "usageTrends": "Usage Trends",
+      "users": "Users",
+      "usersSubtitle": "Look up any user account for support",
       "valueNotes": "Notes on How Values are Calculated"
     },
     "churchesTab": {
@@ -2827,6 +2831,18 @@
       "searchAria": "Search users to impersonate",
       "searchLabel": "User email",
       "searchPlaceholder": "Search by login email"
+    },
+    "jobsTab": {
+      "duration": "Duration",
+      "failed": "Failed",
+      "job": "Job",
+      "lastRun": "Last Run",
+      "loadError": "Unable to load job runs.",
+      "noRuns": "No job runs recorded yet.",
+      "recentFailures": "Recent Failures",
+      "subtitle": "Latest run of each scheduled job. Runs are recorded by the timer handlers and kept for 30 days.",
+      "success": "Success",
+      "title": "Background Jobs"
     },
     "reportPage": {
       "adminOnly": "Admin Only",
@@ -2853,6 +2869,20 @@
     },
     "translationTab": {
       "searchTranslationStatsAria": "Search translation statistics"
+    },
+    "usersTab": {
+      "access": "Access",
+      "description": "Search all user accounts by name or email to see their churches and login activity.",
+      "email": "Email",
+      "lastLogin": "Last Login",
+      "member": "Member",
+      "name": "Name",
+      "noChurches": "This user is not linked to any churches.",
+      "searchAria": "Search users",
+      "searchLabel": "Name or email",
+      "staff": "Staff",
+      "subDomain": "Subdomain",
+      "title": "User Lookup"
     }
   },
   "settings": {
