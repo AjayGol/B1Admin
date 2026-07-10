@@ -1,7 +1,6 @@
 "use client";
 
-import { ApiHelper, ImageEditor, Locale, TabPanel } from "@churchapps/apphelper";
-import { FileHelper } from "@churchapps/apphelper/dist/helpers/FileHelper.js";
+import { ApiHelper, FileHelper, ImageEditor, Locale, TabPanel } from "@churchapps/apphelper";
 import { CommonEnvironmentHelper } from "@churchapps/helpers";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid, InputLabel, MenuItem, Select, Tab, Tabs } from "@mui/material";
 import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
@@ -34,7 +33,7 @@ export const GalleryModal: React.FC<Props> = (props: Props) => {
 
   const loadData = () => { ApiHelper.get("/gallery/" + aspectRatio.toString(), "ContentApi").then((data: any) => setImages(data.images)); };
 
-  const handleImageUpdated = async (dataUrl: string) => {
+  const handleImageUpdated = async (dataUrl?: string) => {
 
     if (!dataUrl) {
       console.warn("No dataUrl provided to handleImageUpdated");
