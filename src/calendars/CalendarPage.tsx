@@ -26,8 +26,10 @@ import { HeaderPrimaryButton, HeaderSecondaryButton } from "../components/ui/hea
 const printStyles = `@media print {
   body * { visibility: hidden; }
   .print-area, .print-area * { visibility: visible; }
-  .print-area { position: absolute; left: 0; top: 0; width: 100%; border: none !important; }
-  .print-area .rbc-calendar { height: 9.5in !important; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important; }
+  .print-area .rbc-calendar { height: 7.8in !important; }
+  .print-area .rbc-calendar:has(.rbc-agenda-view) { height: auto !important; }
+  .print-area .no-print, .print-area .no-print *, .print-area .rbc-btn-group { display: none !important; }
 }`;
 
 export const CalendarPage = () => {
