@@ -569,6 +569,7 @@
     "peopleSearch": {
       "ariaSearch": "Search people",
       "ariaSearchBox": "searchBox",
+      "clearSearch": "Clear Search",
       "display": "Display",
       "noResults": "No people found matching your search criteria.",
       "photo": "Photo",

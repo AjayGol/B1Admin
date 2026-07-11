@@ -98,7 +98,7 @@ export const PeopleSearch = () => {
                         px: 1
                       }}
                     >
-                      Clear Search
+                      {Locale.label("dashboard.peopleSearch.clearSearch")}
                     </Button>
                   )}
                   <Button

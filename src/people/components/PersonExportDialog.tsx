@@ -180,7 +180,10 @@ export const PersonExportDialog: React.FC<Props> = memo((props) => {
   ];
 
   const buildCsvValue = (value: unknown) => {
-    const normalized = String(value ?? "");
+    let normalized = String(value ?? "");
+    // Neutralize CSV formula injection: a leading =,+,-,@ or control char can execute as a
+    // formula when the export is opened in Excel/Sheets. Prefix with a quote to defuse it.
+    if (/^[=+\-@\t\r]/.test(normalized)) normalized = "'" + normalized;
     if (normalized.includes(",") || normalized.includes("\"") || normalized.includes("\n") || normalized.includes("\r")) {
       return `"${normalized.replace(/"/g, "\"\"")}"`;
     }
