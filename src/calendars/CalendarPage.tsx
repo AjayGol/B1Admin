@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   Typography,
   Grid,
@@ -12,10 +12,10 @@ import {
   Stack,
   TableHead
 } from "@mui/material";
-import { Delete as DeleteIcon, CalendarMonth as CalendarIcon, Groups as GroupsIcon, Add as AddIcon, Print as PrintIcon, UploadFile as ImportIcon } from "@mui/icons-material";
+import { Delete as DeleteIcon, CalendarMonth as CalendarIcon, Groups as GroupsIcon, Add as AddIcon, Print as PrintIcon, UploadFile as ImportIcon, EventAvailable as ApprovalsIcon } from "@mui/icons-material";
 import { ApiHelper, UserHelper, Loading, PageHeader, Locale, Permissions } from "@churchapps/apphelper";
 import { type CuratedCalendarInterface, type GroupInterface, type CuratedEventInterface } from "@churchapps/helpers";
-import { useConfirmDelete, useRequirePermission } from "../hooks";
+import { useConfirmDelete, useRequirePermission, usePendingApprovalsCount } from "../hooks";
 import { CuratedCalendar } from "./components/CuratedCalendar";
 import { NewEventModal } from "./components/NewEventModal";
 import { ImportIcsModal } from "./components/ImportIcsModal";
@@ -41,6 +41,7 @@ export const CalendarPage = () => {
   const [showImport, setShowImport] = useState(false);
   const { confirm, ConfirmDialogElement } = useConfirmDelete();
   const denied = useRequirePermission(Permissions.contentApi.content.edit);
+  const pendingApprovals = usePendingApprovalsCount();
 
   const curatedCalendarId = params.id;
 
@@ -89,6 +90,11 @@ export const CalendarPage = () => {
         title={currentCalendar?.name || Locale.label("calendars.calendarPage.calendar")}
         subtitle={Locale.label("calendars.calendarPage.subtitle")}
       >
+        {pendingApprovals > 0 && (
+          <HeaderSecondaryButton startIcon={<ApprovalsIcon />} {...({ component: Link, to: "/calendars/approvals" } as any)} data-testid="pending-approvals-link">
+            {Locale.label("calendars.calendarPage.pendingApprovals").replace("{count}", String(pendingApprovals))}
+          </HeaderSecondaryButton>
+        )}
         <HeaderSecondaryButton startIcon={<ImportIcon />} onClick={() => setShowImport(true)} data-testid="import-ics-button">
           {Locale.label("calendars.calendarPage.importIcs")}
         </HeaderSecondaryButton>

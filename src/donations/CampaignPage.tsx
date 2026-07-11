@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type CampaignInterface, type CampaignProgressInterface, type PledgeInterface, type PledgeProgressRowInterface, type PledgeStatus } from "../helpers";
 import { CampaignEdit, PledgeEdit } from "./components";
 import { AppIconButton } from "../components/ui/AppIconButton";
-import { CardWithHeader, EmptyState, ExportButton, PageHeaderStats, SortableTableHead, HeaderPrimaryButton, HeaderSecondaryButton, hoverRowSx, type SortDirection } from "../components/ui";
+import { Breadcrumbs, type BreadcrumbItem, CardWithHeader, EmptyState, ExportButton, PageHeaderStats, SortableTableHead, HeaderPrimaryButton, HeaderSecondaryButton, hoverRowSx, type SortDirection } from "../components/ui";
 
 const statusColors: Record<PledgeStatus, "default" | "info" | "success" | "warning"> = {
   notStarted: "default",
@@ -162,9 +162,14 @@ export const CampaignPage = () => {
 
   if (!UserHelper.checkAccess(Permissions.givingApi.donations.viewSummary)) return <></>;
 
+  const breadcrumbItems: BreadcrumbItem[] = [
+    { label: Locale.label("components.wrapper.don"), path: "/donations" },
+    { label: campaign?.name || "" }
+  ];
+
   return (
     <>
-      <PageHeader icon={<CampaignIcon />} title={campaign?.name || ""} subtitle={Locale.label("donations.campaignPage.subtitle")}>
+      <PageHeader icon={<CampaignIcon />} title={campaign?.name || ""} subtitle={Locale.label("donations.campaignPage.subtitle")} breadcrumbs={<Breadcrumbs items={breadcrumbItems} showHome={true} />}>
         {progress.data && (
           <PageHeaderStats
             spread

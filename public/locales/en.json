@@ -229,6 +229,7 @@
       "importIcs": "Import .ics",
       "newEvent": "New Event",
       "noGroupsAdded": "No groups added yet",
+      "pendingApprovals": "{count} pending approvals",
       "print": "Print",
       "subtitle": "Manage calendar events and groups"
     },
@@ -559,6 +560,11 @@
       "upcomingEventsTitle": "See What's Happening"
     },
     "myGroups": "My Groups",
+    "needsAttention": {
+      "approvals": "{count} pending calendar approvals",
+      "joinRequests": "{count} pending group join requests",
+      "title": "Needs attention"
+    },
     "peopleSearch": {
       "ariaSearch": "Search people",
       "ariaSearchBox": "searchBox",
@@ -1232,11 +1238,13 @@
       "groups": "Groups",
       "labels": "Labels",
       "noGroupMsg": "No groups found. Please create a group.",
+      "noMatchMsg": "No groups match your search.",
       "pendingRequestSingular": "{count} pending request",
       "pendingRequests": "{count} pending requests",
       "pers": "1 person",
       "ppl": "People",
       "restore": "Restore",
+      "searchPlaceholder": "Search groups...",
       "showArchived": "Show archived",
       "spPpl": " people",
       "subtitle": {
@@ -1337,6 +1345,11 @@
     "sessionEdit": {
       "deleteConfirm": "Are you sure you wish to permanently delete this session?",
       "sesEdit": "Edit Session"
+    },
+    "sessionsDisabled": {
+      "description": "Turn on attendance tracking to record sessions and check-ins for this group.",
+      "enable": "Enable Attendance",
+      "title": "Attendance tracking isn't enabled"
     },
     "tabs": {
       "mem": "Members",
