@@ -2,22 +2,43 @@
 
 # B1Admin
 
+[![License](https://img.shields.io/github/license/ChurchApps/B1Admin?style=flat-square)](https://github.com/ChurchApps/B1Admin/blob/main/LICENSE)
+[![Stars](https://img.shields.io/github/stars/ChurchApps/B1Admin?style=flat-square&color=yellow)](https://github.com/ChurchApps/B1Admin/stargazers)
+[![Last Commit](https://img.shields.io/github/last-commit/ChurchApps/B1Admin?style=flat-square)](https://github.com/ChurchApps/B1Admin/commits)
+[![Sponsor](https://img.shields.io/badge/Sponsor-ea4aaa?style=flat-square&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/ChurchApps)
+[![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=slack&logoColor=white)](https://join.slack.com/t/livechurchsolutions/shared_invite/zt-i88etpo5-ZZhYsQwQLVclW12DKtVflg)
+
 > **B1Admin** is completely free, open-source church management software that allows you to manage key data on church members and visitors. It offers comprehensive features including member and guest information tracking, attendance management with a self check-in app, group coordination, donation tracking with detailed reports, and custom form creation. Visit <a href="https://b1.church/">https://b1.church/</a> to learn more.
 
-<div style="display: flex;gap: 10px;">
-    <img style="width: 49%;" src="https://github.com/ChurchApps/B1Admin/assets/1447203/ccb5dc7b-8c0d-4320-abac-a3128c42beff">
-    <img style="width: 49%;" src="https://github.com/ChurchApps/B1Admin/assets/1447203/ac8593f1-0ae7-45aa-972e-82eaaf0dd639">
-</div>
-<div style="display: flex;gap: 10px;margin-top: 10px;">
-    <img style="width: 49%;" src="https://github.com/ChurchApps/B1Admin/assets/1447203/20f41345-da7d-460a-a64f-224b612ad976">
-    <img style="width: 49%;" src="https://github.com/ChurchApps/B1Admin/assets/1447203/ab7c109b-e4e4-4ac5-8b10-fa8cd633ccfd">
-</div>
+<p align="center">
+    <img width="100%" alt="B1Admin demo — people, groups, attendance, and donations" src="https://raw.githubusercontent.com/ChurchApps/B1Admin/main/public/images/b1admin-demo.gif">
+</p>
+
+## 🚀 Self-Hosting (Beta)
+
+Run your own private instance — B1Admin, the B1 member portal, the API, and a MySQL database.
+
+### Docker
+
+```bash
+git clone https://github.com/ChurchApps/B1Admin.git
+cd B1Admin
+docker compose up -d
+```
+
+Then open http://localhost:3101 and register — the first account becomes the server admin. See the [Docker self-hosting guide](https://support.churchapps.org/docs/developer/deployment/docker) for custom domains, email, backups, and updating.
+
+### Railway
+
+Prefer managed hosting? Deploy the same stack with one click ([guide](https://support.churchapps.org/docs/developer/deployment/railway-template)):
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/b1-template)
 
 ## Get Involved
 
 ### 🤝 Help Support Us
 
-The only reason this program is free is because of the generous support from users. If you want to support us to keep this free, please head over to [ChurchApps](https://churchapps/partner) or [sponsor us on GitHub](https://github.com/sponsors/ChurchApps/). Thank you so much!
+The only reason this program is free is because of the generous support from users. If you want to support us to keep this free, please head over to [ChurchApps](https://churchapps.org/partner) or [sponsor us on GitHub](https://github.com/sponsors/ChurchApps/). Thank you so much!
 
 ### 🏘️ Join the Community
 
@@ -59,9 +80,3 @@ To accept online donations you must first register for developer credentials wit
 After obtaining your tokens, open **Settings → Giving Settings** in B1Admin, select the provider, paste in your Public and Private keys, and toggle "Pay Fees" as desired. Finally, configure your fee parameters in **Fee Options**.
 
 [![B1Admin Dev Setup](https://img.youtube.com/vi/5zsEJEp6yMw/0.jpg)](https://www.youtube.com/watch?v=5zsEJEp6yMw)
-
-### 🚀 Self-Hosting (Beta)
-
-If you'd like to deploy your own copy on Railway, you can use our template below. This is currently in beta — feedback welcome.
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/b1-template)
