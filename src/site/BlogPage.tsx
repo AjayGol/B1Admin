@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Card, Chip, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
-import { Add as AddIcon, Article as ArticleIcon, Delete as DeleteIcon, Edit as EditIcon, RssFeed as RssFeedIcon } from "@mui/icons-material";
-import { ApiHelper, PageHeader, Locale, Permissions } from "@churchapps/apphelper";
+import { Link } from "react-router-dom";
+import { Alert, Box, Button, Card, Chip, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Add as AddIcon, Article as ArticleIcon, Delete as DeleteIcon, Edit as EditIcon, OpenInNew as OpenInNewIcon, RssFeed as RssFeedIcon } from "@mui/icons-material";
+import { ApiHelper, PageHeader, Locale, Permissions, UserHelper } from "@churchapps/apphelper";
 import { BlogPostEdit } from "./components";
 import { AppIconButton } from "../components/ui/AppIconButton";
 import { HeaderPrimaryButton } from "../components/ui";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { formatDateSafe } from "../helpers/DateFormatHelper";
+import { EnvironmentHelper } from "../helpers/EnvironmentHelper";
 import { useRequirePermission } from "../hooks";
 import type { PostInterface } from "../helpers/Interfaces";
+
+const postState = (p: PostInterface): "draft" | "scheduled" | "published" => {
+  if (!p.publishDate) return "draft";
+  return new Date(p.publishDate) > new Date() ? "scheduled" : "published";
+};
 
 export const BlogPage = () => {
   const [posts, setPosts] = useState<PostInterface[]>([]);
@@ -21,10 +28,17 @@ export const BlogPage = () => {
 
   useEffect(loadData, []);
 
+  const clearSiteCache = () => {
+    const subDomain = UserHelper.currentUserChurch?.church?.subDomain;
+    if (!subDomain) return;
+    const b1Url = EnvironmentHelper.B1Url.replace("{subdomain}", subDomain);
+    fetch(b1Url + "/api/revalidate/" + subDomain, { method: "POST" }).catch(() => { /* best-effort */ });
+  };
+
   const handleDelete = () => {
     const p = deletePost;
     if (!p?.id) return;
-    ApiHelper.delete("/posts/" + p.id, "ContentApi").then(() => { setDeletePost(null); loadData(); });
+    ApiHelper.delete("/posts/" + p.id, "ContentApi").then(() => { setDeletePost(null); clearSiteCache(); loadData(); });
   };
 
   const denied = useRequirePermission(Permissions.contentApi.content.edit);
@@ -32,7 +46,7 @@ export const BlogPage = () => {
 
   return (
     <>
-      {editPost && <BlogPostEdit post={editPost} updatedCallback={() => { setEditPost(null); loadData(); }} onDone={() => setEditPost(null)} />}
+      {editPost && <BlogPostEdit post={editPost} categories={[...new Set(posts.map((p) => p.category).filter(Boolean))].sort() as string[]} existingSlugs={posts.filter((p) => p.id !== editPost.id).map((p) => p.slug || "")} updatedCallback={() => { setEditPost(null); clearSiteCache(); loadData(); }} onDone={() => setEditPost(null)} />}
       <ConfirmDialog
         open={!!deletePost}
         title={Locale.label("site.blog.deleteTitle")}
@@ -48,6 +62,9 @@ export const BlogPage = () => {
         </HeaderPrimaryButton>
       </PageHeader>
       <Box sx={{ p: 3 }}>
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {Locale.label("site.blog.navHint")} <Link to="/site/pages">{Locale.label("helpers.secondaryMenuHelper.pages")}</Link>
+        </Alert>
         <Card sx={{ borderRadius: 2, border: "1px solid", borderColor: "grey.200" }}>
           <Box sx={{ p: 2, borderBottom: 1, borderColor: "var(--border-light)" }}>
             <Stack direction="row" spacing={1} alignItems="center">
@@ -80,11 +97,14 @@ export const BlogPage = () => {
                         <Stack direction="row">
                           <AppIconButton label={Locale.label("common.edit")} icon={<EditIcon />} onClick={() => setEditPost(post)} data-testid="edit-post-button" />
                           <AppIconButton label={Locale.label("common.delete")} icon={<DeleteIcon />} intent="remove" onClick={() => setDeletePost(post)} data-testid="delete-post-button" />
+                          {postState(post) === "published" && (
+                            <AppIconButton label={Locale.label("site.blog.view")} icon={<OpenInNewIcon />} onClick={() => window.open(EnvironmentHelper.B1Url.replace("{subdomain}", UserHelper.currentUserChurch?.church?.subDomain || "") + "/blog/" + post.slug, "_blank")} data-testid="view-post-button" />
+                          )}
                         </Stack>
                       </TableCell>
                       <TableCell><Typography variant="body2">{post.title}</Typography></TableCell>
                       <TableCell>
-                        <Chip size="small" label={post.publishDate ? Locale.label("site.blogEdit.published") : Locale.label("site.blogEdit.draft")} color={post.publishDate ? "success" : "default"} sx={{ fontSize: "0.7rem", height: 20 }} />
+                        <Chip size="small" label={Locale.label("site.blog." + postState(post))} color={{ draft: "default", scheduled: "warning", published: "success" }[postState(post)] as any} sx={{ fontSize: "0.7rem", height: 20 }} />
                       </TableCell>
                       <TableCell><Typography variant="body2">{formatDateSafe(post.publishDate)}</Typography></TableCell>
                       <TableCell><Typography variant="body2">{post.category}</Typography></TableCell>
