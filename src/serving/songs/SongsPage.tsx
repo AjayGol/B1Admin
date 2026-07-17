@@ -48,7 +48,15 @@ export const SongsPage = memo(() => {
       const existing = await ApiHelper.get("/arrangements/songDetail/" + songDetail.id, "ContentApi");
       if (existing.length > 0) {
         const song = await ApiHelper.get("/songs/" + existing[0].songId, "ContentApi");
-        selectedSong = song;
+        if (song?.id) {
+          // Song and arrangement both exist — use them
+          selectedSong = song;
+        } else {
+          // Arrangement exists but song record is missing (orphaned) — create it
+          const s: SongInterface = { name: songDetail.title, songDetailId: songDetail.id, dateAdded: new Date() };
+          const newSongs = await ApiHelper.post("/songs", [s], "ContentApi");
+          selectedSong = newSongs[0];
+        }
       } else {
         const s: SongInterface = { name: songDetail.title, songDetailId: songDetail.id, dateAdded: new Date() };
         const newSongs = await ApiHelper.post("/songs", [s], "ContentApi");
