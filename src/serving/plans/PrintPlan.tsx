@@ -104,6 +104,22 @@ export const PrintPlan = () => {
     } else if (planData?.contentId && (planData?.contentType === "venue" || planData?.contentType === "lesson")) {
       try {
         currentFeed = await ApiHelper.get("/venues/public/feed/" + planData.contentId, "LessonsApi");
+        
+        if (currentFeed?.sections) {
+          const planSectionNames = planItemsData.map((pi: any) => pi.label || "");
+          currentFeed.sections = currentFeed.sections.filter((s: any) => planSectionNames.includes(s.name));
+          
+          currentFeed.sections.forEach((s: any) => {
+            const sectionItem = planItemsData.find((pi: any) => pi.label === s.name);
+            if (sectionItem && sectionItem.children) {
+              const planActionNames = sectionItem.children.map((child: any) => child.label || child.description || "");
+              s.actions = s.actions.filter((a: any) => planActionNames.includes(a.content));
+            } else {
+              s.actions = [];
+            }
+          });
+        }
+        
         setFeed(currentFeed);
       } catch (error) {
         console.error("Failed to load lesson feed:", error);
