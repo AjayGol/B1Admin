@@ -1349,7 +1349,7 @@
         "changeImage": "이미지 변경",
         "duration": "지속 시간 (초)",
         "enableIdleScreen": "유휴 화면 활성화",
-        "headerSubtitle": "키오스크 색상은 설정 > 앱 테마에서 관리합니다. 아래에서 배경 이미지 및 유휴 화면 동작을 설정하세요.",
+        "headerSubtitle": "키오스크 색상은 모바일 > 앱 테마에서 관리합니다. 아래에서 배경 이미지 및 유휴 화면 동작을 설정하세요.",
         "idleScreen": "유휴 화면 / 스크린세이버",
         "sectionTitle": "키오스크 테마",
         "slides": "슬라이드",
@@ -1515,7 +1515,6 @@
       "status": "상태:"
     },
     "householdEdit": {
-      "addMatch": "일치하는 주소",
       "addMember": "가구 구성원 추가",
       "blankMsg": "가구 이름을 입력해주세요.",
       "child": "자녀",
@@ -1524,8 +1523,7 @@
       "houseName": "가구 이름",
       "householdNameAria": "가구 이름",
       "other": "기타",
-      "spouse": "배우자",
-      "updQuestion": "업데이트하시겠습니까"
+      "spouse": "배우자"
     },
     "lists": {
       "autoRefresh": "매일 밤 새로 고침",
@@ -1552,8 +1550,7 @@
       "title": "저장된 목록"
     },
     "merge": {
-      "merge": "병합",
-      "mergeRec": "레코드 병합"
+      "merge": "병합"
     },
     "mergeModal": {
       "cancel": "취소",
@@ -2829,7 +2826,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2840,44 +2840,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -2885,11 +2961,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3932,7 +4019,6 @@
     "files": {
       "confirmDelete": "삭제하시겠습니까",
       "storageInfo": "교회 웹사이트에 일반적으로 필요한 PDF 및 기타 문서를 저장하기 위해 100MB의 저장 공간이 무료로 제공됩니다. 추가 공간이 필요한 경우 Google Drive 또는 Dropbox를 사용하여 파일을 저장하는 것이 좋습니다.",
-      "upload": "업로드",
       "uploadFiles": "파일 업로드"
     },
     "filesManager": {
@@ -4133,13 +4219,13 @@
       "noPagesFound": "페이지를 찾을 수 없습니다",
       "pages": "페이지",
       "path": "길",
-      "previewPage": "미리보기 페이지",
       "showLogin": "로그인 표시",
       "showLoginTooltip": "탐색 표시줄에 로그인 버튼 표시",
       "startFromTemplate": "템플릿으로 시작하기",
       "subtitle": "웹사이트 페이지, 콘텐츠, 탐색 관리",
       "toggleLoginVisibility": "로그인 버튼 가시성 전환",
       "totalPages": "총 페이지",
+      "viewLivePage": "미리보기 페이지",
       "websitePages": "웹사이트 페이지"
     },
     "paletteEdit": {
@@ -4156,7 +4242,7 @@
       "darkDesc": "가장 어두운 색상 — 본문 텍스트",
       "error": "오류",
       "errorDesc": "오류 및 위험한 작업",
-      "headerSubtitle": "웹사이트의 색상 구성표를 사용자 지정하세요. 모바일 앱, 회원 포털 및 키오스크 색상은 설정 > 앱 테마로 이동하세요.",
+      "headerSubtitle": "웹사이트의 색상 구성표를 사용자 지정하세요. 모바일 앱, 회원 포털 및 키오스크 색상은 모바일 > 앱 테마로 이동하세요.",
       "headerTitle": "색상 팔레트",
       "light": "밝음",
       "lightAccent": "밝은 강조",
@@ -4545,6 +4631,7 @@
       "name": "편곡 이름",
       "title": "편곡"
     },
+    "arrangements": "편곡",
     "audio": {
       "deleteConfirm": "이 오디오 파일을 삭제하시겠습니까?",
       "upload": "오디오 업로드"
@@ -4611,11 +4698,6 @@
     "oldArrangement": {
       "key": "키"
     },
-    "oldArrangements": {
-      "arrangements": "편곡",
-      "editArrangementAria": "편곡 편집",
-      "noArrangements": "편곡을 찾을 수 없습니다."
-    },
     "praiseChartsProducts": {
       "close": "닫기",
       "download": "다운로드",
@@ -4632,7 +4714,9 @@
       "inputPlaceholder": "노래 제목 또는 아티스트 이름 입력...",
       "noResults": "검색에 대한 노래를 찾을 수 없습니다.",
       "placeholder": "제목이나 아티스트로 노래 검색...",
-      "title": "노래 검색"
+      "title": "노래 검색",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "첫 번째 링크 추가",
@@ -4677,17 +4761,6 @@
     "providedBy": "제공"
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "어디에서나",
-      "campus": "캠퍼스",
-      "eventType": "이벤트 유형",
-      "group": "그룹",
-      "hasAtt": "참석함",
-      "hasNoAtt": "참석하지 않음",
-      "op": "연산자",
-      "serv": "서비스",
-      "servTime": "서비스 시간"
-    },
     "conditionDate": {
       "absolute": "절대값",
       "curMonth": "이번 달",

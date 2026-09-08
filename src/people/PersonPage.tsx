@@ -23,7 +23,7 @@ export const PersonPage = () => {
   const [confidentialConversationId, setConfidentialConversationId] = React.useState("");
 
   React.useEffect(() => {
-    if (!canViewConfidentialNotes || !params.id || params.id === "add") return;
+    if (!canViewConfidentialNotes || !params.id) return;
     ApiHelper.get("/conversations/messages/personConfidential/" + params.id + "?limit=1", "MessagingApi")
       .then((data: ConversationInterface[]) => setConfidentialConversationId(data?.[0]?.id || ""))
       .catch(() => setConfidentialConversationId(""));
@@ -38,7 +38,7 @@ export const PersonPage = () => {
 
   const personData = useQuery<PersonInterface | null>({
     queryKey: ["/people/" + params.id, "MembershipApi"],
-    enabled: !!(params.id && params.id !== "add"),
+    enabled: !!params.id,
     placeholderData: null
   });
 
@@ -51,7 +51,7 @@ export const PersonPage = () => {
   React.useEffect(() => { refetchRef.current = refetch; }, [refetch]);
 
   React.useEffect(() => {
-    if (!params.id || params.id === "add") return;
+    if (!params.id) return;
     const churchId = UserHelper.currentUserChurch?.church?.id;
     const personId = UserHelper.person?.id;
     const conversationId = personData.data?.conversationId;
@@ -68,34 +68,6 @@ export const PersonPage = () => {
   }, [params.id, personData.data?.conversationId]);
 
   const person = useMemo<PersonInterface | null>(() => {
-    if (params.id === "add" || !params.id) {
-      return {
-        name: {
-          first: "",
-          last: "",
-          middle: "",
-          nick: "",
-          display: ""
-        },
-        contactInfo: {
-          address1: "",
-          address2: "",
-          city: "",
-          state: "",
-          zip: "",
-          email: "",
-          homePhone: "",
-          workPhone: "",
-          mobilePhone: ""
-        },
-        membershipStatus: "Visitor",
-        gender: "",
-        birthDate: undefined,
-        maritalStatus: "",
-        nametagNotes: ""
-      };
-    }
-
     if (!personData.data) return null;
     const p: PersonInterface = personData.data;
     if (!p.contactInfo) p.contactInfo = { homePhone: "", workPhone: "", mobilePhone: "" };
@@ -105,12 +77,23 @@ export const PersonPage = () => {
       if (!p.contactInfo.workPhone) p.contactInfo.workPhone = "";
     }
     return p;
-  }, [params.id, personData.data]);
+  }, [personData.data]);
 
   // Person forms show for everyone; a stand-alone form only shows for the people it's linked to.
   const visibleForms = useMemo(() => {
-    const submittedFormIds = new Set((person?.formSubmissions || []).map((fs) => fs.formId));
-    return personForms.filter((form) => form.contentType === "person" || submittedFormIds.has(form.id));
+    const submissions = person?.formSubmissions || [];
+    const submittedFormIds = new Set(submissions.map((fs) => fs.formId));
+    const result = personForms.filter((form) => form.contentType === "person" || submittedFormIds.has(form.id));
+    // /forms omits archived forms, but archiving only stops new submissions - a form
+    // the person already filled out has to keep showing its answers, so add it back
+    // from the submission itself.
+    const listedIds = new Set(result.map((form) => form.id));
+    submissions.forEach((fs) => {
+      if (!fs.formId || !fs.form || listedIds.has(fs.formId)) return;
+      listedIds.add(fs.formId);
+      result.push({ id: fs.formId, name: fs.form.name, archived: fs.form.archived, contentType: fs.form.contentType });
+    });
+    return result;
   }, [personForms, person?.formSubmissions]);
 
   const showForms = formPermission && visibleForms.length > 0;
@@ -205,7 +188,7 @@ export const PersonPage = () => {
 
   const breadcrumbItems: BreadcrumbItem[] = [
     { label: Locale.label("components.wrapper.ppl"), path: "/people" },
-    { label: person.name?.display || Locale.label("createPerson.addNewPerson") }
+    { label: person.name?.display || "" }
   ];
 
   return (

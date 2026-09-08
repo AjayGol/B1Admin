@@ -1349,7 +1349,7 @@
         "changeImage": "Changer l'image",
         "duration": "Durée (s)",
         "enableIdleScreen": "Activer l'écran de veille",
-        "headerSubtitle": "Les couleurs du kiosque sont gérées dans Paramètres > Thème de l'application. Configurez les images d'arrière-plan et le comportement de l'écran de veille ci-dessous.",
+        "headerSubtitle": "Les couleurs du kiosque sont gérées dans Mobile > Thème de l'application. Configurez les images d'arrière-plan et le comportement de l'écran de veille ci-dessous.",
         "idleScreen": "Écran de veille / Économiseur d'écran",
         "sectionTitle": "Thème du kiosque",
         "slides": "Diapositives",
@@ -1515,7 +1515,6 @@
       "status": "Statut :"
     },
     "householdEdit": {
-      "addMatch": "adresse à correspondre",
       "addMember": "Ajouter un membre du foyer",
       "blankMsg": "Veuillez fournir un nom de ménage.",
       "child": "Enfant",
@@ -1524,8 +1523,7 @@
       "houseName": "Nom du ménage",
       "householdNameAria": "Nom du foyer",
       "other": "Autre",
-      "spouse": "Conjoint",
-      "updQuestion": "Souhaitez-vous mettre à jour"
+      "spouse": "Conjoint"
     },
     "lists": {
       "autoRefresh": "Actualiser chaque nuit",
@@ -1552,8 +1550,7 @@
       "title": "Listes enregistrées"
     },
     "merge": {
-      "merge": "fusionner",
-      "mergeRec": "Fusionner les enregistrements"
+      "merge": "fusionner"
     },
     "mergeModal": {
       "cancel": "Annuler",
@@ -2829,7 +2826,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2840,44 +2840,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -2885,11 +2961,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3932,7 +4019,6 @@
     "files": {
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer",
       "storageInfo": "100 Mo d'espace de stockage sont fournis gratuitement pour stocker des PDF et autres documents couramment nécessaires pour les sites web d'église. Nous suggérons d'utiliser Google Drive ou Dropbox pour stocker les fichiers si un espace supplémentaire est nécessaire.",
-      "upload": "Télécharger",
       "uploadFiles": "Télécharger des Fichiers"
     },
     "filesManager": {
@@ -4133,13 +4219,13 @@
       "noPagesFound": "Aucune page trouvée",
       "pages": "Pages",
       "path": "Chemin",
-      "previewPage": "Page d'aperçu",
       "showLogin": "Afficher la connexion",
       "showLoginTooltip": "Afficher le bouton de connexion dans la barre de navigation",
       "startFromTemplate": "Commencer à partir d'un modèle",
       "subtitle": "Gérez les pages, le contenu et la navigation de votre site Web",
       "toggleLoginVisibility": "Basculer la visibilité du bouton de connexion",
       "totalPages": "Nombre total de pages",
+      "viewLivePage": "Page d'aperçu",
       "websitePages": "Pages du site Web"
     },
     "paletteEdit": {
@@ -4156,7 +4242,7 @@
       "darkDesc": "Teinte la plus foncée — texte du corps",
       "error": "Erreur",
       "errorDesc": "Erreurs et actions destructives",
-      "headerSubtitle": "Personnalisez le schéma de couleurs de votre site web. Pour les couleurs de l'application mobile, du portail des membres et du kiosque, allez dans Paramètres > Thème de l'application.",
+      "headerSubtitle": "Personnalisez le schéma de couleurs de votre site web. Pour les couleurs de l'application mobile, du portail des membres et du kiosque, allez dans Mobile > Thème de l'application.",
       "headerTitle": "Palette de couleurs",
       "light": "Clair",
       "lightAccent": "Accent clair",
@@ -4545,6 +4631,7 @@
       "name": "Nom de l'arrangement",
       "title": "Arrangement"
     },
+    "arrangements": "Arrangements",
     "audio": {
       "deleteConfirm": "Voulez-vous vraiment supprimer ce fichier audio ?",
       "upload": "Importer un audio"
@@ -4611,11 +4698,6 @@
     "oldArrangement": {
       "key": "Tonalité"
     },
-    "oldArrangements": {
-      "arrangements": "Arrangements",
-      "editArrangementAria": "Modifier l'arrangement",
-      "noArrangements": "Aucun arrangement trouvé."
-    },
     "praiseChartsProducts": {
       "close": "Fermer",
       "download": "Télécharger",
@@ -4632,7 +4714,9 @@
       "inputPlaceholder": "Entrez le titre du chant ou le nom de l'artiste...",
       "noResults": "Aucun chant trouvé pour votre recherche.",
       "placeholder": "Rechercher des chants par titre ou artiste...",
-      "title": "Rechercher un Chant"
+      "title": "Rechercher un Chant",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "Ajouter le premier lien",
@@ -4677,17 +4761,6 @@
     "providedBy": "Fourni par"
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "N'importe où",
-      "campus": "Campus",
-      "eventType": "Type d'événement",
-      "group": "Groupe",
-      "hasAtt": "a assisté",
-      "hasNoAtt": "n'a pas assisté",
-      "op": "Opérateur",
-      "serv": "Service",
-      "servTime": "Heure de service"
-    },
     "conditionDate": {
       "absolute": "Absolu",
       "curMonth": "Mois en cours",

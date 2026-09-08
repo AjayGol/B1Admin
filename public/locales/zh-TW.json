@@ -1349,7 +1349,7 @@
         "changeImage": "更換圖片",
         "duration": "時長（秒）",
         "enableIdleScreen": "啟用待機螢幕",
-        "headerSubtitle": "自助服務機顏色在設定 > 應用主題中管理。在下方配置背景圖片和待機螢幕行為。",
+        "headerSubtitle": "自助服務機顏色在行動裝置 > 應用主題中管理。在下方配置背景圖片和待機螢幕行為。",
         "idleScreen": "待機螢幕 / 屏保",
         "sectionTitle": "自助服務機主題",
         "slides": "幻燈片",
@@ -1515,7 +1515,6 @@
       "status": "狀態："
     },
     "householdEdit": {
-      "addMatch": "要匹配的地址",
       "addMember": "新增家庭成員",
       "blankMsg": "請提供一個家庭名稱。",
       "child": "子女",
@@ -1524,8 +1523,7 @@
       "houseName": "家庭名稱",
       "householdNameAria": "家庭名稱",
       "other": "其他",
-      "spouse": "配偶",
-      "updQuestion": "您想更新嗎"
+      "spouse": "配偶"
     },
     "lists": {
       "autoRefresh": "每晚重新整理",
@@ -1552,8 +1550,7 @@
       "title": "已儲存的列表"
     },
     "merge": {
-      "merge": "合併",
-      "mergeRec": "合併記錄"
+      "merge": "合併"
     },
     "mergeModal": {
       "cancel": "取消",
@@ -2829,7 +2826,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2840,44 +2840,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -2885,11 +2961,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3932,7 +4019,6 @@
     "files": {
       "confirmDelete": "您確定要刪除",
       "storageInfo": "免費提供100 MB的儲存空間用於儲存教會網站通常需要的PDF和其他文件。如果需要額外空間，我們建議使用Google Drive或Dropbox儲存檔案。",
-      "upload": "上傳",
       "uploadFiles": "上傳檔案"
     },
     "filesManager": {
@@ -4133,13 +4219,13 @@
       "noPagesFound": "沒有找到頁面",
       "pages": "頁數",
       "path": "小路",
-      "previewPage": "預覽頁面",
       "showLogin": "顯示登入",
       "showLoginTooltip": "在導航欄中顯示登入按鈕",
       "startFromTemplate": "從模板開始",
       "subtitle": "管理您的網站頁面、內容和導航",
       "toggleLoginVisibility": "切換登入按鈕可見性",
       "totalPages": "總頁數",
+      "viewLivePage": "預覽頁面",
       "websitePages": "網站頁面"
     },
     "paletteEdit": {
@@ -4156,7 +4242,7 @@
       "darkDesc": "最深色調 — 內文文字",
       "error": "錯誤",
       "errorDesc": "錯誤與危險操作",
-      "headerSubtitle": "自訂您網站的配色方案。對於行動應用程式、成員門戶和自助服務機顏色，請前往「設定 > 應用主題」。",
+      "headerSubtitle": "自訂您網站的配色方案。對於行動應用程式、成員門戶和自助服務機顏色，請前往「行動裝置 > 應用主題」。",
       "headerTitle": "調色盤",
       "light": "淺色",
       "lightAccent": "淺色強調",
@@ -4545,6 +4631,7 @@
       "name": "編曲名稱",
       "title": "編曲"
     },
+    "arrangements": "編排",
     "audio": {
       "deleteConfirm": "確定要刪除此音訊檔案嗎？",
       "upload": "上傳音訊"
@@ -4611,11 +4698,6 @@
     "oldArrangement": {
       "key": "調"
     },
-    "oldArrangements": {
-      "arrangements": "編排",
-      "editArrangementAria": "編輯編排",
-      "noArrangements": "未找到編排。"
-    },
     "praiseChartsProducts": {
       "close": "關閉",
       "download": "下載",
@@ -4632,7 +4714,9 @@
       "inputPlaceholder": "輸入歌曲標題或藝術家姓名...",
       "noResults": "未找到您搜尋的歌曲。",
       "placeholder": "按標題或藝術家搜尋歌曲...",
-      "title": "搜尋歌曲"
+      "title": "搜尋歌曲",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "新增第一個連結",
@@ -4677,17 +4761,6 @@
     "providedBy": "提供方："
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "任何地方",
-      "campus": "校園",
-      "eventType": "事件型別",
-      "group": "團體",
-      "hasAtt": "已參加",
-      "hasNoAtt": "未參加",
-      "op": "運算子",
-      "serv": "服務",
-      "servTime": "服務時間"
-    },
     "conditionDate": {
       "absolute": "絕對",
       "curMonth": "當月",

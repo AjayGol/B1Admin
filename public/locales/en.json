@@ -30,6 +30,7 @@
       "groups": "Groups",
       "scheduled": "Scheduled",
       "service": "Service",
+      "serviceTimes": "Service times",
       "services": "Services",
       "subtitle": "Track attendance for services and groups",
       "time": "Time",
@@ -38,7 +39,9 @@
     },
     "attendanceSetup": {
       "manageCampuses": "Manage Campuses",
+      "namedAttendanceHelp": "To take named attendance, open the group → Sessions. This page only assigns groups to service times.",
       "setupMessage": "Set up campuses, services, and service times to begin tracking attendance.",
+      "title": "Service structure",
       "unassigned": "Unassigned"
     },
     "checkinType": {
@@ -59,6 +62,7 @@
       "service": "Service",
       "serviceTime": "Service Time",
       "title": "Enter Headcount",
+      "totalOnlyHint": "This is a total count, not a named roster. Record who attended on the group's Sessions tab.",
       "validate": {
         "count": "Enter a whole number of zero or more.",
         "date": "Please choose a date.",
@@ -199,7 +203,10 @@
       "cancel": "Cancel",
       "confirmDelete": "Are you sure you wish to delete this event?",
       "confirmDeleteSeries": "This is a recurring event. Deleting it will remove the entire series and all of its occurrences. Are you sure?",
+      "confirmEditSeries": "This is a recurring event. Saving changes will update the entire series and all of its occurrences. Continue?",
       "delete": "Delete",
+      "edit": "Edit",
+      "editEvent": "Edit Event",
       "manageRegistrations": "Manage Registrations",
       "noGroups": "No groups found."
     },
@@ -247,14 +254,17 @@
     },
     "eventReminders": {
       "channels": "Channels",
+      "email": "Email",
       "enableReminders": "Enable reminders",
       "maxOffsets": "Maximum of 3 times selected",
       "message": "Message (optional)",
       "messageHint": "Merge field: {{eventTitle}}",
+      "messagePlaceholder": "Don't miss it! {{eventTitle}} starts soon",
       "modeAuto": "Auto",
       "modeGroup": "Group members",
       "modeRegistrants": "Registrants only",
       "modeRegistrantsHoh": "Heads / registrants only",
+      "push": "Push",
       "timeOfDay": "Time of day",
       "timeOfDayHint": "Church local time (e.g. 9:00 AM)",
       "title": "Reminders",
@@ -347,7 +357,7 @@
     "amount": "Amount",
     "appTheme": "App Theme",
     "b1CheckIn": "B1 CheckIn",
-    "b1Mobile": "B1 Mobile",
+    "b1Mobile": "Member portal",
     "back": "Back",
     "bottom": "Bottom",
     "cancel": "Cancel",
@@ -368,6 +378,15 @@
       }
     },
     "custom": "Custom",
+    "days": {
+      "friday": "Friday",
+      "monday": "Monday",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "thursday": "Thursday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday"
+    },
     "delete": "Delete",
     "done": "Done",
     "duplicate": "Duplicate",
@@ -391,6 +410,7 @@
       "title": "Select Icon",
       "tryDifferent": "Try a different search term"
     },
+    "labels": "Labels",
     "left": "Left",
     "loading": "Loading",
     "mobile": "Mobile",
@@ -459,7 +479,8 @@
     },
     "permissionDenied": {
       "contactAdmin": "Please contact your church administrator to request access.",
-      "defaultMessage": "You do not have the required permission(s) to access this feature:"
+      "defaultMessage": "You don't have permission to view this page.",
+      "required": "Permission required"
     },
     "search": {
       "ariaSearchInput": "Search for person",
@@ -649,6 +670,7 @@
       "printDescription": "Generate a consolidated document with all giving statements for printing",
       "printStatements": "Printable Statements",
       "selectYear": "Select Year",
+      "statementFormat": "Statement format",
       "subtitle": "Download giving statements for all donors",
       "summary": "Summary",
       "title": "Batch Giving Statements",
@@ -660,8 +682,10 @@
     },
     "bulkEntry": {
       "addDonation": "Add Donation",
+      "fullEditor": "full donation editor",
       "pressEnter": "Press Enter to save and add another donation",
-      "selectPerson": "Select Person or Anonymous"
+      "selectPerson": "Select Person or Anonymous",
+      "splitFundsHint": "Need a split across funds? Use the"
     },
     "campaignEdit": {
       "allowSelfPledge": "Allow donors to pledge",
@@ -974,6 +998,7 @@
     "formEdit": {
       "access": "Form Access",
       "accessLevelAria": "Access level",
+      "addForm": "Add Form",
       "addToGroup": "Add submitters to a group",
       "addToGroupHelper": "Submitters are added to this group automatically.",
       "addToGroupNone": "None",
@@ -1016,6 +1041,8 @@
       "view": "View Only"
     },
     "formPage": {
+      "backToForms": "Back to Forms",
+      "notFound": "Form not found",
       "subtitleConfig": "Form configuration and submissions"
     },
     "formQuestionEdit": {
@@ -1057,12 +1084,15 @@
       "archForms": "Archived Forms",
       "archive": "Archive",
       "archiveFormAria": "Archive form {name}",
+      "confirmDuplicate": "Duplicate this form?",
       "confirmMsg1": "Are you sure you want to archive this form?",
       "confirmMsg2": "Are you sure you want to restore this form?",
       "duplicate": "Duplicate",
+      "duplicated": "Form duplicated",
       "forms": "Forms",
       "noArch": "No archived forms.",
       "noCustomMsg": "No custom forms have been created yet. They will appear here when added.",
+      "personProfileForm": "Person profile form",
       "restore": "Restore",
       "restoreFormAria": "Restore form {name}",
       "subtitleManage": "Create and manage custom forms",
@@ -1079,9 +1109,29 @@
     "aspectRatio": "Aspect Ratio",
     "confirmDelete": "Confirm Delete",
     "freeForm": "Free Form",
+    "gallery": "Gallery",
+    "galleryImage": "Gallery image",
+    "selectAPhoto": "Select a Photo",
+    "selectImage": "Select image",
+    "stockPhotos": "Stock Photos",
+    "upload": "Upload",
     "uploadError": "Image processing completed, but upload failed. The API may not be available in this environment."
   },
   "groups": {
+    "export": {
+      "campusId": "Campus ID",
+      "categoryName": "Category Name",
+      "churchId": "Church ID",
+      "id": "ID",
+      "joinPolicy": "Join Policy",
+      "labelCount": "Label Count",
+      "labels": "Labels",
+      "meetingLocation": "Meeting Location",
+      "meetingTime": "Meeting Time",
+      "memberCount": "Member Count",
+      "name": "Name",
+      "tags": "Tags"
+    },
     "groupAdd": {
       "add": "Add",
       "catName": "Category Name",
@@ -1259,7 +1309,9 @@
     "groupSessions": {
       "addSesMsg": "Please add a new session to continue.",
       "allYears": "All Years",
+      "assignServiceTimeHint": "Assign this group to a service time under People → Attendance → Setup.",
       "attFor": "Attendance for",
+      "confirmRemove": "Remove this person from the session's attendance?",
       "new": "New",
       "noAttendance": "No attendance records found",
       "noSesMsg": "There are no sessions.",
@@ -1273,6 +1325,7 @@
     "groupsPage": {
       "addGroup": "Add Group",
       "cat": "Category",
+      "confirmRestore": "Restore {name} from the archive?",
       "export": "Export",
       "groups": "Groups",
       "labels": "Labels",
@@ -1447,8 +1500,8 @@
       "title": "App Theme"
     },
     "b1MobilePage": {
-      "subtitle": "Configure settings for the B1 Mobile app",
-      "title": "B1 Mobile"
+      "subtitle": "Member directory, visibility, and messaging for the B1.church app",
+      "title": "Portal settings"
     },
     "checkInPage": {
       "copyLink": "Copy link",
@@ -1462,7 +1515,7 @@
         "changeImage": "Change Image",
         "duration": "Duration (s)",
         "enableIdleScreen": "Enable idle screen",
-        "headerSubtitle": "Kiosk colors are managed in Settings > App Theme. Configure background images and idle screen behavior below.",
+        "headerSubtitle": "Kiosk colors are managed in Mobile > App Theme. Configure background images and idle screen behavior below.",
         "idleScreen": "Idle Screen / Screensaver",
         "sectionTitle": "Kiosk Theme",
         "slides": "Slides",
@@ -1609,6 +1662,42 @@
       "value": "Value",
       "valuePlaceholder": "Value"
     },
+    "export": {
+      "address": "Address",
+      "address1": "Address 1",
+      "address2": "Address 2",
+      "age": "Age",
+      "anniversary": "Anniversary",
+      "birthDate": "Birth Date",
+      "campusId": "Campus ID",
+      "churchId": "Church ID",
+      "city": "City",
+      "contactCity": "Contact City",
+      "contactEmail": "Contact Email",
+      "contactState": "Contact State",
+      "contactZip": "Contact Zip",
+      "conversationId": "Conversation ID",
+      "display": "Display Name",
+      "first": "First Name",
+      "firstName": "First Name",
+      "gender": "Gender",
+      "householdId": "Household ID",
+      "id": "ID",
+      "last": "Last Name",
+      "lastName": "Last Name",
+      "membershipStatus": "Membership Status",
+      "middle": "Middle Name",
+      "middleName": "Middle Name",
+      "mobilePhone": "Mobile Phone",
+      "nametagNotes": "Nametag Notes",
+      "nick": "Nick Name",
+      "optedOut": "Opted Out",
+      "phone": "Phone",
+      "photo": "Photo",
+      "photoUpdated": "Photo Updated",
+      "state": "State",
+      "workPhone": "Work Phone"
+    },
     "gdprActions": {
       "anonymize": "Anonymize",
       "anonymizeConfirmType": "Type \"ANONYMIZE\" to confirm:",
@@ -1635,7 +1724,6 @@
       "status": "Status:"
     },
     "householdEdit": {
-      "addMatch": "address to match",
       "addMember": "Add Household Member",
       "blankMsg": "Please provide a household name.",
       "child": "Child",
@@ -1645,7 +1733,7 @@
       "householdNameAria": "Household name",
       "other": "Other",
       "spouse": "Spouse",
-      "updQuestion": "Would you like to update"
+      "useAddress": "Use {first}'s address ({address}) for {current}'s household?"
     },
     "lists": {
       "autoRefresh": "Refresh nightly",
@@ -1672,8 +1760,8 @@
       "title": "Saved Lists"
     },
     "merge": {
-      "merge": "merge",
-      "mergeRec": "Merge Records"
+      "findPerson": "Find person to merge",
+      "merge": "merge"
     },
     "mergeModal": {
       "cancel": "Cancel",
@@ -2003,6 +2091,7 @@
       "lengthSeconds": "180",
       "linkUrl": "https://example.com/chords",
       "lyrics": "Enter lyrics here...",
+      "sequence": "Verse 1, Chorus, Verse 2, Chorus, Bridge",
       "title": "Amazing Grace"
     },
     "task": {
@@ -2406,8 +2495,10 @@
     },
     "servingOverviewPage": {
       "autoSchedule": "Auto-schedule",
+      "autoScheduleConfirm": "Auto-schedule volunteers into every open slot in this date range?",
       "autoScheduleResult": "Auto-scheduled {filled} of {total} plans",
       "emailAll": "Email Volunteers",
+      "emailAllConfirm": "Email every assigned volunteer in this date range?",
       "emailEmpty": "No assigned volunteers in this range to email.",
       "emailResult": "Emailed {sent} volunteers ({failed} failed)",
       "endDate": "End Date",
@@ -2420,6 +2511,7 @@
       "overviewSuffix": "Overview",
       "position": "Position",
       "remove": "Remove",
+      "removeConfirm": "Remove {name} from this assignment?",
       "startDate": "Start Date",
       "subtitle": "Positions by date with assigned volunteers",
       "title": "Serving Overview"
@@ -2515,6 +2607,8 @@
       "addScreen": "Add Screen",
       "device": "Device",
       "editDevice": "Edit Device",
+      "emptyDescription": "Paired TVs and screens running FreePlay or ChurchApps Player show up here. Use Add Screen to pair one.",
+      "emptyTitle": "No paired screens yet",
       "label": "Label",
       "lastActiveDate": "Last Active Date",
       "registrationDate": "Registration Date",
@@ -2593,6 +2687,7 @@
       "percent": "Percent",
       "price": "Price",
       "promote": "Promote",
+      "promoteConfirm": "Promote this waitlisted registrant to confirmed?",
       "registrationDetails": "Registration Details",
       "removeConfirm": "Remove this item? This cannot be undone.",
       "selections": "Selections",
@@ -2623,6 +2718,7 @@
       "name": "Name",
       "noRegistrations": "No registrations yet.",
       "registrations": "Registrations",
+      "selectTypeFirst": "Select an attendee type to continue.",
       "status": "Status",
       "subtitle": "Manage registrations for this event",
       "unansweredOnly": "Unanswered questions only",
@@ -2642,12 +2738,14 @@
       "saveSettings": "Save Settings",
       "tags": "Tags",
       "tagsHelper": "Comma-separated tags for filtering",
-      "tagsPlaceholder": "youth, retreat, vbs"
+      "tagsPlaceholder": "youth, retreat, vbs",
+      "unsavedChanges": "You have unsaved type, selection, or discount code changes. Save each section before leaving this page."
     },
     "registrationsPage": {
       "date": "Date",
       "enabledEvents": "Events with Registration Enabled",
       "event": "Event",
+      "goToCalendars": "Turn on registration on a calendar event",
       "noEvents": "No events have registration enabled yet.",
       "noEventsHint": "To enable registration, open an event on a calendar and click Manage Registrations.",
       "registered": "registered",
@@ -2973,7 +3071,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2984,49 +3085,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
-      "field": {},
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
-      "rejectReason": {},
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
-      "removeReason": {},
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
-      "resolution": {},
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
-      "resolveAction": {},
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -3034,11 +3206,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3279,6 +3462,7 @@
     "checkinSettingsEdit": {
       "block": "Block (prevent check-in)",
       "help": "Choose how check-in responds when a room is over its volunteer-to-child ratio or below its minimum volunteers.",
+      "kioskLink": "Check-in kiosk, QR, and labels",
       "ratioEnforcement": "Volunteer Ratio Enforcement",
       "title": "Check-In",
       "warn": "Warn (allow with confirmation)"
@@ -3426,11 +3610,13 @@
       "copyWebhookUrl": "Copy webhook URL",
       "currency": "Currency",
       "currencyHelper": "Make sure this currency is also enabled in your Stripe Dashboard. Enable currency here:",
+      "feesAndStatementsSection": "Fees & statements",
       "forceMsg": "Automatically forces users to cover the transaction fees",
       "giving": "Giving",
       "kfSetup": "Enter the Tokenization Key and Source Key from your Kingdom Funding dashboard. Get started at",
       "kfWebhookInstructions": "Provide this webhook URL to your Kingdom Funding representative during onboarding so transaction updates flow back into your giving reports:",
       "none": "None",
+      "paymentGatewaySection": "Payment gateway",
       "paypalSetup": "Create a PayPal REST app and paste its Client ID and Secret below. Get started at",
       "paystackSetup": "Copy your Public and Secret keys from the Paystack Dashboard (Settings → API Keys & Webhooks) and paste them below. Open the",
       "paystackWebhookInstructions": "Paste this URL into the Webhook URL field of your Paystack Dashboard (Settings → API Keys & Webhooks) so recurring gifts and mobile money payments are recorded:",
@@ -3491,8 +3677,9 @@
     },
     "mobileAppSettings": {
       "addTab": "Add Tab",
-      "subtitle": "Configure mobile app settings",
-      "title": "Mobile App Settings"
+      "subtitle": "Tabs on the B1.church app",
+      "tabBarNote": "The first three tabs appear in the phone tab bar; the rest are under More.",
+      "title": "Navigation"
     },
     "roleCheck": {
       "permissionAria": "Permission {label}"
@@ -3517,6 +3704,7 @@
       "roleEdit": "Edit Role:"
     },
     "rolePermissions": {
+      "filter": "Filter permissions",
       "permEdit": "Edit Permissions"
     },
     "roles": {
@@ -3781,6 +3969,7 @@
     },
     "appearancePage": {
       "subtitle": "Below is a preview of a sample site with your colors, fonts and logos. This is not your actual site content.",
+      "themeGroup": "Theme, fonts & footer",
       "title": "Site Styles"
     },
     "blockEdit": {
@@ -3970,6 +4159,7 @@
       "disablePublishConfirm": "Turn off publishing for this page? Edits will go live immediately again.",
       "discardChanges": "Discard unpublished changes",
       "discardChangesConfirm": "Discard all changes made since the last publish? The editor will be restored to the live version.",
+      "editSiteFooter": "Edit site footer",
       "exit": "Exit",
       "justNow": "just now",
       "page": "Page",
@@ -3981,8 +4171,11 @@
       "savedAllChanges": "All changes saved",
       "saving": "Saving…",
       "statusLiveOnSave": "Live on save",
+      "statusLiveOnSaveTip": "Edits go live immediately.",
       "statusPublished": "Published",
+      "statusPublishedTip": "The published version is live; the editor matches it.",
       "statusUnpublishedChanges": "Unpublished changes",
+      "statusUnpublishedChangesTip": "The published version is live; the editor has unpublished changes.",
       "switchToDesktop": "Switch to Desktop View",
       "switchToMobile": "Switch to Mobile View",
       "undoTip": "Undo (Ctrl+Z)",
@@ -4109,10 +4302,11 @@
     "files": {
       "confirmDelete": "Are you sure you wish to delete",
       "storageInfo": "100 MB of storage space is provided for free for storing PDFs and other documents commonly needed for church websites. Need more? Link your own Google Drive, Dropbox, OneDrive or S3 bucket under Settings, File Storage.",
-      "upload": "Upload",
       "uploadFiles": "Upload Files"
     },
     "filesManager": {
+      "copied": "Link copied",
+      "copyLink": "Copy link",
       "files": "Files",
       "getStarted": "Get started by uploading your first file",
       "name": "Name",
@@ -4289,6 +4483,7 @@
       "loading": "Loading...",
       "pageSettings": "Page Settings",
       "previewOf": "Preview of {title}",
+      "showingPublished": "This is the published version of the page. Unpublished editor changes are not shown.",
       "subtitle": "Previewing: {title}",
       "title": "Website Preview"
     },
@@ -4310,13 +4505,13 @@
       "noPagesFound": "No pages found",
       "pages": "Pages",
       "path": "Path",
-      "previewPage": "Preview page",
       "showLogin": "Show Login",
       "showLoginTooltip": "Show login button in the navigation bar",
       "startFromTemplate": "Start From a Template",
       "subtitle": "Manage your website pages, content, and navigation",
       "toggleLoginVisibility": "Toggle login button visibility",
       "totalPages": "Total Pages",
+      "viewLivePage": "View live page",
       "websitePages": "Website Pages"
     },
     "paletteEdit": {
@@ -4333,7 +4528,7 @@
       "darkDesc": "Darkest shade — body text",
       "error": "Error",
       "errorDesc": "Errors and destructive actions",
-      "headerSubtitle": "Customize your website's color scheme. For mobile app, member portal, and kiosk colors, go to Settings > App Theme.",
+      "headerSubtitle": "Customize your website's color scheme. For mobile app, member portal, and kiosk colors, go to Mobile > App Theme.",
       "headerTitle": "Color Palette",
       "light": "Light",
       "lightAccent": "Light Accent",
@@ -4385,7 +4580,7 @@
       "ga4": "GA4 Measurement ID",
       "ga4Hint": "Format: G-XXXXXXXXXX",
       "normalizeHint": "Paths are normalized: lowercased, with a leading slash and no trailing slash.",
-      "title": "Redirects",
+      "title": "Redirects & analytics",
       "toPath": "To Path"
     },
     "row": {
@@ -4528,7 +4723,7 @@
       "startDate": "Start Date",
       "text": "Text",
       "textColor": "Text Color",
-      "title": "Site Widgets",
+      "title": "Announcement & widgets",
       "url": "URL"
     },
     "sitesDialog": {},
@@ -4625,7 +4820,7 @@
       "fonts": "Fonts",
       "fontsDesc": "Select and customize typography",
       "footer": "Site Footer",
-      "footerDesc": "Customize your site footer",
+      "footerDesc": "Opens the block editor",
       "loadingPreview": "Loading preview...",
       "logo": "Logo",
       "logoDesc": "Upload and manage your logo",
@@ -4728,8 +4923,10 @@
       "enterLyrics": "Manually enter lyrics or import from PraiseCharts",
       "lyrics": "Lyrics",
       "name": "Arrangement Name",
+      "sequence": "Sequence",
       "title": "Arrangement"
     },
+    "arrangements": "Arrangements",
     "audio": {
       "deleteConfirm": "Are you sure you want to delete this audio file?",
       "upload": "Upload Audio"
@@ -4796,11 +4993,6 @@
     "oldArrangement": {
       "key": "Key"
     },
-    "oldArrangements": {
-      "arrangements": "Arrangements",
-      "editArrangementAria": "Edit arrangement",
-      "noArrangements": "No arrangements found."
-    },
     "praiseChartsProducts": {
       "close": "Close",
       "download": "Download",
@@ -4817,7 +5009,9 @@
       "inputPlaceholder": "Enter song title or artist name...",
       "noResults": "No songs found for your search.",
       "placeholder": "Search songs by title or artist...",
-      "title": "Search for a Song"
+      "title": "Search for a Song",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "Add First Link",
@@ -4862,17 +5056,6 @@
     "providedBy": "Provided By"
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "Anywhere",
-      "campus": "Campus",
-      "eventType": "Event Type",
-      "group": "Group",
-      "hasAtt": "has attended",
-      "hasNoAtt": "has not attended",
-      "op": "Operator",
-      "serv": "Service",
-      "servTime": "Service Time"
-    },
     "conditionDate": {
       "absolute": "Absolute",
       "curMonth": "Current Month",

@@ -1349,7 +1349,7 @@
         "changeImage": "छवि बदलें",
         "duration": "अवधि (सेकंड)",
         "enableIdleScreen": "निष्क्रिय स्क्रीन सक्षम करें",
-        "headerSubtitle": "कियोस्क रंग सेटिंग्स > ऐप थीम में प्रबंधित किए जाते हैं। नीचे पृष्ठभूमि छवियां और निष्क्रिय स्क्रीन व्यवहार कॉन्फ़िगर करें।",
+        "headerSubtitle": "कियोस्क रंग मोबाइल > ऐप थीम में प्रबंधित किए जाते हैं। नीचे पृष्ठभूमि छवियां और निष्क्रिय स्क्रीन व्यवहार कॉन्फ़िगर करें।",
         "idleScreen": "निष्क्रिय स्क्रीन / स्क्रीनसेवर",
         "sectionTitle": "कियोस्क थीम",
         "slides": "स्लाइड",
@@ -1515,7 +1515,6 @@
       "status": "स्थिति:"
     },
     "householdEdit": {
-      "addMatch": "मिलान के लिए पता",
       "addMember": "घरेलू सदस्य जोड़ें",
       "blankMsg": "कृपया एक पारिवारिक नाम प्रदान करें।",
       "child": "बच्चा",
@@ -1524,8 +1523,7 @@
       "houseName": "पारिवारिक नाम",
       "householdNameAria": "घर का नाम",
       "other": "अन्य",
-      "spouse": "जीवनसाथी",
-      "updQuestion": "क्या आप अपडेट करना चाहेंगे"
+      "spouse": "जीवनसाथी"
     },
     "lists": {
       "autoRefresh": "रात में ताज़ा करें",
@@ -1552,8 +1550,7 @@
       "title": "सहेजी गई सूचियां"
     },
     "merge": {
-      "merge": "मर्ज करें",
-      "mergeRec": "रिकॉर्ड मर्ज करें"
+      "merge": "मर्ज करें"
     },
     "mergeModal": {
       "cancel": "रद्द करें",
@@ -2829,7 +2826,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2840,44 +2840,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -2885,11 +2961,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3932,7 +4019,6 @@
     "files": {
       "confirmDelete": "क्या आप वाकई हटाना चाहते हैं",
       "storageInfo": "चर्च वेबसाइटों के लिए आमतौर पर आवश्यक PDF और अन्य दस्तावेज़ों को संग्रहीत करने के लिए 100 MB स्टोरेज स्पेस निःशुल्क प्रदान किया जाता है। यदि अतिरिक्त स्थान की आवश्यकता है तो हम फ़ाइलों को संग्रहीत करने के लिए Google Drive या Dropbox का उपयोग करने का सुझाव देते हैं।",
-      "upload": "अपलोड करें",
       "uploadFiles": "फ़ाइलें अपलोड करें"
     },
     "filesManager": {
@@ -4133,13 +4219,13 @@
       "noPagesFound": "कोई पेज नहीं मिला",
       "pages": "पृष्ठों",
       "path": "पथ",
-      "previewPage": "पूर्वावलोकन पृष्ठ",
       "showLogin": "लॉगिन दिखाएँ",
       "showLoginTooltip": "नेविगेशन बार में लॉगिन बटन दिखाएँ",
       "startFromTemplate": "टेम्पलेट से शुरू करें",
       "subtitle": "अपने वेबसाइट पेज, सामग्री और नेविगेशन प्रबंधित करें",
       "toggleLoginVisibility": "लॉगिन बटन दृश्यता टॉगल करें",
       "totalPages": "कुल पृष्ठ",
+      "viewLivePage": "पूर्वावलोकन पृष्ठ",
       "websitePages": "वेबसाइट पेज"
     },
     "paletteEdit": {
@@ -4156,7 +4242,7 @@
       "darkDesc": "सबसे गहरी छाया — मुख्य पाठ",
       "error": "त्रुटि",
       "errorDesc": "त्रुटियां और विनाशकारी कार्य",
-      "headerSubtitle": "अपनी वेबसाइट की रंग योजना अनुकूलित करें। मोबाइल ऐप, सदस्य पोर्टल और कियोस्क रंगों के लिए, सेटिंग्स > ऐप थीम पर जाएं।",
+      "headerSubtitle": "अपनी वेबसाइट की रंग योजना अनुकूलित करें। मोबाइल ऐप, सदस्य पोर्टल और कियोस्क रंगों के लिए, मोबाइल > ऐप थीम पर जाएं।",
       "headerTitle": "रंग पैलेट",
       "light": "हल्का",
       "lightAccent": "हल्का एक्सेंट",
@@ -4545,6 +4631,7 @@
       "name": "व्यवस्था का नाम",
       "title": "व्यवस्था"
     },
+    "arrangements": "व्यवस्थाएँ",
     "audio": {
       "deleteConfirm": "क्या आप वाकई इस ऑडियो फ़ाइल को हटाना चाहते हैं?",
       "upload": "ऑडियो अपलोड करें"
@@ -4611,11 +4698,6 @@
     "oldArrangement": {
       "key": "कुंजी"
     },
-    "oldArrangements": {
-      "arrangements": "व्यवस्थाएँ",
-      "editArrangementAria": "व्यवस्था संपादित करें",
-      "noArrangements": "कोई व्यवस्था नहीं मिली।"
-    },
     "praiseChartsProducts": {
       "close": "बंद करें",
       "download": "डाउनलोड करें",
@@ -4632,7 +4714,9 @@
       "inputPlaceholder": "गीत का शीर्षक या कलाकार का नाम दर्ज करें...",
       "noResults": "आपकी खोज के लिए कोई गीत नहीं मिला।",
       "placeholder": "शीर्षक या कलाकार द्वारा गीत खोजें...",
-      "title": "एक गीत खोजें"
+      "title": "एक गीत खोजें",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "पहला लिंक जोड़ें",
@@ -4677,17 +4761,6 @@
     "providedBy": "प्रदान किया गया"
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "कहीं भी",
-      "campus": "कैम्पस",
-      "eventType": "घटना प्रकार",
-      "group": "समूह",
-      "hasAtt": "ने भाग लिया है",
-      "hasNoAtt": "ने भाग नहीं लिया है",
-      "op": "ऑपरेटर",
-      "serv": "सेवा",
-      "servTime": "सेवा समय"
-    },
     "conditionDate": {
       "absolute": "पूर्ण",
       "curMonth": "वर्तमान माह",

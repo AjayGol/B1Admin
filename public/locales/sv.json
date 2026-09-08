@@ -1349,7 +1349,7 @@
         "changeImage": "Byt bild",
         "duration": "Varaktighet (s)",
         "enableIdleScreen": "Aktivera vilskärm",
-        "headerSubtitle": "Kioskfärger hanteras i Inställningar > Apptema. Konfigurera bakgrundsbilder och vilskärmsbeteende nedan.",
+        "headerSubtitle": "Kioskfärger hanteras i Mobil > Apptema. Konfigurera bakgrundsbilder och vilskärmsbeteende nedan.",
         "idleScreen": "Vilskärm / skärmsläckare",
         "sectionTitle": "Kiosktema",
         "slides": "Bilder",
@@ -1515,7 +1515,6 @@
       "status": "Status:"
     },
     "householdEdit": {
-      "addMatch": "adress att matcha",
       "addMember": "Lägg till hushållsmedlem",
       "blankMsg": "Vänligen ange ett hushållsnamn.",
       "child": "Barn",
@@ -1524,8 +1523,7 @@
       "houseName": "Hushållsnamn",
       "householdNameAria": "Hushållsnamn",
       "other": "Övrigt",
-      "spouse": "Make/maka",
-      "updQuestion": "Vill du uppdatera"
+      "spouse": "Make/maka"
     },
     "lists": {
       "autoRefresh": "Uppdatera nightly",
@@ -1552,8 +1550,7 @@
       "title": "Sparade listor"
     },
     "merge": {
-      "merge": "sammanfoga",
-      "mergeRec": "Sammanfoga poster"
+      "merge": "sammanfoga"
     },
     "mergeModal": {
       "cancel": "Avbryt",
@@ -2829,7 +2826,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2840,44 +2840,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -2885,11 +2961,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3932,7 +4019,6 @@
     "files": {
       "confirmDelete": "Är du säker på att du vill ta bort",
       "storageInfo": "100 MB lagringsutrymme tillhandahålls gratis för att lagra PDF-filer och andra dokument som vanligtvis behövs för kyrkowebbplatser. Vi föreslår att du använder Google Drive eller Dropbox för att lagra filer om ytterligare utrymme behövs.",
-      "upload": "Ladda upp",
       "uploadFiles": "Ladda upp filer"
     },
     "filesManager": {
@@ -4133,13 +4219,13 @@
       "noPagesFound": "Inga sidor hittades",
       "pages": "Sidor",
       "path": "Sökväg",
-      "previewPage": "Förhandsvisa sida",
       "showLogin": "Visa inloggning",
       "showLoginTooltip": "Visa inloggningsknapp i navigeringsfältet",
       "startFromTemplate": "Börja från en mall",
       "subtitle": "Hantera webbplatsens sidor, innehåll och navigering",
       "toggleLoginVisibility": "Växla synlighet för inloggningsknapp",
       "totalPages": "Totalt antal sidor",
+      "viewLivePage": "Förhandsvisa sida",
       "websitePages": "Webbplatssidor"
     },
     "paletteEdit": {
@@ -4156,7 +4242,7 @@
       "darkDesc": "Mörkaste nyansen — brödtext",
       "error": "Fel",
       "errorDesc": "Fel och destruktiva åtgärder",
-      "headerSubtitle": "Anpassa webbplatsens färgschema. För mobilapp, medlemsportal och kioskfärger, gå till Inställningar > Apptema.",
+      "headerSubtitle": "Anpassa webbplatsens färgschema. För mobilapp, medlemsportal och kioskfärger, gå till Mobil > Apptema.",
       "headerTitle": "Färgpalett",
       "light": "Ljus",
       "lightAccent": "Ljus accent",
@@ -4545,6 +4631,7 @@
       "name": "Arrangemangsnamn",
       "title": "Arrangemang"
     },
+    "arrangements": "Arrangemang",
     "audio": {
       "deleteConfirm": "Är du säker på att du vill ta bort den här ljudfilen?",
       "upload": "Ladda upp ljud"
@@ -4611,11 +4698,6 @@
     "oldArrangement": {
       "key": "Tonart"
     },
-    "oldArrangements": {
-      "arrangements": "Arrangemang",
-      "editArrangementAria": "Redigera arrangemang",
-      "noArrangements": "Inga arrangemang hittades."
-    },
     "praiseChartsProducts": {
       "close": "Stäng",
       "download": "Ladda ner",
@@ -4632,7 +4714,9 @@
       "inputPlaceholder": "Ange sångtitel eller artistnamn...",
       "noResults": "Inga sånger hittades för din sökning.",
       "placeholder": "Sök sånger efter titel eller artist...",
-      "title": "Sök efter en sång"
+      "title": "Sök efter en sång",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "Lägg till första länk",
@@ -4677,17 +4761,6 @@
     "providedBy": "Tillhandahållet av"
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "Var som helst",
-      "campus": "Campus",
-      "eventType": "Händelsetyp",
-      "group": "Grupp",
-      "hasAtt": "har deltagit",
-      "hasNoAtt": "har inte deltagit",
-      "op": "Operator",
-      "serv": "Gudstjänst",
-      "servTime": "Gudstjänsttid"
-    },
     "conditionDate": {
       "absolute": "Absolut",
       "curMonth": "Innevarande månad",

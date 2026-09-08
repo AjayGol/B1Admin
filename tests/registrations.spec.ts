@@ -7,7 +7,7 @@ import { STORAGE_STATE_PATH } from "./global-setup";
 import { confirmDelete } from "./helpers/fixtures";
 
 
-const API_BASE = "http://localhost:8084";
+const API_BASE = process.env.API_BASE || "http://localhost:8084";
 const CALENDAR = "Zacchaeus Registrations Calendar";
 const EVENT_TITLE = "Zacchaeus Registration Test Event";
 const GROUP = "Middle School Youth";
@@ -36,6 +36,18 @@ async function selectOption(page: Page, selectTestId: string, optionName: string
   await option.waitFor({ state: "visible", timeout: 10000 });
   await option.click();
 }
+
+test.describe("Registrations list empty state", () => {
+  test("shows guidance and a link to Calendars when no events have registration enabled", async ({ page }) => {
+    await page.route("**/events/registerable", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+    await navigateToRegistrations(page);
+    await expect(page.getByText("No events have registration enabled yet.")).toBeVisible({ timeout: 15000 });
+    const link = page.getByTestId("empty-state-go-to-calendars");
+    await expect(link).toBeVisible();
+    await link.click();
+    await page.waitForURL(/\/calendars/, { timeout: 10000 });
+  });
+});
 
 test.describe.serial("Registrations — Registration Questions, Add Attendee, filters", () => {
   let page: Page;

@@ -1349,7 +1349,7 @@
         "changeImage": "Промени слику",
         "duration": "Трајање (с)",
         "enableIdleScreen": "Омогући екран мировања",
-        "headerSubtitle": "Бојама киоска се управља у Подешавања > Тема апликације. Конфигуришите позадинске слике и понашање екрана мировања испод.",
+        "headerSubtitle": "Бојама киоска се управља у Мобилни > Тема апликације. Конфигуришите позадинске слике и понашање екрана мировања испод.",
         "idleScreen": "Екран мировања / Чувар екрана",
         "sectionTitle": "Тема киоска",
         "slides": "Слајдови",
@@ -1515,7 +1515,6 @@
       "status": "Статус:"
     },
     "householdEdit": {
-      "addMatch": "адресу да се поклапа",
       "addMember": "Додај члана домаћинства",
       "blankMsg": "Молимо обезбеди назив домаћинства.",
       "child": "Дете",
@@ -1524,8 +1523,7 @@
       "houseName": "Назив домаћинства",
       "householdNameAria": "Назив домаћинства",
       "other": "Други",
-      "spouse": "Супруг(а)",
-      "updQuestion": "Да ли желиш да ажурираш"
+      "spouse": "Супруг(а)"
     },
     "lists": {
       "autoRefresh": "Освежи ноћу",
@@ -1552,8 +1550,7 @@
       "title": "Сачуване листе"
     },
     "merge": {
-      "merge": "спајање",
-      "mergeRec": "Спајање записа"
+      "merge": "спајање"
     },
     "mergeModal": {
       "cancel": "Откажи",
@@ -2829,7 +2826,10 @@
       "approveNote": "Approval note (optional)",
       "approvedSuffix": "approved",
       "assetStatus": {
-        "published": "Published"
+        "pending": "Pending",
+        "published": "Published",
+        "removed": "Removed",
+        "unpublished": "Unpublished"
       },
       "assetType": "Asset Type",
       "badgeEditBy": "Edit by {name}",
@@ -2840,44 +2840,120 @@
       "colActions": "Actions",
       "colAge": "Age",
       "colAsset": "Asset",
+      "colBasis": "Basis",
       "colChanges": "Changes",
+      "colConfidence": "Confidence",
+      "colFile": "File",
       "colScore": "Score",
+      "colSha": "SHA-256",
       "colSubmitter": "Submitter",
       "colType": "Type",
+      "confidence": {
+        "chart-only": "Chart only",
+        "converted-from-abc": "Converted from ABC",
+        "generated-from-midi": "Generated from MIDI",
+        "lyrics-only": "Lyrics only",
+        "proofread-score": "Proofread score",
+        "sunday-ready": "Sunday-ready"
+      },
       "confirmApprove": "Approve this submission?",
       "confirmApproveDetail": "{name} · {license}",
       "confirmReject": "Reject Submission",
+      "confirmRequestChanges": "Send back for changes",
+      "contributors": "Contributors",
       "copyrightReports": "Copyright",
       "date": "Date",
+      "declineFile": "Decline",
+      "declineReason": "Reason for declining this file",
+      "declineReasonRequired": "Give a reason for each declined file.",
+      "declinedFiles": "Declined files",
+      "declinedSuffix": "declined",
       "detailsUpdated": "Details updated",
       "download": "Download",
       "downloads": "Downloads",
       "feature": "Feature",
+      "featureTooltip": "Featured highlights the song on the home page. It is not the Sunday-ready mark — that comes from the listen gate.",
       "featured": "Featured",
+      "field": {
+        "arranger": "Arranger",
+        "bpm": "BPM",
+        "certified": "Writer certifies they hold the rights",
+        "chordPro": "Lyrics and chords",
+        "description": "Description",
+        "language": "Language",
+        "license": "License",
+        "meter": "Meter",
+        "name": "Title",
+        "proAnswer": "Society or publisher",
+        "recordingOwned": "Owns the recording",
+        "scripture": "Scripture",
+        "songKey": "Key",
+        "tags": "Tags",
+        "themes": "Themes",
+        "timeSignature": "Time signature",
+        "translator": "Translator",
+        "tune": "Tune",
+        "writer": "Writer",
+        "year": "Year"
+      },
       "files": "Files",
       "firstSubmission": "first submission",
+      "intakeFindings": "Intake findings",
       "justNow": "just now",
       "licensePd": "Public domain",
       "licenseWc": "Free for worship",
+      "listenHelp": "Tick each published key you have listened through. The song becomes Sunday-ready once every key is covered and it has a score, chords and slides.",
+      "listenTitle": "Listened keys for {name}",
+      "listened": "Listened",
       "lyricsAndChords": "Lyrics and chords",
+      "musicEditorRightsBlocked": "This proposal changes rights (license or ownership). Only a server admin can approve it.",
       "name": "Name",
       "noAssets": "No assets found.",
       "noFieldChanges": "No changes to show.",
+      "noFindings": "Nothing flagged at intake.",
+      "noKeys": "No published keys yet.",
       "noReports": "No reports have been filed.",
       "noSubmissions": "No submissions are waiting for review.",
       "note": "Note",
+      "original": "original",
       "policyReports": "Policy & Other",
       "possibleDuplicate": "Duplicate?",
+      "possibleDuplicateSearch": "Search WorshipCommons for similar titles",
       "product": "Product",
       "publisher": "Publisher",
       "reason": "Reason",
       "recentlyResolved": "Recently Resolved",
       "reject": "Reject",
+      "rejectReason": {
+        "ccli": "Copyrighted (CCLI) song",
+        "duplicate": "Duplicate",
+        "incomplete": "Incomplete",
+        "licensing": "Licensing problem",
+        "offtopic": "Off topic",
+        "other": "Other",
+        "quality": "Quality"
+      },
       "remove": "Remove",
       "removeConfirm": "Remove {name}? It will no longer be available to anyone.",
+      "removeReason": {
+        "copyright": "Copyright",
+        "policy": "Policy"
+      },
       "reporterRole": "Reporter Role",
       "republish": "Republish",
+      "requestChanges": "Request changes",
+      "requestChangesNote": "Tell the submitter what to change",
+      "resolution": {
+        "dismissed": "Dismissed",
+        "duplicate": "Duplicate",
+        "upheld": "Upheld"
+      },
       "resolve": "Resolve",
+      "resolveAction": {
+        "none": "No action",
+        "remove": "Remove",
+        "unpublish": "Unpublish"
+      },
       "review": "Review",
       "rights": "Rights",
       "rightsFlag": "Rights",
@@ -2885,11 +2961,22 @@
       "scoreHeuristicOnly": "completeness heuristic only — not an AI judgment",
       "searchAssets": "Search assets",
       "signature": "Signature",
+      "sources": "Sources",
       "status": "Status",
+      "submissionType": {
+        "additionalFile": "Additional file",
+        "arrangement": "Arrangement",
+        "correction": "Correction",
+        "new": "New song",
+        "removal": "Removal",
+        "translation": "Translation"
+      },
       "submittedBy": "Submitted by",
+      "sundayReady": "Sunday-ready",
       "tabAssets": "Assets",
       "tabQueue": "Queue",
       "tabReports": "Reports",
+      "triageScore": "Triage score",
       "unchangedFiles": "Unchanged files",
       "unpublish": "Unpublish",
       "viewOnWorshipCommons": "View on WorshipCommons"
@@ -3932,7 +4019,6 @@
     "files": {
       "confirmDelete": "Да ли сте сигурни да желите да обришете",
       "storageInfo": "Бесплатно је обезбеђено 100 MB складишног простора за чување PDF-ова и других докумената који су често потребни за веб локације цркви. Препоручујемо коришћење Google Drive-а или Dropbox-а за складиштење фајлова ако је потребан додатни простор.",
-      "upload": "Учитај",
       "uploadFiles": "Учитај фајлове"
     },
     "filesManager": {
@@ -4133,13 +4219,13 @@
       "noPagesFound": "Нема пронађених страница",
       "pages": "Странице",
       "path": "Путања",
-      "previewPage": "Прегледај страницу",
       "showLogin": "Прикажи пријаву",
       "showLoginTooltip": "Прикажи дугме пријаве у навигационој траци",
       "startFromTemplate": "Почни од шаблона",
       "subtitle": "Управљај страницама ваше веб локације, садржајем и навигацијом",
       "toggleLoginVisibility": "Пребаци видљивост дугмета пријаве",
       "totalPages": "Укупно страница",
+      "viewLivePage": "Прегледај страницу",
       "websitePages": "Странице веб локације"
     },
     "paletteEdit": {
@@ -4156,7 +4242,7 @@
       "darkDesc": "Најтамнија нијанса — текст",
       "error": "Грешка",
       "errorDesc": "Грешке и деструктивне радње",
-      "headerSubtitle": "Прилагодите шему боја ваше веб локације. За боје мобилне апликације, портала чланова и киоска, идите на Подешавања > Тема апликације.",
+      "headerSubtitle": "Прилагодите шему боја ваше веб локације. За боје мобилне апликације, портала чланова и киоска, идите на Мобилни > Тема апликације.",
       "headerTitle": "Палета боја",
       "light": "Светло",
       "lightAccent": "Светли акцент",
@@ -4545,6 +4631,7 @@
       "name": "Име аранжмана",
       "title": "Аранжман"
     },
+    "arrangements": "Аранжмани",
     "audio": {
       "deleteConfirm": "Да ли сте сигурни да желите да обришете ову аудио датотеку?",
       "upload": "Отпреми аудио"
@@ -4611,11 +4698,6 @@
     "oldArrangement": {
       "key": "Тоналитет"
     },
-    "oldArrangements": {
-      "arrangements": "Аранжмани",
-      "editArrangementAria": "Уреди аранжман",
-      "noArrangements": "Нису пронађени аранжмани."
-    },
     "praiseChartsProducts": {
       "close": "Затвори",
       "download": "Преузми",
@@ -4632,7 +4714,9 @@
       "inputPlaceholder": "Унесите наслов песме или име извођача...",
       "noResults": "Нису пронађене песме за вашу претрагу.",
       "placeholder": "Претражи песме по наслову или извођачу...",
-      "title": "Претражи песму"
+      "title": "Претражи песму",
+      "viewOnWorshipCommons": "View on WorshipCommons",
+      "worshipCommonsFree": "WorshipCommons — free"
     },
     "songDetailLinks": {
       "addFirstLink": "Додај прву везу",
@@ -4677,17 +4761,6 @@
     "providedBy": "Обезбеђено: "
   },
   "tasks": {
-    "conditionAttendance": {
-      "anywhere": "Било где",
-      "campus": "Филијала",
-      "eventType": "Тип догађаја",
-      "group": "Група",
-      "hasAtt": "присуствовао",
-      "hasNoAtt": "није присуствовао",
-      "op": "Оператор",
-      "serv": "Служба",
-      "servTime": "Време службе"
-    },
     "conditionDate": {
       "absolute": "Апсолутно",
       "curMonth": "Тренутни месец",
