@@ -149,6 +149,7 @@ export const PersonEdit = memo((props: Props) => {
   const updatePerson = useCallback(async (p: PersonInterface) => {
     try {
       await ApiHelper.post("/people/", [p], "MembershipApi");
+      if (B1AdminPersonHelper.getExpandedPersonObject(p).id === context?.person?.id) context?.setPerson(p);
       await saveCustomFields();
       setSaveErrors([]);
       props.updatedFunction();
@@ -157,7 +158,7 @@ export const PersonEdit = memo((props: Props) => {
       setSaveErrors([Locale.label("common.saveError")]);
     }
     setIsSubmitting(false);
-  }, [props.updatedFunction, saveCustomFields]);
+  }, [props.updatedFunction, saveCustomFields, context]);
 
   // Only new people get checked - editing an existing record can't create a duplicate of itself.
   const checkDuplicates = useCallback(async (p: PersonInterface): Promise<PersonInterface[]> => {
@@ -180,8 +181,6 @@ export const PersonEdit = memo((props: Props) => {
     setIsSubmitting(true);
     setSaveErrors([]);
     const p = buildPerson(values);
-
-    if (B1AdminPersonHelper.getExpandedPersonObject(p).id === context?.person?.id) context?.setPerson(p);
 
     const matches = await checkDuplicates(p);
     if (matches.length > 0) {
@@ -232,14 +231,14 @@ export const PersonEdit = memo((props: Props) => {
 
   const handleYes = useCallback(async () => {
     setShowUpdateAddressModal(false);
+    setIsSubmitting(true);
     const p = buildPerson(getValues());
-    await Promise.all((members || []).map(async (member) => {
-      member.contactInfo = PersonHelper.changeOnlyAddress(member.contactInfo, p.contactInfo);
-      try { await ApiHelper.post("/people", [member], "MembershipApi"); } catch (error) { console.log(`error in updating ${p.name.display}"s address`, error); }
+    await Promise.all((members || []).filter((member) => member.id !== p.id).map(async (member) => {
+      const updated = { ...member, contactInfo: PersonHelper.changeOnlyAddress(member.contactInfo, p.contactInfo) };
+      try { await ApiHelper.post("/people", [updated], "MembershipApi"); } catch (error) { console.log(`error in updating ${member.name?.display}'s address`, error); }
     }));
-    await saveCustomFields();
-    props.updatedFunction();
-  }, [members, getValues, buildPerson, props.updatedFunction, saveCustomFields]);
+    await updatePerson(p);
+  }, [members, getValues, buildPerson, updatePerson]);
 
   const handleNo = useCallback(() => {
     setShowUpdateAddressModal(false);

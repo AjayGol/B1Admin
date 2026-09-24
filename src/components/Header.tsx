@@ -6,6 +6,7 @@ import { hasPlansEditAccess } from "../helpers";
 import { SiteHeader } from "@churchapps/apphelper";
 import UserContext from "../UserContext";
 import { useNavigate } from "react-router-dom";
+import { CommandPalette } from "./commandPalette/CommandPalette";
 
 export const Header: React.FC = () => {
   const context = React.useContext(UserContext);
@@ -89,7 +90,7 @@ export const Header: React.FC = () => {
   useEffect(() => {
     const addTestIds = () => {
       const urlToTestId: Record<string, string> = {
-        "/": "nav-item-quick-actions",
+        "/": "nav-item-dashboard",
         "/dashboard": "nav-item-dashboard",
         "/people": "nav-item-people",
         "/groups": "nav-item-groups",
@@ -125,6 +126,7 @@ export const Header: React.FC = () => {
         if (text) {
           const textToTestId: Record<string, string> = {
             dashboard: "nav-item-dashboard",
+            sunday: "nav-item-dashboard",
             people: "nav-item-people",
             groups: "nav-item-groups",
             donations: "nav-item-donations",
@@ -155,9 +157,14 @@ export const Header: React.FC = () => {
       });
     };
 
-    const timer = setTimeout(addTestIds, 100);
+    let timer = setTimeout(addTestIds, 100);
+    let pending = false;
 
-    const observer = new MutationObserver(addTestIds);
+    const observer = new MutationObserver(() => {
+      if (pending) return;
+      pending = true;
+      timer = setTimeout(() => { pending = false; addTestIds(); }, 250);
+    });
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
@@ -168,14 +175,17 @@ export const Header: React.FC = () => {
 
   /*<Typography variant="h6" noWrap>{UserHelper.currentUserChurch?.church?.name || ""}</Typography>*/
   return (
-    <SiteHeader
-      primaryMenuItems={primaryMenu}
-      primaryMenuLabel={getPrimaryLabel()}
-      secondaryMenuItems={secondaryMenu.menuItems}
-      secondaryMenuLabel={secondaryMenu.label}
-      context={context!}
-      appName={"B1Admin"}
-      onNavigate={handleNavigate}
-    />
+    <>
+      <SiteHeader
+        primaryMenuItems={primaryMenu}
+        primaryMenuLabel={getPrimaryLabel()}
+        secondaryMenuItems={secondaryMenu.menuItems}
+        secondaryMenuLabel={secondaryMenu.label}
+        context={context!}
+        appName={"B1Admin"}
+        onNavigate={handleNavigate}
+      />
+      <CommandPalette />
+    </>
   );
 };

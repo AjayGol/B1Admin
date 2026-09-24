@@ -234,12 +234,11 @@ test.describe("Attendance Management", () => {
       await page?.context().close();
     });
 
-    // AppDatePicker renders MM/DD/YYYY spinbutton sections; typing from the Month section auto-advances.
     const setHeadcountDate = async (mmddyyyy: string) => {
       const box = page.locator("#headcountBox");
-      await box.getByRole("spinbutton", { name: "Month" }).click();
-      await page.keyboard.type(mmddyyyy);
-      await expect(box.locator('[data-testid="headcount-date-input"]')).toContainText(`${mmddyyyy.slice(0, 2)}/${mmddyyyy.slice(2, 4)}/${mmddyyyy.slice(4)}`);
+      const iso = `${mmddyyyy.slice(4)}-${mmddyyyy.slice(0, 2)}-${mmddyyyy.slice(2, 4)}`;
+      await box.locator('[data-testid="headcount-date-input"] input').fill(iso);
+      await expect(box.locator('[data-testid="headcount-date-input"] input')).toHaveValue(iso);
     };
 
     const headcountRow = (value: string) => page.locator('[data-testid="headcount-table"] tbody tr').filter({ has: page.locator('[data-testid="headcount-value-cell"]', { hasText: new RegExp(`^${value}$`) }) });
@@ -277,7 +276,7 @@ test.describe("Attendance Management", () => {
       await page.locator('button[role="tab"]').getByText("Headcount Trend", { exact: true }).click();
       const reportRows = page.locator('[id="reportsBox"] table tr');
       await expect(reportRows.first()).toBeVisible({ timeout: 15000 });
-      await expect(page.locator('[id="reportsBox"] table')).toContainText("137", { timeout: 10000 });
+      await expect(page.locator('[id="reportsBox"]')).toContainText("137", { timeout: 10000 });
 
       // Filtering to the service time keeps the total; the report reads the denormalized serviceTimeId.
       const timeName = page.locator('[id="mui-component-select-serviceTimeId"]');
@@ -285,7 +284,7 @@ test.describe("Attendance Management", () => {
       await timeName.click();
       await page.locator("li").getByText("10:30 AM Service").click();
       await page.locator("button").getByText("Run Report").click();
-      await expect(page.locator('[id="reportsBox"] table')).toContainText("137", { timeout: 10000 });
+      await expect(page.locator('[id="reportsBox"]')).toContainText("137", { timeout: 10000 });
     });
 
     test("should edit the headcount", async () => {

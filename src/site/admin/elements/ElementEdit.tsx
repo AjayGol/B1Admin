@@ -71,6 +71,7 @@ const APPEARANCE_FIELDS: Record<string, string[]> = {
   countdown: fullAppearance,
   stats: fullAppearance,
   sermons: standardAppearance,
+  podcast: standardAppearance,
   campaignProgress: fullAppearance,
   staffGrid: standardAppearance,
   serviceTimes: fullAppearance
@@ -102,7 +103,10 @@ export function ElementEdit(props: Props) {
   // Hoisted null-safe view of element: the compiler merges optional member deps
   // (element?.answersJSON) into non-optional guard reads that crash while element is null.
   const el: ElementInterface = element || ({} as ElementInterface);
-  const parsedData = el.answersJSON ? JSON.parse(el.answersJSON) : {};
+  const parsedData = (() => {
+    if (!el.answersJSON) return {};
+    try { return JSON.parse(el.answersJSON); } catch { return {}; }
+  })();
   const parsedStyles = el.stylesJSON ? JSON.parse(el.stylesJSON) : {};
   const parsedAnimations = el.animationsJSON ? JSON.parse(el.animationsJSON) : {};
   const baselineRef = React.useRef<{ answersJSON?: string; stylesJSON?: string; animationsJSON?: string }>(null);
@@ -164,18 +168,26 @@ export function ElementEdit(props: Props) {
     setElement(p);
   };
 
-  const handleHtmlChange = (field: string, newValue: string) => {
-    try {
-      // Lexical normalizes the stored HTML on mount and fires onChange with it;
-      // rebase the dirty-tracking baseline so that first emission never reads as an edit.
-      if (!normalizedHtmlFieldsRef.current.has(field)) {
-        normalizedHtmlFieldsRef.current.add(field);
-        if (baselineRef.current) {
+  const handleEditorHtmlChange = (field: string, newValue: string) => {
+    // Lexical normalizes the stored HTML on mount and fires onChange with it;
+    // rebase the dirty-tracking baseline so that first emission never reads as an edit.
+    if (!normalizedHtmlFieldsRef.current.has(field)) {
+      normalizedHtmlFieldsRef.current.add(field);
+      if (baselineRef.current) {
+        try {
           const baseAnswers = baselineRef.current.answersJSON ? JSON.parse(baselineRef.current.answersJSON) : {};
           baseAnswers[field] = newValue;
           baselineRef.current = { ...baselineRef.current, answersJSON: JSON.stringify(baseAnswers) };
+        } catch (error) {
+          console.error("ElementEdit handleEditorHtmlChange error:", error);
         }
       }
+    }
+    handleHtmlChange(field, newValue);
+  };
+
+  const handleHtmlChange = (field: string, newValue: any) => {
+    try {
       parsedData[field] = newValue;
       const p = { ...element };
       p.answers = parsedData;
@@ -208,7 +220,8 @@ export function ElementEdit(props: Props) {
 
   const handleSave = () => {
     if (innerErrors.length === 0) {
-      trackSave(ApiHelper.post("/elements", [element], "ContentApi"))
+      const toSave = element?.elements ? { ...element, elements: element.elements.filter((c) => !c.id?.startsWith("__preview_col_")) } : element;
+      trackSave(ApiHelper.post("/elements", [toSave], "ContentApi"))
         .then((response: any) => {
           const data = Array.isArray(response) ? response[0] : response;
           if (data.answersJSON) data.answers = JSON.parse(data.answersJSON);
@@ -317,7 +330,7 @@ export function ElementEdit(props: Props) {
       <HtmlEditor
         value={parsedData[field] || ""}
         onChange={(val: any) => {
-          handleHtmlChange(field, val);
+          handleEditorHtmlChange(field, val);
         }}
       />
     </Box>
@@ -891,6 +904,16 @@ export function ElementEdit(props: Props) {
     </>
   );
 
+  const getPodcastFields = () => (
+    <>
+      <TextField fullWidth size="small" label={Locale.label("site.podcastEdit.feedUrl")} name="feedUrl" value={parsedData.feedUrl || ""} onChange={handleChange} onKeyDown={handleKeyDown} placeholder="https://example.com/podcast/feed.xml" data-testid="podcast-feed-url-input" />
+      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>{Locale.label("site.podcastEdit.feedUrlHint")}</Typography>
+      <TextField fullWidth size="small" type="number" label={Locale.label("site.podcastEdit.itemCount")} name="itemCount" value={parsedData.itemCount ?? 10} onChange={handleChange} onKeyDown={handleKeyDown} data-testid="podcast-item-count-input" />
+      <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showDates !== "false" && parsedData.showDates !== false} />} name="showDates" label={Locale.label("site.podcastEdit.showDates")} />
+      <FormControlLabel control={<Checkbox onChange={handleCheck} checked={parsedData.showDescriptions !== "false" && parsedData.showDescriptions !== false} />} name="showDescriptions" label={Locale.label("site.podcastEdit.showDescriptions")} />
+    </>
+  );
+
   const getFields = () => {
     let result = getJsonFields();
     switch (element?.elementType) {
@@ -920,10 +943,11 @@ export function ElementEdit(props: Props) {
         result = <FormEdit parsedData={parsedData} handleChange={handleChange} />;
         break;
       case "faq":
-        result = <FaqEdit parsedData={parsedData} handleChange={handleChange} handleHtmlChange={handleHtmlChange} />;
+        result = <FaqEdit parsedData={parsedData} handleChange={handleChange} handleHtmlChange={handleHtmlChange} handleEditorHtmlChange={handleEditorHtmlChange} />;
         break;
       case "map": result = getMapFields(); break;
       case "sermons": result = getSermonsFields(); break;
+      case "podcast": result = getPodcastFields(); break;
       case "iconFeature": result = getIconFeatureFields(); break;
       case "socialIcons": result = getSocialIconsFields(); break;
       case "countdown": result = getCountdownFields(); break;
@@ -1135,8 +1159,8 @@ export function ElementEdit(props: Props) {
   const handleDuplicate = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (await confirm(Locale.label("site.elements.confirmDuplicate"), { destructive: false, confirmLabel: Locale.label("common.confirm", "Confirm") })) {
-      trackSave(ApiHelper.post("/elements/duplicate/" + props.element.id, {}, "ContentApi")).then((data: any) => {
-        props.updatedCallback(data);
+      trackSave(ApiHelper.post("/elements/duplicate/" + props.element.id, {}, "ContentApi")).then(() => {
+        props.updatedCallback(null as unknown as ElementInterface);
       });
     }
   };
@@ -1153,7 +1177,7 @@ export function ElementEdit(props: Props) {
         stickyFooter={props.inPanel}
         onSave={handleSave}
         onCancel={handleCancel}
-        onDelete={handleDelete}
+        onDelete={props.element.id ? handleDelete : undefined}
         headerActions={
           props.element.id && (
             <a href="about:blank" onClick={handleDuplicate}>

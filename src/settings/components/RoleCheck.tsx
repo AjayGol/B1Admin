@@ -8,7 +8,7 @@ interface Props {
   contentType: string;
   action: string;
   label: string;
-  roleId: string;
+  roleId?: string;
   rolePermissions: RolePermissionInterface[];
 }
 
@@ -33,8 +33,8 @@ export const RoleCheck: React.FC<Props> = (props) => {
       };
       setRolePermission(rp); // optimistic
       try {
-        const data: any = await ApiHelper.post("/rolepermissions/", [rp], "MembershipApi");
-        setRolePermission({ ...rp, id: data[0] });
+        const data: RolePermissionInterface[] = await ApiHelper.post("/rolepermissions/", [rp], "MembershipApi");
+        setRolePermission({ ...rp, id: data[0].id });
       } catch {
         setRolePermission(null); // revert
         setErrors([Locale.label("common.saveError")]);

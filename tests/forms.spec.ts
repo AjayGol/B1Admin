@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { request as pwRequest, type APIRequestContext, type Page } from "@playwright/test";
 import { settingsTest as test, expect } from "./helpers/test-fixtures";
 import { navigateToForms, navigateToPeople } from "./helpers/navigation";
 import { openPersonRow, SEED_PEOPLE, confirmDelete } from "./helpers/fixtures";
@@ -71,6 +71,65 @@ test.describe("Forms page", () => {
     await expect(page.getByText("Form not found")).toBeVisible({ timeout: 15000 });
     await page.getByRole("link", { name: "Back to Forms" }).click();
     await expect(page).toHaveURL(/\/forms$/, { timeout: 10000 });
+  });
+});
+
+// Issue #1066: forms could be edited, duplicated and archived but never printed.
+// The list now offers a paper copy of any form (blank answer spaces), and a person's
+// submitted form can be printed from their Forms tab.
+test.describe("Printing forms", () => {
+  test("prints a blank copy of a form from the Forms list", async ({ page }) => {
+    await openFormsPage(page);
+    const row = page.locator("table tbody tr").filter({ hasText: "Visitor Information Card" }).first();
+    await expect(row).toBeVisible({ timeout: 10000 });
+    await row.locator('[data-testid^="print-form-button-"]').click();
+
+    const dialog = page.locator('[data-testid="form-print-dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    await expect(dialog.getByRole("heading", { name: "Visitor Information Card" })).toBeVisible({ timeout: 10000 });
+    // Required questions carry a marker; the legend explains it.
+    await expect(dialog.getByText("First Name *", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("* Required", { exact: true })).toBeVisible();
+    // Optional questions do not.
+    await expect(dialog.getByText("Phone Number", { exact: true })).toBeVisible();
+    // Multiple choice prints every option so it can be ticked on paper.
+    await expect(dialog.getByText("How did you hear about us?", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("Friend or Family", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("Community Event", { exact: true })).toBeVisible();
+    await expect(dialog.locator('[data-testid="form-print-confirm"]')).toBeEnabled();
+    await page.screenshot({ path: ".pr-screenshots/after.png", fullPage: true });
+
+    await dialog.locator('[data-testid="form-print-close"]').click();
+    await expect(dialog).toHaveCount(0, { timeout: 10000 });
+  });
+
+  test("a person's submitted form prints with a title, name and submission date", async ({ page }) => {
+    await navigateToPeople(page);
+    await openPersonRow(page, "Brian Harris");
+    await page.getByRole("tab", { name: "Forms" }).click();
+    const railItem = page.getByText("Visitor Information Card", { exact: true }).first();
+    await expect(railItem).toBeVisible({ timeout: 10000 });
+    await railItem.click();
+    const pane = page.locator('[data-testid="display-box-content"]');
+    await expect(pane.getByText("brian.harris@email.com")).toBeVisible({ timeout: 10000 });
+
+    const printBtn = page.locator('[data-testid="print-form-submission-button"]');
+    await expect(printBtn).toBeVisible({ timeout: 10000 });
+    // The edit button keeps its accessible name next to the new print button.
+    await expect(page.locator('button[aria-label="editButton"]').first()).toBeVisible();
+
+    // On screen the paper header stays hidden; under print media it appears and the
+    // buttons disappear, which is exactly what react-to-print sends to the printer.
+    const printHeader = pane.getByText("Submitted For: Brian Harris");
+    await expect(printHeader).toBeHidden();
+    await page.emulateMedia({ media: "print" });
+    await expect(printHeader).toBeVisible({ timeout: 10000 });
+    await expect(pane.getByRole("heading", { name: "Visitor Information Card" })).toBeVisible();
+    await expect(pane.getByText(/Submission Date: /)).toBeVisible();
+    await expect(printBtn).toBeHidden();
+    await page.screenshot({ path: ".pr-screenshots/submission-after.png", fullPage: true });
+    await page.emulateMedia({ media: "screen" });
+    await expect(printBtn).toBeVisible();
   });
 });
 
@@ -188,12 +247,10 @@ test.describe.serial("Stand Alone form lifecycle", () => {
     const availabilityFormControl = page.locator("#formBox div.MuiFormControl-root", { hasText: "Set Form Availability Timeframe" });
     await selectMuiOption(page, availabilityFormControl.locator('[role="combobox"]'), "Yes");
 
-    const startPicker = page.getByRole("group", { name: "Availability Start Date" });
-    const endPicker = page.getByRole("group", { name: "Availability End Date" });
-    await startPicker.click();
-    await page.keyboard.type("01012026");
-    await endPicker.click();
-    await page.keyboard.type("12312026");
+    const startPicker = page.getByLabel("Availability Start Date");
+    const endPicker = page.getByLabel("Availability End Date");
+    await startPicker.fill("2026-01-01");
+    await endPicker.fill("2026-12-31");
 
     await saveFormDrawer(page);
     const row = page.locator("table tbody tr").filter({ hasText: DISPOSABLE_STANDALONE_FORM }).first();
@@ -274,6 +331,88 @@ test.describe("Person form submissions (profile rail)", () => {
     await post;
     await expect(page.locator("#formSubmissionBox")).toHaveCount(0, { timeout: 10000 });
     await expect(page.getByText("donald.card@example.com").first()).toBeVisible({ timeout: 10000 });
+  });
+});
+
+// Issue #1108: a person who filled the same form out more than once only ever had one
+// of those submissions rendered on their Forms tab. The Api returns every submission -
+// PersonForms collapsed them into a map keyed by formId, so each one overwrote the last.
+//
+// The extra submission is deliberately dated *before* the seeded card. The chromium
+// project runs fullyParallel, so "Printing forms" and "Person form submissions (profile
+// rail)" can be open on Brian Harris's pane while this describe's row exists, and both
+// assert on brian.harris@email.com. Backdating keeps the seeded card the newest, so the
+// pane those tests see is unchanged; a dedicated request context is not enough on its
+// own because the extra row is shared server state, not client state.
+test.describe.serial("Repeated submissions of the same form stay reachable", () => {
+  const API = process.env.API_BASE || "http://localhost:8084";
+  const BRIAN_HARRIS = "PER00000079"; // demo seed person with one Visitor Information Card submission
+  const VISITOR_FORM = "FRM00000001";
+  const FIRST_NAME_QUESTION = "QST00000001";
+  const EMAIL_QUESTION = "QST00000003";
+  const SEEDED_EMAIL = "brian.harris@email.com"; // FSB00000001, submitted 2025-09-15
+  const EARLIER_EMAIL = "brian.harris.second@example.com"; // the extra submission this describe adds
+
+  let ctx: APIRequestContext;
+  let auth: { headers: { Authorization: string } };
+  let extraSubmissionId = "";
+
+  test.beforeAll(async () => {
+    ctx = await pwRequest.newContext();
+    const loginRes = await ctx.post(`${API}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+    expect(loginRes.ok()).toBeTruthy();
+    const body = await loginRes.json();
+    const uc = (body.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || body.userChurches?.[0];
+    expect(uc?.jwt).toBeTruthy();
+    auth = { headers: { Authorization: "Bearer " + uc.jwt } };
+
+    // Brian filled the visitor card out once before the seeded one.
+    const res = await ctx.post(`${API}/membership/formsubmissions`, {
+      ...auth,
+      data: [
+        {
+          formId: VISITOR_FORM,
+          contentType: "person",
+          contentId: BRIAN_HARRIS,
+          submissionDate: "2024-03-05T10:30:00.000Z",
+          submittedBy: BRIAN_HARRIS,
+          answers: [
+            { questionId: FIRST_NAME_QUESTION, value: "Brian" },
+            { questionId: EMAIL_QUESTION, value: EARLIER_EMAIL }
+          ]
+        }
+      ]
+    });
+    expect(res.ok()).toBeTruthy();
+    const saved = await res.json();
+    extraSubmissionId = saved?.[0]?.id;
+    expect(extraSubmissionId).toBeTruthy();
+  });
+
+  test.afterAll(async () => {
+    if (extraSubmissionId) await ctx.delete(`${API}/membership/formsubmissions/${extraSubmissionId}`, auth);
+    await ctx?.dispose();
+  });
+
+  test("both Visitor Information Card submissions are reachable from the person's Forms tab", async ({ page }) => {
+    await navigateToPeople(page);
+    await openPersonRow(page, "Brian Harris");
+    await page.getByRole("tab", { name: "Forms" }).click();
+
+    const railItem = page.getByText("Visitor Information Card", { exact: true }).first();
+    await expect(railItem).toBeVisible({ timeout: 10000 });
+    await railItem.click();
+
+    const pane = page.locator('[data-testid="display-box-content"]');
+
+    // The newest submission opens by default.
+    await expect(pane.getByText(SEEDED_EMAIL)).toBeVisible({ timeout: 10000 });
+
+    // The other one is still reachable instead of being overwritten.
+    const options = page.locator('[data-testid="submission-picker"] [data-testid^="submission-option-"]');
+    await expect(options).toHaveCount(2, { timeout: 10000 });
+    await options.nth(1).click();
+    await expect(pane.getByText(EARLIER_EMAIL)).toBeVisible({ timeout: 10000 });
   });
 });
 

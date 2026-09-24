@@ -18,16 +18,16 @@ export const getWorshipCommonsOrigin = (): string => {
 
 export type AssetStatus = "pending" | "published" | "unpublished" | "removed";
 export type FileAction = "add" | "replace" | "remove";
-export type RejectReason = "quality" | "duplicate" | "licensing" | "ccli" | "offtopic" | "incomplete" | "other";
-export type ReportReason = "copyright" | "policy" | "quality" | "other";
+export type RejectReason = "quality" | "duplicate" | "licensing" | "ccli" | "ai" | "offtopic" | "incomplete" | "other";
+export type ReportReason = "copyright" | "ai" | "policy" | "quality" | "other";
 export type ReportStatus = "open" | "reviewing" | "resolved";
 export type ReportResolution = "upheld" | "dismissed" | "duplicate";
 export type ReportAction = "none" | "unpublish" | "remove";
 export type RemovedReason = "copyright" | "policy";
-export type SubmissionType = "new" | "translation" | "arrangement" | "correction" | "additionalFile" | "removal";
-export type Confidence = "sunday-ready" | "proofread-score" | "converted-from-abc" | "generated-from-midi" | "chart-only" | "lyrics-only";
+export type SubmissionType = "new" | "translation" | "arrangement" | "correction" | "additionalFile" | "recording" | "removal";
+export type Confidence = "sunday-ready" | "score" | "generated-from-midi" | "chart-only" | "lyrics-only";
 
-export const REJECT_REASONS: RejectReason[] = ["quality", "duplicate", "licensing", "ccli", "offtopic", "incomplete", "other"];
+export const REJECT_REASONS: RejectReason[] = ["quality", "duplicate", "licensing", "ccli", "ai", "offtopic", "incomplete", "other"];
 export const RESOLUTIONS: ReportResolution[] = ["upheld", "dismissed", "duplicate"];
 export const RESOLVE_ACTIONS: ReportAction[] = ["none", "unpublish", "remove"];
 export const REMOVE_REASONS: RemovedReason[] = ["copyright", "policy"];
@@ -179,6 +179,9 @@ export interface CommonsPayload {
   tags?: string;
   language?: string;
   license?: string;
+  licenseVersion?: string;
+  attestationVersion?: string;
+  attestedAt?: string;
   publisherChurchId?: string;
   detail?: Record<string, unknown>;
   qualityDetail?: CommonsQualityDetail;

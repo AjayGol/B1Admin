@@ -7,8 +7,16 @@ import { Box, Divider, Grid, Stack, TextField, Typography, MenuItem } from "@mui
 
 type AnyRecord = Record<string, any>;
 
-const DAY_KEYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-const dayLabel = (day: number) => Locale.label("common.days." + DAY_KEYS[day]);
+const DAY_LABELS = [
+  () => Locale.label("common.days.sunday"),
+  () => Locale.label("common.days.monday"),
+  () => Locale.label("common.days.tuesday"),
+  () => Locale.label("common.days.wednesday"),
+  () => Locale.label("common.days.thursday"),
+  () => Locale.label("common.days.friday"),
+  () => Locale.label("common.days.saturday")
+];
+const dayLabel = (day: number) => DAY_LABELS[day]();
 
 interface Props {
   church: ChurchInterface;
@@ -39,8 +47,12 @@ export const ChurchInfoSection: React.FC<Props> = ({ church, onSaved }) => {
     setSaving(true);
     const { churchName, ...rest } = values;
     const updated: ChurchInterface = { ...church, ...rest, name: churchName };
-    const resp = await ApiHelper.post("/churches", [updated], "MembershipApi");
-    setSaving(false);
+    let resp;
+    try {
+      resp = await ApiHelper.post("/churches", [updated], "MembershipApi");
+    } finally {
+      setSaving(false);
+    }
     if (resp?.errors !== undefined) return;
     setEditing(false);
     onSaved();
@@ -82,7 +94,7 @@ export const ChurchInfoSection: React.FC<Props> = ({ church, onSaved }) => {
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField fullWidth select label={Locale.label("settings.churchSettingsEdit.firstDayOfWeek") || "First Day of Week"} id="firstDayOfWeek" {...register("firstDayOfWeek", { valueAsNumber: true })} defaultValue={(church as any)?.firstDayOfWeek || 0}>
-              {DAY_KEYS.map((key, i) => <MenuItem key={key} value={i}>{dayLabel(i)}</MenuItem>)}
+              {DAY_LABELS.map((_, i) => <MenuItem key={i} value={i}>{dayLabel(i)}</MenuItem>)}
             </TextField>
           </Grid>
         </Grid>

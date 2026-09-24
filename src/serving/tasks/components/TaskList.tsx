@@ -40,7 +40,7 @@ export const TaskList = memo((props: Props) => {
   const context = React.useContext(UserContext);
 
   const tasks = useQuery<TaskInterface[]>({
-    queryKey: props.status === Locale.label("tasks.taskPage.closed") ? ["/tasks/closed", "DoingApi"] : ["/tasks", "DoingApi"],
+    queryKey: props.status === "Closed" ? ["/tasks/closed", "DoingApi"] : ["/tasks", "DoingApi"],
     placeholderData: []
   });
 
@@ -294,7 +294,11 @@ export const TaskList = memo((props: Props) => {
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
             <Stack direction="row" alignItems="center" spacing={1}>
               <TaskIcon sx={{ color: "primary.main", fontSize: 20 }} />
-              <Typography variant="h6">
+              <Typography
+                variant="h6"
+                component={Link}
+                to="/serving/tasks"
+                sx={{ color: "inherit", textDecoration: "none", "&:hover": { color: "primary.main" } }}>
                 {Locale.label("tasks.taskList.tasks")}
               </Typography>
             </Stack>

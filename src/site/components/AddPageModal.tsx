@@ -4,6 +4,7 @@ import { FormCard } from "../../components/ui";
 import { Permissions, type LinkInterface } from "@churchapps/helpers";
 import { Button, Dialog, Grid, Icon, InputLabel, type SelectChangeEvent, TextField, Typography, CircularProgress, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { gatherChurchFacts, resolvePhotos } from "../aiPageCandidates";
 
 type Props = {
   mode: string,
@@ -83,9 +84,11 @@ export function AddPageModal(props: Props) {
   };
 
   const handleAiGenerate = async () => {
-    // Validate prompt
-    if (!aiPrompt || aiPrompt.trim().length < 10) {
-      setAiErrors([Locale.label("site.addPageModal.errAiPromptTooShort")]);
+    const promptErrors: string[] = [];
+    if (!page?.title) promptErrors.push(Locale.label("site.addPageModal.errTitle"));
+    if (!aiPrompt || aiPrompt.trim().length < 10) promptErrors.push(Locale.label("site.addPageModal.errAiPromptTooShort"));
+    if (promptErrors.length > 0) {
+      setAiErrors(promptErrors);
       return;
     }
 
@@ -94,179 +97,47 @@ export function AddPageModal(props: Props) {
     setAiGenerationStatus(Locale.label("site.addPageModal.statusGatheringInfo"));
 
     try {
-      // STEP 1: Gather context from ContentApi
       const church = UserHelper.currentUserChurch.church;
-      const globalStyles = await ApiHelper.get("/globalStyles", "ContentApi");
+      const [globalStyles, records, existingPages] = await Promise.all([
+        ApiHelper.get("/globalStyles", "ContentApi"),
+        gatherChurchFacts(church.id),
+        ApiHelper.get("/pages", "ContentApi").catch((): any[] => [])
+      ]);
+      const palette = typeof globalStyles?.palette === "string" ? JSON.parse(globalStyles.palette || "{}") : globalStyles?.palette;
+      const address = [church.address1, church.city, church.state].filter(Boolean).join(", ");
+      const request = { prompt: aiPrompt.trim(), churchContext: { churchName: church.name, address: address || undefined, theme: { palette }, resolvesPhotos: true, ...records } };
 
-      const validElementTypes = [
-        "text",
-        "textWithPhoto",
-        "card",
-        "faq",
-        "iconFeature",
-        "testimonial",
-        "stats",
-        "gallery",
-        "socialIcons",
-        "countdown",
-        "table",
-        "image",
-        "video",
-        "map",
-        "logo",
-        "sermons",
-        "stream",
-        "donation",
-        "donateLink",
-        "form",
-        "calendar",
-        "groupList",
-        "row",
-        "box",
-        "carousel",
-        "rawHTML",
-        "iframe",
-        "buttonLink",
-        "whiteSpace",
-        "block"
-      ];
-
-      const churchContext = {
-        churchId: church.id,
-        churchName: church.name,
-        subdomain: church.subDomain,
-        theme: {
-          primaryColor: globalStyles?.palette?.primary,
-          secondaryColor: globalStyles?.palette?.secondary,
-          fonts: globalStyles?.fonts,
-          palette: globalStyles?.palette
-        }
-      };
-
-      // STEP 2: Generate page outline (fast, uses haiku model)
+      // Each phase is its own request so every call stays inside the API gateway timeout.
       setAiGenerationStatus(Locale.label("site.addPageModal.statusPlanning"));
-      const outlineRequest = {
-        prompt: aiPrompt.trim(),
-        churchContext,
-        availableElementTypes: validElementTypes,
-        constraints: {
-          maxSections: 10,
-          preferredLayout: "headerFooter"
-        }
-      };
+      const plan = await ApiHelper.post("/website/planPage", request, "AskApi");
+      if (!plan?.candidates?.length) throw new Error(plan?.error || Locale.label("site.addPageModal.errOutlineFailed"));
 
-      const outlineResponse = await ApiHelper.post("/website/generatePageOutline", outlineRequest, "AskApi");
-
-      if (!outlineResponse?.outline?.sections?.length) {
-        throw new Error(Locale.label("site.addPageModal.errOutlineFailed"));
+      // A brand-new site has no look of its own yet, so it takes the suggested palette and fonts. Existing sites keep theirs.
+      if (Array.isArray(existingPages) && existingPages.length === 0 && plan.suggestedStyle?.palette) {
+        const merged = { ...globalStyles, fonts: JSON.stringify(plan.suggestedStyle.fonts), palette: JSON.stringify({ ...palette, ...plan.suggestedStyle.palette }) };
+        await ApiHelper.post("/globalStyles", [merged], "ContentApi").catch((): null => null);
+        request.churchContext.theme = { palette: { ...palette, ...plan.suggestedStyle.palette } };
       }
 
-      const outline = outlineResponse.outline;
-      const sectionCount = outline.sections.length;
-
-      // STEP 3: Generate all sections in parallel (uses sonnet model for quality)
-      // Use Promise.allSettled to handle individual failures gracefully
-      setAiGenerationStatus(Locale.label("site.addPageModal.statusGenerating").replace("{count}", sectionCount.toString()));
-
-      const sectionPromises = outline.sections.map((sectionOutline: any, index: number) =>
-        ApiHelper.post("/website/generateSection", {
-          sectionOutline,
-          churchContext,
-          availableElementTypes: validElementTypes,
-          pageContext: {
-            title: outline.title,
-            totalSections: sectionCount,
-            sectionIndex: index
-          }
-        }, "AskApi"));
-
-      const sectionResults = await Promise.allSettled(sectionPromises);
-
-      // Filter out failed sections and collect successful ones
-      const successfulSections: any[] = [];
-      const failedSectionIndices: number[] = [];
-
-      sectionResults.forEach((result, index) => {
-        if (result.status === "fulfilled" && result.value?.section) {
-          successfulSections.push({
-            ...result.value.section,
-            sort: successfulSections.length // Re-number based on successful sections
-          });
-        } else {
-          failedSectionIndices.push(index + 1); // 1-based for user display
-          console.error(`Section ${index} failed:`, result.status === "rejected" ? result.reason : "No section data");
-        }
-      });
-
-      // If all sections failed, throw an error
-      if (successfulSections.length === 0) {
-        throw new Error(Locale.label("site.addPageModal.errAllSectionsFailed"));
+      // Only the best-ranked layout is written; the runner-up is a fallback if that write fails.
+      setAiGenerationStatus(Locale.label("site.addPageModal.statusGenerating").replace("{count}", plan.candidates[0].layout.length.toString()));
+      // the details the request left out were decided once while planning, so every section tells the same story
+      (request.churchContext as any).assumedDetails = Array.isArray(plan.assumedDetails) ? plan.assumedDetails : [];
+      let first: { sections: any[] } | null = null;
+      for (const candidate of plan.candidates.slice(0, 2)) {
+        const result = await ApiHelper.post("/website/writePage", { ...request, layout: candidate.layout, tone: plan.tone, pageType: plan.pageType }, "AskApi").catch((): null => null);
+        if (result?.sections?.length) { first = { sections: await resolvePhotos(result.sections) }; break; }
       }
+      if (!first) throw new Error(Locale.label("site.addPageModal.errAllSectionsFailed"));
 
-      // STEP 4: Assemble the complete page structure with successful sections
-      const assembledPage = {
-        title: outline.title,
-        url: outline.url,
-        layout: outline.layout || "headerFooter",
-        sections: successfulSections
-      };
-
-      // Warn user if some sections failed
-      if (failedSectionIndices.length > 0) {
-        const failedMsg = `Note: ${failedSectionIndices.length} section(s) failed to generate and were skipped.`;
-        console.warn(failedMsg);
-        // We'll continue with what we have
-      }
-
-      // STEP 5: Post generated structure to ContentApi
       setAiGenerationStatus(Locale.label("site.addPageModal.statusCreatingSections"));
-      const pageToSave = {
-        title: assembledPage.title,
-        churchId: church.id,
-        siteId: props.siteId || undefined,
-        layout: assembledPage.layout,
-        url: SlugHelper.slugifyString(
-          "/" + assembledPage.title.toLowerCase().replace(/\s+/g, "-"),
-          "urlPath"
-        ) || "/untitled"
-      };
+      const title = page.title;
+      const url = props.requestedSlug || SlugHelper.slugifyString("/" + title.toLowerCase().replace(/\s+/g, "-"), "urlPath") || "/untitled";
+      const savedPage = await ApiHelper.post("/pages/importTree", { title, url, layout: "headerFooter", siteId: props.siteId || undefined, sections: first.sections }, "ContentApi");
 
-      // Create page record
-      const savedPage = await ApiHelper.post("/pages", [pageToSave], "ContentApi");
-      const pageId = savedPage[0].id;
-
-      // Create sections and elements using existing ContentApi endpoints
-      for (const section of assembledPage.sections || []) {
-        section.pageId = pageId;
-        section.churchId = church.id;
-
-        const savedSection = await ApiHelper.post("/sections", [section], "ContentApi");
-        const sectionId = savedSection[0].id;
-
-        // Save elements for this section (handle nested elements for rows, boxes, etc.)
-        const saveElements = async (elements: any[], parentId?: string) => {
-          for (const element of elements || []) {
-            element.sectionId = sectionId;
-            element.churchId = church.id;
-            if (parentId) element.parentId = parentId;
-
-            const savedElement = await ApiHelper.post("/elements", [element], "ContentApi");
-            const elementId = savedElement[0].id;
-
-            // Recursively save nested elements (e.g., for rows, boxes, carousels)
-            if (element.elements && element.elements.length > 0) {
-              await saveElements(element.elements, elementId);
-            }
-          }
-        };
-
-        await saveElements(section.elements);
-      }
-
-      // STEP 6: Navigate to preview
       setAiGenerationStatus(Locale.label("site.addPageModal.statusOpening"));
       props.updatedCallback();
-      navigate(`/site/pages/preview/${pageId}`);
+      navigate(`/site/pages/preview/${savedPage.id}`);
 
     } catch (error) {
       setAiErrors([(error as Error)?.message || Locale.label("site.addPageModal.errFailedGenerate")]);
@@ -358,8 +229,7 @@ export function AddPageModal(props: Props) {
             {getTemplateButton("about", "quiz", Locale.label("site.addPageModal.aboutUs"))}
             {getTemplateButton("donate", "volunteer_activism", Locale.label("site.addPageModal.donate"))}
             {getTemplateButton("location", "location_on", Locale.label("site.addPageModal.location"))}
-            {/* ponytail: AI page generation temporarily disabled — restore to re-enable */}
-            {/* {getTemplateButton("ai", "auto_awesome", "AI")} */}
+            {getTemplateButton("ai", "auto_awesome", "AI")}
             {(props.mode === "navigation") && getTemplateButton("link", "link", Locale.label("site.addPageModal.linkType"))}
           </Grid>
 
@@ -404,19 +274,17 @@ export function AddPageModal(props: Props) {
             </>
           )}
 
-          {pageTemplate !== "ai" && (
-            <Grid container spacing={2}>
-              {(pageTemplate !== "link") && <Grid size={(props.mode === "navigation") ? 6 : 12}>
-                <TextField size="small" fullWidth label={Locale.label("site.addPageModal.pageTitle")} name="title" value={page?.title || ""} onChange={handleChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.addPage.title")} data-testid="page-title-input" />
-              </Grid>}
-              {(pageTemplate === "link") && <Grid size={(props.mode === "navigation") ? 6 : 12}>
-                <TextField size="small" fullWidth label={Locale.label("site.addPageModal.linkUrl")} name="linkUrl" value={link?.url || ""} onChange={handleLinkChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.addPage.linkUrl")} />
-              </Grid>}
-              {(props.mode === "navigation") && <Grid size={6}>
-                <TextField size="small" fullWidth label={Locale.label("site.addPageModal.linkText")} name="linkText" value={link?.text || ""} onChange={handleLinkChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.addPage.linkText")} />
-              </Grid>}
-            </Grid>
-          )}
+          <Grid container spacing={2} sx={pageTemplate === "ai" ? { mt: 1 } : undefined}>
+            {(pageTemplate !== "link") && <Grid size={(props.mode === "navigation") ? 6 : 12}>
+              <TextField size="small" fullWidth label={Locale.label("site.addPageModal.pageTitle")} name="title" value={page?.title || ""} onChange={handleChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.addPage.title")} data-testid="page-title-input" />
+            </Grid>}
+            {(pageTemplate === "link") && <Grid size={(props.mode === "navigation") ? 6 : 12}>
+              <TextField size="small" fullWidth label={Locale.label("site.addPageModal.linkUrl")} name="linkUrl" value={link?.url || ""} onChange={handleLinkChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.addPage.linkUrl")} />
+            </Grid>}
+            {(props.mode === "navigation") && <Grid size={6}>
+              <TextField size="small" fullWidth label={Locale.label("site.addPageModal.linkText")} name="linkText" value={link?.text || ""} onChange={handleLinkChange} onKeyDown={handleKeyDown} placeholder={Locale.label("placeholders.addPage.linkText")} />
+            </Grid>}
+          </Grid>
         </FormCard>
 
       </Dialog>

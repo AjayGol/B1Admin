@@ -291,6 +291,7 @@ test.describe.serial("Serving Management - Plans", () => {
       await editBtn.click();
       const deleteBtn = page.locator("button").getByText("Delete");
       await deleteBtn.click();
+      await confirmDelete(page);
       const verifiedPlan = page.locator("a").getByText("Mar 1, 2030");
       await expect(verifiedPlan).toHaveCount(0, { timeout: 10000 });
     });
@@ -483,6 +484,84 @@ test.describe("Plans page navigation", () => {
     await page.goto("/serving");
     await page.waitForURL(/\/serving\/plans/, { timeout: 15000 });
     await expect(page).toHaveURL(/\/serving\/plans/);
+  });
+});
+
+// ChurchAppsSupport#1084: a slow or failing /songs/search left the Service Order song
+// picker spinning forever, recoverable only by closing and reopening the dialog.
+test.describe("Service Order song search error handling", () => {
+  const API = process.env.API_BASE || "http://localhost:8084";
+  let ctx: APIRequestContext;
+  let jwt: string;
+  let planId: string;
+
+  test.beforeAll(async () => {
+    ctx = await pwRequest.newContext();
+    const loginRes = await ctx.post(`${API}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+    expect(loginRes.ok()).toBeTruthy();
+    const body = await loginRes.json();
+    const uc = (body.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || body.userChurches?.[0];
+    expect(uc?.jwt).toBeTruthy();
+    jwt = uc.jwt as string;
+    const auth = { headers: { Authorization: "Bearer " + jwt } };
+
+    const planRes = await ctx.post(`${API}/doing/plans`, {
+      ...auth,
+      data: [{ name: "Song Search Failure Repro", serviceDate: "2030-06-01", ministryId: "GRP0000000a", planTypeId: "PLT00000001", serviceOrder: true }]
+    });
+    expect(planRes.ok()).toBeTruthy();
+    planId = (await planRes.json())[0].id;
+
+    const headerRes = await ctx.post(`${API}/doing/planItems`, { ...auth, data: [{ planId, sort: 1, itemType: "header", label: "Song Search Section" }] });
+    expect(headerRes.ok()).toBeTruthy();
+  });
+
+  test.afterAll(async () => {
+    if (planId) await ctx.delete(`${API}/doing/plans/${planId}`, { headers: { Authorization: "Bearer " + jwt } });
+    await ctx.dispose();
+  });
+
+  test("a failed song search clears the spinner and reports the failure", async ({ page }) => {
+    const failure = { status: 500, contentType: "application/json", body: JSON.stringify({ errors: ["Search timed out"] }) };
+    await page.route("**/songs/search**", (route) => route.fulfill(failure));
+    await page.goto(`/serving/plans/${planId}`);
+    await page.getByRole("tab", { name: "Service Order" }).click({ timeout: 20000 });
+    await expect(page.getByText("Song Search Section")).toBeVisible({ timeout: 20000 });
+
+    await page.getByRole("button", { name: "Add Item" }).first().click();
+    await page.getByRole("menuitem").filter({ hasText: "Song" }).click();
+
+    const dialog = page.getByRole("dialog");
+    await dialog.getByTestId("song-search-input").locator("input").fill("Issue1084");
+    await dialog.getByTestId("song-search-button").click();
+
+    // The spinner has to stop; leaving it up is the reported "stuck" state.
+    await expect(dialog.locator(".MuiCircularProgress-root")).toHaveCount(0, { timeout: 15000 });
+    await expect(dialog.getByTestId("song-search-error")).toBeVisible({ timeout: 15000 });
+
+    // And the search box stays usable so a retry does not need the dialog reopened.
+    await expect(dialog.getByTestId("song-search-button")).toBeEnabled();
+  });
+});
+
+// Issue #1082: label keys built from a prefix plus a variable were never harvested by
+// /locale-sync, so Locale.label() returned the key itself. The Edit Plan Type dialog
+// rendered its reminders accordion header as "plans.planTypeReminders.title".
+test.describe("Edit Plan Type locale", () => {
+  test("the reminders section of the Edit Plan Type dialog is localized", async ({ page }) => {
+    await page.goto("/serving/plans");
+    await page.waitForURL(/\/serving\/plans/, { timeout: 15000 });
+
+    const row = page.locator("tr", { hasText: "Sunday Service" }).first();
+    await expect(row).toBeVisible({ timeout: 15000 });
+    await row.locator('button[aria-label="Edit"]').click();
+
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    await expect(dialog.getByText("Plan Type Details")).toBeVisible({ timeout: 10000 });
+
+    await expect(dialog).not.toContainText("plans.planTypeReminders.");
+    await expect(dialog.getByText("Reminders", { exact: true })).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -849,5 +928,104 @@ test.describe.serial("Service Order multi-select import from the External Item p
     await expect(itemRow("Multi Import Action Three")).toHaveCount(1);
     await expect(itemRow("Multi Import Video")).toHaveCount(1);
     await expect(itemRow("Multi Import Action Two")).toHaveCount(0);
+  });
+});
+
+// ChurchAppsSupport#1045: a Service Order heading carried one position for the whole plan, so a plan
+// that runs two services from one order showed the same volunteer beside the heading in both views.
+// Churches split the role per service ("Worship Leader AM" / "Worship Leader PM"), so the heading now
+// resolves a position per service time — the one the "Viewing as" picker selects.
+test.describe.serial("Service Order heading position per service time", () => {
+  test.describe.configure({ retries: 0 });
+
+  const API = process.env.API_BASE || "http://localhost:8084";
+  const DEMO_PLAN = "/serving/plans/PLA00000001";
+
+  // Demo seed: POS00000001 "Worship Leader" is filled by Michael Davis, POS00000002
+  // "Acoustic Guitar" by David Lopez. Two positions, two people, one shared "Worship" heading.
+  const DEFAULT_POSITION = "Worship - Worship Leader";
+  const DEFAULT_VOLUNTEER = "Michael Davis";
+  const PER_SERVICE_POSITION = "Worship - Acoustic Guitar";
+  const PER_SERVICE_VOLUNTEER = "David Lopez";
+
+  let ctx: APIRequestContext;
+  let jwt: string;
+  let page: Page;
+
+  test.beforeAll(async ({ browser }) => {
+    ctx = await pwRequest.newContext();
+    const loginRes = await ctx.post(`${API}/membership/users/login`, { data: { email: "demo@b1.church", password: "password" } });
+    expect(loginRes.ok()).toBeTruthy();
+    const body = await loginRes.json();
+    const uc = (body.userChurches || []).find((c: any) => c.church?.id === "CHU00000001") || body.userChurches?.[0];
+    expect(uc?.jwt).toBeTruthy();
+    jwt = uc.jwt as string;
+
+    const context = await browser.newContext({ storageState: STORAGE_STATE_PATH });
+    page = await context.newPage();
+    await login(page);
+  });
+
+  // This runs against the shared demo plan, so the extra service time has to go back out or the
+  // next run would add a second one and the "Second Service" lookups would be ambiguous.
+  test.afterAll(async () => {
+    await page?.context().close();
+    const auth = { headers: { Authorization: "Bearer " + jwt } };
+    const timesRes = await ctx.get(`${API}/doing/times/plan/PLA00000001`, auth);
+    if (timesRes.ok()) {
+      const times = await timesRes.json();
+      for (const t of times.filter((t: any) => t.displayName === "Second Service")) {
+        await ctx.delete(`${API}/doing/times/${t.id}`, auth);
+      }
+    }
+    await ctx.dispose();
+  });
+
+  test("the heading shows each service's own volunteer as Viewing as changes", async () => {
+    await page.goto(DEMO_PLAN);
+
+    // The demo plan ships with one service time; a second one is what makes the
+    // per-service choice meaningful (and is what the "Include in services" list needs).
+    const addTime = page.locator('[data-testid="add-time-button"]');
+    await expect(addTime).toBeVisible({ timeout: 15000 });
+    await addTime.click();
+    await page.locator('[name="displayName"]').fill("Second Service");
+    await page.locator("button").getByText("Save").last().click();
+    await expect(page.locator("td button").getByText("Second Service")).toHaveCount(1, { timeout: 15000 });
+
+    const serviceOrderTab = page.locator('[role="tab"]').getByText("Service Order");
+    await expect(serviceOrderTab).toBeVisible({ timeout: 15000 });
+    await serviceOrderTab.click();
+
+    const worshipHeader = page.locator(".planItemHeader").filter({ hasText: "Worship" }).first();
+    await expect(worshipHeader).toBeVisible({ timeout: 15000 });
+    await worshipHeader.getByLabel("Edit section").click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByText("Include in services")).toBeVisible({ timeout: 15000 });
+
+    // Default position for the heading, used by any service without its own override.
+    await dialog.locator('[data-testid="plan-item-position-select"]').click();
+    await page.getByRole("option", { name: DEFAULT_POSITION, exact: true }).click();
+
+    // Override just the second service's position.
+    const secondServiceRow = dialog.locator(".serviceTimeSettingRow").filter({ hasText: "Second Service" });
+    await expect(secondServiceRow).toHaveCount(1, { timeout: 15000 });
+    await secondServiceRow.getByRole("combobox").click();
+    await page.getByRole("option", { name: PER_SERVICE_POSITION, exact: true }).click();
+
+    await dialog.getByRole("button", { name: /^Save$/ }).click();
+    await expect(dialog).toHaveCount(0, { timeout: 15000 });
+
+    // Role-scoped: a closed MUI menu stays mounted, so the label alone also matches its listbox.
+    const viewingAs = page.getByRole("combobox", { name: /Viewing as/ });
+
+    await viewingAs.click();
+    await page.getByRole("option", { name: /Second Service/ }).click();
+    await expect(worshipHeader.locator(".planItemPosition")).toHaveText(PER_SERVICE_VOLUNTEER, { timeout: 15000 });
+
+    await viewingAs.click();
+    await page.getByRole("option", { name: /Sunday Service/ }).click();
+    await expect(worshipHeader.locator(".planItemPosition")).toHaveText(DEFAULT_VOLUNTEER, { timeout: 15000 });
   });
 });

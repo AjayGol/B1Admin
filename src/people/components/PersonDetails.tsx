@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { Household, Merge, PersonEdit, PersonExportDialog, PersonView } from "./";
 import { PickupPeople } from "./PickupPeople";
 import { type PersonInterface } from "@churchapps/helpers";
-import { ImageEditor, Locale, Permissions, PersonHelper, UserHelper } from "@churchapps/apphelper";
+import { ApiHelper, ImageEditor, Locale, Permissions, PersonHelper, UserHelper } from "@churchapps/apphelper";
 import { Button } from "@mui/material";
 import { FileDownload as ExportIcon } from "@mui/icons-material";
 
@@ -20,6 +20,7 @@ export const PersonDetails = memo((props: Props) => {
   const [showExportDialog, setShowExportDialog] = React.useState(false);
   const { inPhotoEditMode, setInPhotoEditMode, editMode, setEditMode } = props;
   const formPermission = UserHelper.checkAccess(Permissions.membershipApi.forms.admin) || UserHelper.checkAccess(Permissions.membershipApi.forms.edit);
+  const canEdit = UserHelper.checkAccess(Permissions.membershipApi.people.edit);
 
   React.useEffect(() => setPerson(props.person), [props.person]);
 
@@ -31,6 +32,11 @@ export const PersonDetails = memo((props: Props) => {
     }
     setPerson(updatedPerson);
     setInPhotoEditMode(false);
+    // Edit mode saves the photo with the form; otherwise nothing else will persist it.
+    if (editMode !== "edit" && updatedPerson.id) {
+      const toSave = { ...updatedPerson, photo: dataUrl ?? null, photoUpdated: dataUrl ? updatedPerson.photoUpdated : null } as unknown as PersonInterface;
+      ApiHelper.post("/people", [toSave], "MembershipApi").then(() => props.updatedFunction()).catch((error) => console.error("Error saving photo:", error));
+    }
   };
 
   const togglePhotoEditor = (show: boolean, updatedPerson?: PersonInterface) => {
@@ -71,7 +77,7 @@ export const PersonDetails = memo((props: Props) => {
         <>
           <PersonView
             person={person}
-            editFunction={() => setEditMode("edit")}
+            editFunction={canEdit ? () => setEditMode("edit") : undefined}
             updatedFunction={props.updatedFunction}
             showForms={false}
             headerActions={formPermission ? (
